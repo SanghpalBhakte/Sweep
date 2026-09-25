@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { SUPPORTED_CURRENCIES } from '@/lib/utils/currency';
 import dynamic from 'next/dynamic';
@@ -55,6 +55,8 @@ import {
   Lock,
   CreditCard,
   Plus,
+  LogIn,
+  UserPlus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -66,10 +68,10 @@ const REMINDER_OFFSET_OPTIONS = [
 ];
 
 const ANNUAL_BENCHMARK_OPTIONS = [
-  { value: 10, label: '10% — Conservative (~1 mo free)' },
-  { value: 15, label: '15% — Standard SaaS discount' },
-  { value: 16.7, label: '16.7% — Default (2 COMPLIMENTARY months)' },
-  { value: 20, label: '20% — Aggressive (~2.4 mos free)' },
+  { value: 10, label: '10% (about 1 month free)' },
+  { value: 15, label: '15% (a common yearly discount)' },
+  { value: 16.7, label: '16.7% (default, 2 months free)' },
+  { value: 20, label: '20% (about 2.4 months free)' },
 ];
 
 export default function SettingsPage() {
@@ -334,9 +336,34 @@ export default function SettingsPage() {
           Settings
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Manage currency preferences, security, backups, and appearance.
+          Currency, reminders, backups, and how Sweep looks.
         </p>
       </div>
+
+      {/* Guests had no way to find sign in on mobile, so show it here for everyone */}
+      {!user && isConfigured ? (
+        <Card className="border-primary/25">
+          <CardContent className="p-4 sm:p-5 space-y-3">
+            <div className="space-y-1">
+              <h2 className="text-sm font-semibold text-foreground">You are not signed in</h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Your subscriptions are saved only in this browser. Sign in to keep them safe and
+                see them on your other devices.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <ButtonLink href="/login" variant="primary" size="sm" className="gap-1.5 text-xs">
+                <LogIn className="w-3.5 h-3.5" aria-hidden="true" />
+                Sign in
+              </ButtonLink>
+              <ButtonLink href="/signup" variant="outline" size="sm" className="gap-1.5 text-xs">
+                <UserPlus className="w-3.5 h-3.5" aria-hidden="true" />
+                Create an account
+              </ButtonLink>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* Save Success Alert */}
       {savedSuccess ? (
@@ -368,17 +395,18 @@ export default function SettingsPage() {
           <form onSubmit={handleSaveGeneral} className="space-y-5">
             {/* Currency Selector */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-foreground">
-                Display Currency
+              <label htmlFor="display-currency" className="block text-xs font-medium text-foreground">
+                Display currency
               </label>
               <Select
+                id="display-currency"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                helperText="All recurring subscription totals will be converted to this currency."
+                helperText="All your totals are shown in this currency."
               >
                 {SUPPORTED_CURRENCIES.map((c) => (
                   <option key={c.code} value={c.code}>
-                    {c.code} ({c.symbol}) — {c.name}
+                    {c.name} ({c.code} {c.symbol})
                   </option>
                 ))}
               </Select>
@@ -392,7 +420,7 @@ export default function SettingsPage() {
                     Renewal & Trial Alerts
                   </span>
                   <span className="text-[11px] text-muted-foreground">
-                    Get quiet advance reminders before cards are charged.
+                    Get a reminder before you are charged.
                   </span>
                 </div>
               </div>
@@ -405,7 +433,7 @@ export default function SettingsPage() {
                     onChange={(e) => setNotifyRenewals(e.target.checked)}
                     className="w-4 h-4 rounded text-primary border-border accent-primary"
                   />
-                  <span>Alert on upcoming recurring renewals</span>
+                  <span>Remind me before a subscription renews</span>
                 </label>
 
                 <label className="flex items-center gap-2.5 text-xs text-foreground cursor-pointer">
@@ -415,14 +443,14 @@ export default function SettingsPage() {
                     onChange={(e) => setNotifyTrials(e.target.checked)}
                     className="w-4 h-4 rounded text-primary border-border accent-primary"
                   />
-                  <span>Alert before free trial periods expire</span>
+                  <span>Remind me before a free trial ends</span>
                 </label>
               </div>
 
               {/* Reminder Offset Chips */}
               <div className="space-y-1.5 pt-2">
                 <label className="text-[11px] font-medium text-muted-foreground block">
-                  Advance Reminder Days
+                  When to remind me
                 </label>
                 <div className="flex items-center gap-2 flex-wrap">
                   {REMINDER_OFFSET_OPTIONS.map((opt) => {
@@ -478,7 +506,7 @@ export default function SettingsPage() {
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 className="w-full py-1 text-xs font-medium text-muted-foreground hover:text-foreground flex items-center justify-between transition-colors cursor-pointer"
               >
-                <span>Advanced power settings (Benchmarks, Rules, Sync)</span>
+                <span>More settings (yearly discount, bank rules, sync)</span>
                 {showAdvanced ? (
                   <ChevronUp className="w-3.5 h-3.5" />
                 ) : (
@@ -605,13 +633,13 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-3 pt-0 text-xs">
           <p className="text-muted-foreground text-[11px]">
-            Manage credit cards, bank accounts, and digital wallets used for subscription billing.
+            The cards, bank accounts, and wallets you pay with.
           </p>
 
           {paymentMethods.length === 0 ? (
             <div className="p-4 rounded-xl bg-surface/50 border border-border text-center space-y-2">
               <p className="text-muted-foreground">
-                No payment methods saved yet. Add one to assign subscriptions and track accounts.
+                No payment methods yet. Add one to see which card pays for what.
               </p>
               <Button
                 type="button"
@@ -699,18 +727,14 @@ export default function SettingsPage() {
               ) : null}
 
               <div className="pt-1 flex items-center justify-end gap-2">
-                <Link href="/settings/security">
-                  <Button variant="outline" size="sm" className="text-xs h-8">
-                    Change Password
-                  </Button>
-                </Link>
+                <ButtonLink href="/settings/security" variant="outline" size="sm" className="text-xs h-8">
+                  Change Password
+                </ButtonLink>
 
-                <Link href="/settings/mfa">
-                  <Button variant={totpFactor ? 'outline' : 'primary'} size="sm" className="text-xs h-8 gap-1.5 shadow-xs">
-                    <KeyRound className="w-3.5 h-3.5" />
-                    {totpFactor ? 'Manage 2FA' : 'Set Up 2FA'}
-                  </Button>
-                </Link>
+                <ButtonLink href="/settings/mfa" variant={totpFactor ? 'outline' : 'primary'} size="sm" className="text-xs h-8 gap-1.5 shadow-xs">
+                  <KeyRound className="w-3.5 h-3.5" />
+                  {totpFactor ? 'Manage 2FA' : 'Set Up 2FA'}
+                </ButtonLink>
               </div>
             </div>
 
@@ -747,7 +771,7 @@ export default function SettingsPage() {
             <div>
               <span className="font-semibold text-foreground block">Theme Mode</span>
               <span className="text-muted-foreground text-[11px]">
-                Toggle between calm Paper Ledger (light) and Night Shelf (dark).
+                Light, dark, or match your device.
               </span>
             </div>
             <ThemeToggle />
@@ -767,7 +791,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4 pt-0 text-xs">
           <p className="text-muted-foreground leading-relaxed">
-            Your ledger data is client-side and fully portable. Export open backups at any time or restore a previous snapshot safely.
+            Download a copy of your data any time, or restore a backup you saved before.
           </p>
 
           {/* Prominent Trust Restore Hero Box */}
@@ -777,8 +801,8 @@ export default function SettingsPage() {
                 <RefreshCw className="w-4 h-4 text-primary" />
                 Restore From Backup
               </span>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Safely restore or merge a <code className="font-mono bg-surface px-1 py-0.2 rounded">sweep-backup-*.json</code> file.
+              <p className="text-[11px] text-foreground/70 mt-0.5">
+                Restore or merge a <code className="font-mono bg-surface px-1 py-0.2 rounded">sweep-backup-*.json</code> file.
               </p>
             </div>
 
@@ -838,11 +862,9 @@ export default function SettingsPage() {
           {/* Statement Import Link */}
           <div className="pt-2 flex items-center justify-between border-t border-border/60">
             <span className="text-muted-foreground">Bank Statement Import</span>
-            <Link href="/subscriptions/import">
-              <Button variant="outline" size="sm" className="text-xs gap-1">
-                Open Importer <ExternalLink className="w-3 h-3" />
-              </Button>
-            </Link>
+            <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="text-xs gap-1">
+              Open Importer <ExternalLink className="w-3 h-3" />
+            </ButtonLink>
           </div>
 
           {/* Danger Zone: Delete All Data */}
@@ -853,7 +875,7 @@ export default function SettingsPage() {
                 Delete All Data
               </span>
               <span className="text-[11px] text-muted-foreground">
-                Permanently erase all local subscriptions, categories, and preferences.
+                Deletes all your subscriptions, categories, and settings. This cannot be undone.
               </span>
             </div>
 
@@ -887,7 +909,7 @@ export default function SettingsPage() {
               Privacy-First & Local-First
             </span>
             <p className="text-[11px]">
-              Sweep operates privately without third-party ad tracking, data brokers, or bank credential collection. Your ledger belongs entirely to you.
+              No ad trackers, no selling your data, and Sweep never asks for your bank login. Your data is yours.
             </p>
           </div>
 
@@ -908,7 +930,7 @@ export default function SettingsPage() {
               Enjoying Sweep?
             </span>
             <a
-              href="https://github.com/SanghpalBhakte/Sift"
+              href="https://github.com/SanghpalBhakte/Sweep"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground hover:underline"

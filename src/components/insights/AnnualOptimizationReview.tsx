@@ -67,9 +67,9 @@ export function AnnualOptimizationReview({
         <div className="flex items-center gap-2">
           <CalendarClock className="w-4 h-4 text-primary" />
           <div>
-            <CardTitle>Annual Renewal & Plan Optimization</CardTitle>
+            <CardTitle>Yearly plans</CardTitle>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Review upcoming annual commitments before they auto-renew
+              Check these before they renew for another year
             </p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export function AnnualOptimizationReview({
 
       <CardContent className="space-y-3 pt-1">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Arbitrage calculations compare visible annual vs. monthly rate math from your ledger entries. Sweep does not monitor live merchant feature quotas or plan limits.
+          These numbers compare the yearly and monthly prices you entered. Sweep does not check the company website for price changes.
         </p>
 
         <div className="divide-y divide-border">

@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { Subscription } from '@/lib/types';
 import { SubscriptionCard } from './SubscriptionCard';
-import { Button } from '../ui/Button';
+import { Button, ButtonLink } from '../ui/Button';
 import { Search, Plus, Layers, Sparkles, UploadCloud, RotateCcw } from 'lucide-react';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 
@@ -97,25 +96,21 @@ export function SubscriptionList({
         </div>
         <div className="space-y-1">
           <h3 className="text-lg font-bold text-foreground">
-            Your subscriptions ledger is empty
+            No subscriptions yet
           </h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-            Add recurring software tools, streaming services, or import statements to sweep and track your renewals.
+            Add the apps and services you pay for, or import a bank statement to find them for you.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Link href="/subscriptions/new" className="w-full sm:w-auto">
-            <Button variant="primary" size="md" className="w-full sm:w-auto gap-1.5 shadow-xs">
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              Add First Subscription
-            </Button>
-          </Link>
-          <Link href="/subscriptions/import" className="w-full sm:w-auto">
-            <Button variant="outline" size="md" className="w-full sm:w-auto gap-1.5">
-              <UploadCloud className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-              Import Statement
-            </Button>
-          </Link>
+          <ButtonLink href="/subscriptions/new" variant="primary" size="md" className="w-full sm:w-auto gap-1.5 shadow-xs">
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Add a subscription
+          </ButtonLink>
+          <ButtonLink href="/subscriptions/import" variant="outline" size="md" className="w-full sm:w-auto gap-1.5">
+            <UploadCloud className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+            Import statement
+          </ButtonLink>
           <Button
             type="button"
             variant="ghost"
@@ -124,7 +119,7 @@ export function SubscriptionList({
             className="w-full sm:w-auto gap-1"
           >
             <Sparkles className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-            Load Sample Data
+            Try with sample data
           </Button>
         </div>
       </div>
@@ -247,12 +242,10 @@ export function SubscriptionList({
               <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               Reset Filters
             </Button>
-            <Link href="/subscriptions/new">
-              <Button variant="primary" size="sm" className="gap-1">
-                <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-                Add Subscription
-              </Button>
-            </Link>
+            <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1">
+              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+              Add Subscription
+            </ButtonLink>
           </div>
         </div>
       )}

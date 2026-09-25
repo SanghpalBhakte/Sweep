@@ -108,7 +108,7 @@ self.addEventListener('fetch', (event) => {
             return rootCached;
           }
           return new Response(
-            '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sweep — Offline</title><style>body{background:#F6F1E8;color:#24201E;font-family:system-ui,sans-serif;padding:32px;text-align:center}h1{font-family:Georgia,serif;font-size:24px;color:#5B294A}p{color:#756D65;font-size:14px;max-width:320px;margin:12px auto}</style></head><body><h1>Sweep</h1><p>You are currently offline. Please reconnect to sync your ledger.</p></body></html>',
+            '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sweep (offline)</title><style>body{background:#F6F1E8;color:#24201E;font-family:system-ui,sans-serif;padding:32px;text-align:center}h1{font-family:Georgia,serif;font-size:24px;color:#5B294A}p{color:#756D65;font-size:14px;max-width:320px;margin:12px auto}</style></head><body><h1>Sweep</h1><p>You are offline. Connect to the internet to sync your subscriptions.</p></body></html>',
             {
               status: 200,
               headers: { 'Content-Type': 'text/html; charset=utf-8' },

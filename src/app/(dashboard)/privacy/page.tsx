@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
+import { ButtonLink } from '@/components/ui/Button';
 import {
   ShieldCheck,
   Lock,
@@ -30,11 +29,9 @@ export default function PrivacyPolicyPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Link href="/settings">
-              <Button variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground">
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-            </Link>
+            <ButtonLink href="/settings" variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Back to settings">
+              <ArrowLeft className="w-4 h-4" />
+            </ButtonLink>
             <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
               Privacy & Data Policy
             </h1>
@@ -47,11 +44,9 @@ export default function PrivacyPolicyPage() {
           </p>
         </div>
 
-        <Link href="/settings">
-          <Button variant="outline" size="sm" className="text-xs gap-1.5 self-start sm:self-center">
-            <Download className="w-3.5 h-3.5" /> Export My Data in Settings
-          </Button>
-        </Link>
+        <ButtonLink href="/settings" variant="outline" size="sm" className="text-xs gap-1.5 self-start sm:self-center">
+          <Download className="w-3.5 h-3.5" /> Export My Data in Settings
+        </ButtonLink>
       </div>
 
       {/* 1. Core Privacy Principles */}
@@ -230,11 +225,9 @@ export default function PrivacyPolicyPage() {
           </p>
 
           <div className="pt-2 flex items-center gap-2">
-            <Link href="/settings">
-              <Button variant="outline" size="sm" className="text-xs gap-1">
-                Go to Settings & Backup <ArrowLeft className="w-3 h-3 rotate-180" />
-              </Button>
-            </Link>
+            <ButtonLink href="/settings" variant="outline" size="sm" className="text-xs gap-1">
+              Go to Settings & Backup <ArrowLeft className="w-3 h-3 rotate-180" />
+            </ButtonLink>
           </div>
         </CardContent>
       </Card>

@@ -77,7 +77,7 @@ export function SubscriptionCard({
       <Link
         href={`/subscriptions/${subscription.id}/edit`}
         className={cn(
-          'px-3.5 py-3 sm:px-4 sm:py-3.5 flex items-center justify-between gap-3 hover:bg-surface/50 transition-colors block group cursor-pointer',
+          'px-3.5 py-3 sm:px-4 sm:py-3.5 flex items-center justify-between gap-3 hover:bg-surface/50 transition-colors group cursor-pointer',
           subscription.status === 'paused' && 'opacity-60 bg-surface/20',
           subscription.status === 'canceled' && 'opacity-50'
         )}
@@ -113,10 +113,10 @@ export function SubscriptionCard({
                 {formatDate(subscription.next_renewal_date)}
               </span>
               {subscription.category ? (
-                <>
-                  <span className="opacity-40">·</span>
-                  <span className="truncate hidden xs:inline">{subscription.category.name}</span>
-                </>
+                <span className="truncate hidden sm:inline">
+                  <span className="opacity-40 mr-1.5" aria-hidden="true">·</span>
+                  {subscription.category.name}
+                </span>
               ) : null}
             </div>
           </div>
@@ -141,7 +141,7 @@ export function SubscriptionCard({
               {countdown.label}
             </span>
           ) : (
-            <span className="text-[11px] text-muted-foreground/80 block mt-0.5 capitalize">
+            <span className="text-[11px] text-muted-foreground block mt-0.5 capitalize">
               {subscription.status}
             </span>
           )}

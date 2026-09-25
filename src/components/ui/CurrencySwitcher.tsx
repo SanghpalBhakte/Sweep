@@ -4,7 +4,7 @@ import React from 'react';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { cn } from '@/lib/utils/cn';
 
-const POPULAR_CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'JPY'];
+const POPULAR_CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'JPY'];
 
 export function CurrencySwitcher({ className }: { className?: string }) {
   const { displayCurrency, updateProfile } = useSubscriptions();

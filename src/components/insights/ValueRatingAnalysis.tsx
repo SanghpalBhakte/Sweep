@@ -8,8 +8,16 @@ import { formatCurrency } from '@/lib/utils/currency';
 import { ShieldCheck, ThumbsUp, HelpCircle, Scissors, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
-export function ValueRatingAnalysis({ subscriptions }: { subscriptions: Subscription[] }) {
-  const breakdown = calculateValueRatingBreakdown(subscriptions);
+export function ValueRatingAnalysis({
+  subscriptions,
+  currency = 'USD',
+  rates,
+}: {
+  subscriptions: Subscription[];
+  currency?: string;
+  rates?: Record<string, number>;
+}) {
+  const breakdown = calculateValueRatingBreakdown(subscriptions, currency, rates);
   const cancelCandidate = breakdown.find((b) => b.rating === 'cancel_candidate');
 
   const getRatingIcon = (rating: string) => {
@@ -32,19 +40,19 @@ export function ValueRatingAnalysis({ subscriptions }: { subscriptions: Subscrip
       <CardHeader>
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
-          <CardTitle>Utility & Value Alignment</CardTitle>
+          <CardTitle>Is it worth it?</CardTitle>
         </div>
         {cancelCandidate && cancelCandidate.totalMonthly > 0 ? (
           <span className="text-xs text-danger font-medium font-mono">
-            Save up to {formatCurrency(cancelCandidate.totalMonthly, 'USD')}/mo
+            Save up to {formatCurrency(cancelCandidate.totalMonthly, currency)}/mo
           </span>
         ) : null}
       </CardHeader>
 
       <CardContent className="space-y-4 pt-1">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Sweep organizes spend into user-declared utility tiers. Because Sweep is privacy-first and never monitors
-          your browser or app usage, value alignments reflect your own ongoing audit ratings.
+          This is based on how you rated each subscription. Sweep never tracks your apps or browser, so
+          only you know what is worth keeping.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -58,20 +66,20 @@ export function ValueRatingAnalysis({ subscriptions }: { subscriptions: Subscrip
                   : 'border-border bg-surface/50'
               )}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
                   {getRatingIcon(item.rating)}
                   {item.label}
                 </div>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  {item.count} items ({item.percentage}%)
+                <span className="text-[11px] text-muted-foreground font-mono shrink-0">
+                  {item.count} {item.count === 1 ? 'item' : 'items'} ({item.percentage}%)
                 </span>
               </div>
 
               <div className="flex items-baseline justify-between pt-1 border-t border-border/60">
                 <span className="text-[11px] text-muted-foreground">Monthly spend</span>
                 <span className="text-sm font-semibold text-foreground font-mono">
-                  {formatCurrency(item.totalMonthly, 'USD')}
+                  {formatCurrency(item.totalMonthly, currency)}
                 </span>
               </div>
             </div>

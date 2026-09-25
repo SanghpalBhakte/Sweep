@@ -141,7 +141,7 @@ export function DesktopSidebar() {
         <div className="p-3 rounded-xl bg-card border border-border/50 shadow-2xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">
-              Monthly Run-Rate
+              You pay per month
             </span>
             <span className="text-xs font-bold tabular-nums text-foreground">
               <AnimatedCurrency
@@ -152,7 +152,7 @@ export function DesktopSidebar() {
           </div>
 
           <div className="flex items-center justify-between text-xs text-muted-foreground pt-1.5 border-t border-border/40">
-            <span>{stats.activeCount} active services</span>
+            <span>{stats.activeCount} active</span>
             {stats.trialCount > 0 ? (
               <span className="text-warning flex items-center gap-1 text-xs font-medium">
                 <ShieldAlert className="w-3 h-3" />
@@ -170,7 +170,7 @@ export function DesktopSidebar() {
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-medium text-foreground truncate max-w-[100px] lg:max-w-[120px]">
-                {user ? user.email : 'Personal Mode'}
+                {user ? user.email : 'Not signed in'}
               </p>
             </div>
           </div>

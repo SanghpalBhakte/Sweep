@@ -179,16 +179,15 @@ export function StatementDropzone({
       </div>
 
       {/* Privacy Guarantee Banner */}
-      <div className="p-3.5 rounded-xl bg-[hsl(var(--surface)/0.6)] border border-[hsl(var(--border))] flex items-start gap-2.5 text-xs text-[hsl(var(--muted-foreground))]">
+      <div className="p-3.5 rounded-xl bg-[hsl(var(--card))] border border-[hsl(var(--border))] flex items-start gap-2.5 text-xs text-[hsl(var(--muted-foreground))]">
         <ShieldCheck className="w-4 h-4 text-[hsl(var(--primary))] mt-0.5 shrink-0" />
         <div className="space-y-0.5">
           <div className="font-semibold text-[hsl(var(--foreground))] text-xs">
-            100% Client-Side Privacy
+            Your file stays on your device
           </div>
           <p className="text-[11px] leading-relaxed">
-            All statement files (both CSV and PDF) are parsed locally inside your browser with zero
-            server uploads. Non-subscription charges are discarded, and only subscriptions you
-            approve are added to your ledger.
+            Sweep reads your CSV or PDF right here in your browser. Nothing is uploaded. Other
+            charges are ignored, and only the subscriptions you pick get added.
           </p>
         </div>
       </div>
@@ -214,7 +213,7 @@ export function StatementDropzone({
             onClick={handleLoadSampleDirectly}
             className="text-xs gap-1 text-[hsl(var(--primary))]"
           >
-            <FileText className="w-3.5 h-3.5" /> Load Sample Directly
+            <FileText className="w-3.5 h-3.5" /> Try the sample file
           </Button>
         </div>
       </div>

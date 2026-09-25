@@ -37,7 +37,7 @@ const CandidateReviewCard = dynamic(
   () => import('@/components/import/CandidateReviewCard').then((m) => m.CandidateReviewCard),
   { ssr: false }
 );
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { AnimatedCurrency } from '@/components/ui/AnimatedCurrency';
@@ -108,8 +108,8 @@ export default function StatementImportPage() {
     (!isMultiAccountBatch && subscriptions.length > 0);
 
   const trendBadgeText = isMultiAccountBatch
-    ? `Statement ${currentBatchNum} of ${totalBatchNum} — Trend Analysis Enabled`
-    : 'Statement 2 of 2 — Trend Analysis Enabled';
+    ? `Statement ${currentBatchNum} of ${totalBatchNum}: price changes will be checked`
+    : 'Statement 2 of 2: price changes will be checked';
 
   // Step 1A: CSV File Loaded
   const handleCsvLoaded = (csvContent: string, name: string) => {
@@ -361,16 +361,17 @@ export default function StatementImportPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/subscriptions"
+            aria-label="Back to subscriptions"
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Import Statement (CSV & PDF)
+              Import a bank statement
             </h1>
             <p className="text-xs text-muted-foreground">
-              Detect recurring subscriptions from bank, card, or digital PDF statements
+              Upload a CSV or PDF statement and Sweep will find your subscriptions
             </p>
           </div>
         </div>
@@ -726,17 +727,13 @@ export default function StatementImportPage() {
           ) : null}
 
           <div className="flex items-center justify-center gap-3 pt-2">
-            <Link href="/subscriptions">
-              <Button variant="primary" size="md">
-                View Subscriptions
-              </Button>
-            </Link>
+            <ButtonLink href="/subscriptions" variant="primary" size="md">
+              View Subscriptions
+            </ButtonLink>
 
-            <Link href="/">
-              <Button variant="outline" size="md">
-                Go to Dashboard
-              </Button>
-            </Link>
+            <ButtonLink href="/" variant="outline" size="md">
+              Go to Dashboard
+            </ButtonLink>
           </div>
         </Card>
       ) : null}

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { MetricCard } from '@/components/ui/MetricCard';
 import dynamic from 'next/dynamic';
@@ -63,7 +62,7 @@ import {
   getAllAnnualSubscriptions,
 } from '@/lib/utils/annualOptimization';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 import { AnimatedCurrency } from '@/components/ui/AnimatedCurrency';
 import { CurrencySwitcher } from '@/components/ui/CurrencySwitcher';
 import {
@@ -127,11 +126,11 @@ export default function InsightsPage() {
       <div className="space-y-6 max-w-2xl mx-auto py-6">
         <div className="text-center space-y-1">
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-            Spend Insights & Analytics
+            Insights
           </h1>
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
-            Once you track subscriptions, Sweep computes recurring projections, category breakdowns,
-            and identifies optimization opportunities.
+            Add a few subscriptions and you will see where your money goes each month and where you
+            can save.
           </p>
         </div>
 
@@ -142,20 +141,18 @@ export default function InsightsPage() {
 
           <div className="space-y-1.5">
             <h3 className="text-base font-bold text-foreground">
-              No subscription data yet
+              Nothing to show yet
             </h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              Add your first recurring service to generate cashflow trajectories and category distributions.
+              Add your first subscription, or try Sweep with some sample data.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Link href="/subscriptions/new" className="w-full sm:w-auto">
-              <Button variant="primary" size="md" className="w-full sm:w-auto gap-1.5 shadow-xs">
-                <Plus className="w-4 h-4" />
-                Add First Subscription
-              </Button>
-            </Link>
+            <ButtonLink href="/subscriptions/new" variant="primary" size="md" className="w-full sm:w-auto gap-1.5 shadow-xs">
+              <Plus className="w-4 h-4" />
+              Add a subscription
+            </ButtonLink>
 
             <Button
               type="button"
@@ -165,7 +162,7 @@ export default function InsightsPage() {
               className="w-full sm:w-auto gap-1.5 text-xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-primary" />
-              Load Sample Templates
+              Try with sample data
             </Button>
           </div>
         </div>
@@ -179,10 +176,10 @@ export default function InsightsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-            Recurring Spend Insights
+            Insights
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Clear visibility on recurring burn, cost drivers, and annual plan arbitrage
+            Where your money goes each month and where you can save
           </p>
         </div>
 
@@ -194,41 +191,41 @@ export default function InsightsPage() {
       {/* 1. Top-Level Stat Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <MetricCard
-          label="Monthly Recurring"
+          label="Per month"
           value={<AnimatedCurrency value={stats.monthlyTotal} currency={currency} />}
-          subtitle="Normalized run-rate"
+          subtitle="All active subscriptions"
           trend={{
-            text: `${stats.activeCount} active items`,
+            text: `${stats.activeCount} active`,
             type: 'accent',
           }}
         />
 
         <MetricCard
-          label="Annual Commitment"
+          label="Per year"
           value={<AnimatedCurrency value={stats.yearlyProjected} currency={currency} />}
-          subtitle="12-month projection"
+          subtitle="If nothing changes"
           trend={{
-            text: 'Current baseline',
+            text: '12 months',
             type: 'neutral',
           }}
         />
 
         <MetricCard
-          label="Average Tool Cost"
+          label="Average cost"
           value={<AnimatedCurrency value={stats.averageMonthlySpend} currency={currency} />}
-          subtitle="Per active subscription/mo"
+          subtitle="Per subscription, each month"
           trend={{
-            text: 'Across active tools',
+            text: 'Active ones only',
             type: 'neutral',
           }}
         />
 
         <MetricCard
-          label="Next 30 Days Due"
+          label="Due in 30 days"
           value={<AnimatedCurrency value={stats.upcoming30DaysTotal} currency={currency} />}
           subtitle={`${upcoming30Days.length} upcoming charges`}
           trend={{
-            text: 'Near-term cashflow',
+            text: 'Coming up soon',
             type: upcoming30Days.some((u) => u.isUrgent) ? 'warning' : 'neutral',
           }}
         />
@@ -273,7 +270,11 @@ export default function InsightsPage() {
         </section>
 
         <section>
-          <ValueRatingAnalysis subscriptions={subscriptions} />
+          <ValueRatingAnalysis
+            subscriptions={subscriptions}
+            currency={currency}
+            rates={exchangeRates.rates}
+          />
         </section>
       </div>
 
@@ -283,19 +284,19 @@ export default function InsightsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-primary" />
-              <CardTitle>Recurring Spend Hygiene</CardTitle>
+              <CardTitle>Quick tips</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-2.5 text-xs text-muted-foreground leading-relaxed">
             <div className="flex items-start gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
               <p>
-                <strong className="text-foreground">Cost concentration:</strong> Your top{' '}
-                {Math.min(topSubscriptions.length, 3)} subscriptions account for{' '}
+                <strong className="text-foreground">Biggest costs:</strong> Your top{' '}
+                {Math.min(topSubscriptions.length, 3)} subscriptions make up{' '}
                 <strong className="text-foreground font-mono">
                   {topSubscriptions.slice(0, 3).reduce((acc, s) => acc + s.percentageOfTotal, 0)}%
                 </strong>{' '}
-                of your total recurring budget.
+                of what you spend each month.
               </p>
             </div>
 
@@ -303,9 +304,9 @@ export default function InsightsPage() {
               <div className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-danger mt-1.5 shrink-0" />
                 <p>
-                  <strong className="text-danger">Cancel candidate pruning:</strong> You have{' '}
-                  {stats.cancelCandidateCount} item{stats.cancelCandidateCount === 1 ? '' : 's'} marked for review.
-                  Pruning them will save{' '}
+                  <strong className="text-danger">Marked to cancel:</strong> You marked{' '}
+                  {stats.cancelCandidateCount} subscription{stats.cancelCandidateCount === 1 ? '' : 's'} to cancel.
+                  Cancelling {stats.cancelCandidateCount === 1 ? 'it' : 'them'} saves{' '}
                   <strong className="text-foreground font-mono">
                     {formatCurrency(stats.potentialMonthlySavings, currency)}/mo
                   </strong>{' '}
@@ -317,7 +318,7 @@ export default function InsightsPage() {
             <div className="flex items-start gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
               <p>
-                <strong className="text-foreground">Annual contract arbitrage:</strong> Comparing annual rates against monthly plans helps ensure high-commitment subscriptions continue to earn their discount before renewal.
+                <strong className="text-foreground">Yearly plans:</strong> Paying yearly is often cheaper than paying monthly. Check the price before a yearly plan renews.
               </p>
             </div>
           </CardContent>

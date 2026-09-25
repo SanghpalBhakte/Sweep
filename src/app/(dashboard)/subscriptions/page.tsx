@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { SubscriptionList } from '@/components/subscriptions/SubscriptionList';
-import { Button } from '@/components/ui/Button';
+import { ButtonLink } from '@/components/ui/Button';
 import { Plus, UploadCloud } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils/currency';
 import { AppErrorBoundary } from '@/lib/errors/AppErrorBoundary';
@@ -21,10 +20,10 @@ export default function SubscriptionsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[hsl(var(--border))]">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Subscriptions & Services
+              Subscriptions
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {subscriptions.length} total tracked · Total run-rate{' '}
+              {subscriptions.length} tracked · You pay{' '}
               <span className="font-semibold text-[hsl(var(--foreground))]">
                 {formatCurrency(stats.monthlyTotal, profile?.currency_preference || 'USD')}/mo
               </span>
@@ -32,19 +31,15 @@ export default function SubscriptionsPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/subscriptions/import">
-              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-                <UploadCloud className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
-                Import Statement
-              </Button>
-            </Link>
+            <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="gap-1.5 text-xs">
+              <UploadCloud className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
+              Import Statement
+            </ButtonLink>
 
-            <Link href="/subscriptions/new">
-              <Button variant="primary" size="sm" className="gap-1.5 shadow-xs">
-                <Plus className="w-3.5 h-3.5" />
-                Add Subscription
-              </Button>
-            </Link>
+            <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1.5 shadow-xs">
+              <Plus className="w-3.5 h-3.5" />
+              Add Subscription
+            </ButtonLink>
           </div>
         </div>
 

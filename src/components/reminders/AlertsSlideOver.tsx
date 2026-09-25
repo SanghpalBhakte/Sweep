@@ -62,10 +62,10 @@ export function AlertsSlideOver() {
               </div>
               <div>
                 <h2 className="text-sm font-bold text-[hsl(var(--foreground))]">
-                  Upcoming Alerts & Reminders
+                  Reminders
                 </h2>
                 <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
-                  {alerts.length} item{alerts.length === 1 ? '' : 's'} need attention
+                  {alerts.length} coming up
                 </p>
               </div>
             </div>
@@ -87,11 +87,10 @@ export function AlertsSlideOver() {
               <div className="p-3.5 rounded-xl border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--primary)/0.04)] space-y-2.5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-[hsl(var(--foreground))]">
                   <BellRing className="w-4 h-4 text-[hsl(var(--primary))]" />
-                  <span>Enable Browser Notifications</span>
+                  <span>Get notified on this device</span>
                 </div>
                 <p className="text-[11px] text-[hsl(var(--muted-foreground))] leading-relaxed">
-                  Receive quiet alerts on this device before trial expirations and scheduled renewal
-                  charges.
+                  Get a notification before a free trial ends or a subscription renews.
                 </p>
                 <Button
                   type="button"
@@ -100,7 +99,7 @@ export function AlertsSlideOver() {
                   onClick={() => requestPermission()}
                   className="w-full text-xs"
                 >
-                  Allow Device Reminders
+                  Turn on notifications
                 </Button>
               </div>
             ) : null}
@@ -181,7 +180,7 @@ export function AlertsSlideOver() {
                               rel="noreferrer noopener"
                               className="text-[11px] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] flex items-center gap-1"
                             >
-                              Cancel Link <ExternalLink className="w-2.5 h-2.5" />
+                              Cancel page <ExternalLink className="w-2.5 h-2.5" />
                             </a>
                           ) : null}
 
@@ -204,7 +203,7 @@ export function AlertsSlideOver() {
           {/* Footer */}
           <div className="p-3.5 border-t border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.3)] flex items-center justify-between text-xs">
             <span className="text-[11px] text-[hsl(var(--muted-foreground))]">
-              Configured via profile preferences
+              Change when you get reminded
             </span>
             <Link
               href="/settings"

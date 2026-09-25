@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthShell } from '@/components/auth/auth-shell';
 import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { useAuth } from '@/context/AuthContext';
 import { CheckCircle2, AlertCircle, UserPlus } from 'lucide-react';
@@ -80,8 +80,8 @@ export default function SignUpPage() {
 
   return (
     <AuthShell
-      title="Create your Sweep workspace"
-      description="A calmer way to keep up with what renews."
+      title="Create your Sweep account"
+      description="Keep track of what you pay for and get reminded before it renews."
       icon={<UserPlus className="w-6 h-6" />}
       footer={
         <div className="text-center text-xs text-muted-foreground w-full">
@@ -123,11 +123,9 @@ export default function SignUpPage() {
               We sent a confirmation link to <strong>{email}</strong>. Please check your inbox
               to activate your account.
             </p>
-            <Link href="/login" className="inline-block pt-1">
-              <Button variant="outline" size="sm" className="text-xs">
-                Back to Sign In
-              </Button>
-            </Link>
+            <ButtonLink href="/login" variant="outline" size="sm" className="text-xs">
+              Back to Sign In
+            </ButtonLink>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3.5">

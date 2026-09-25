@@ -97,7 +97,7 @@ function LoginForm() {
   return (
     <AuthShell
       title="Welcome back to Sweep"
-      description="Sign in to your calm recurring spend workspace."
+      description="Sign in to see your subscriptions on any device."
       icon={<LogIn className="w-6 h-6" />}
       footer={
         <div className="text-center text-xs text-muted-foreground w-full">

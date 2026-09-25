@@ -21,12 +21,12 @@ export function SpendTrendChart({ data, currency = 'USD' }: SpendTrendChartProps
         <CardHeader>
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" />
-            <CardTitle>6-Month Spend Trend</CardTitle>
+            <CardTitle>Monthly spend</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <div className="py-8 text-center text-xs text-muted-foreground">
-            Not enough subscription history to display trend.
+            Not enough history yet to show a trend.
           </div>
         </CardContent>
       </Card>
@@ -44,9 +44,9 @@ export function SpendTrendChart({ data, currency = 'USD' }: SpendTrendChartProps
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-primary" />
           <div>
-            <CardTitle>Recurring Spend Trajectory</CardTitle>
+            <CardTitle>Monthly spend</CardTitle>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Monthly run-rate over the past 6 months
+              Your monthly total over the last 6 months
             </p>
           </div>
         </div>
@@ -73,11 +73,11 @@ export function SpendTrendChart({ data, currency = 'USD' }: SpendTrendChartProps
         {/* Hover info pill */}
         <div className="h-7 flex items-center justify-between text-xs px-2.5 rounded-md bg-surface/40 border border-border/40 transition-all">
           <span className="text-xs text-muted-foreground">
-            {hoveredPoint ? `${hoveredPoint.monthLabel} Snapshot` : 'Latest Month'}
+            {hoveredPoint ? hoveredPoint.monthLabel : 'This month'}
           </span>
           <span className="font-semibold text-foreground text-xs font-mono tabular-nums">
             {hoveredPoint
-              ? `${formatCurrency(hoveredPoint.totalMonthly, currency)}/mo (${hoveredPoint.activeCount} services)`
+              ? `${formatCurrency(hoveredPoint.totalMonthly, currency)}/mo (${hoveredPoint.activeCount} active)`
               : `${formatCurrency(currentMonth.totalMonthly, currency)}/mo (${currentMonth.activeCount} active)`}
           </span>
         </div>
@@ -109,7 +109,7 @@ export function SpendTrendChart({ data, currency = 'USD' }: SpendTrendChartProps
                   ) : null}
 
                   {/* Bar */}
-                  <div className="w-full max-w-[32px] sm:max-w-[40px] flex items-end justify-center rounded-t-md overflow-hidden bg-surface transition-all">
+                  <div className="w-full max-w-[32px] sm:max-w-[40px] flex-1 min-h-0 flex items-end justify-center rounded-t-md overflow-hidden bg-surface transition-all">
                     <div
                       style={{ height: `${heightPercent}%` }}
                       className={cn(
@@ -143,9 +143,9 @@ export function SpendTrendChart({ data, currency = 'USD' }: SpendTrendChartProps
         {/* Legend note */}
         <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-chart-1" /> Active normalized baseline
+            <span className="w-2 h-2 rounded-full bg-chart-1" /> Monthly total
           </span>
-          <span>6-month scope</span>
+          <span>Last 6 months</span>
         </div>
       </CardContent>
     </Card>

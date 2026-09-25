@@ -239,8 +239,13 @@ export function calculateCategoryBreakdown(
     created_at: new Date().toISOString(),
   };
 
+  // Subscriptions whose category is missing (or not loaded yet) all share one
+  // "uncategorized" bucket so the list never gets two rows with the same id.
+  const knownCategoryIds = new Set(categories.map((c) => c.id));
+
   activeSubs.forEach((sub) => {
-    const catId = sub.category_id || 'uncategorized';
+    const catId =
+      sub.category_id && knownCategoryIds.has(sub.category_id) ? sub.category_id : 'uncategorized';
     const rawMonthly =
       sub.monthly_amount ||
       normalizeMonthlyAmount(sub.amount, sub.billing_cycle, sub.custom_interval_days);

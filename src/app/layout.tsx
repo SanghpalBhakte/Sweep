@@ -30,14 +30,30 @@ const fraunces = Fraunces({
   variable: '--font-fraunces',
 });
 
+const SITE_URL = 'https://sift-sand.vercel.app';
+const SITE_TITLE = 'Sweep: Keep track of your subscriptions';
+const SITE_DESCRIPTION =
+  'Put all your subscriptions in one place. Get a reminder before something renews or a free trial ends, and see how much you spend each month.';
+const OG_IMAGE = {
+  url: '/og-image.png',
+  width: 1200,
+  height: 630,
+  alt: 'Sweep logo with the text: Keep track of your subscriptions',
+  type: 'image/png',
+};
+
+// Runs before the first paint so the page never flashes the wrong theme.
+// Keep the storage keys in sync with ThemeContext.
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('sweep_theme_preference')||localStorage.getItem('sift_theme_preference');if(t!=='paper-ledger'&&t!=='night-shelf'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'night-shelf':'paper-ledger';}var r=document.documentElement;if(t==='night-shelf'){r.classList.add('dark');}else{r.classList.remove('dark');}r.setAttribute('data-theme',t);}catch(e){}})();`;
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 'https://sweep-sanghapal2006-8427s-projects.vercel.app'
-  ),
-  title: 'Sweep — Your recurring life, in one clear view',
-  description:
-    'A calm, tactile subscription and recurring spend workspace. Track subscriptions, upcoming renewals, free trials, and clear financial clutter with peace of mind.',
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   applicationName: 'Sweep',
+  alternates: {
+    canonical: './',
+  },
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
@@ -56,28 +72,19 @@ export const metadata: Metadata = {
     title: 'Sweep',
   },
   openGraph: {
-    title: 'Sweep — Your recurring life, in one clear view',
-    description:
-      'A calm, tactile subscription and recurring spend workspace. Track subscriptions, upcoming renewals, free trials, and clear financial clutter.',
-    url: 'https://sweep-sanghapal2006-8427s-projects.vercel.app',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: './',
     siteName: 'Sweep',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Sweep — Recurring Spend Workspace',
-      },
-    ],
+    images: [OG_IMAGE],
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sweep — Your recurring life, in one clear view',
-    description:
-      'A calm, tactile subscription and recurring spend workspace. Track subscriptions, upcoming renewals, free trials, and clear financial clutter.',
-    images: ['/og-image.png'],
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
   },
 };
 
@@ -110,6 +117,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {supabaseOrigin && (
           <>
             <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" />

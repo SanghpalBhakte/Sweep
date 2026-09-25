@@ -263,7 +263,7 @@ export function ColumnMapper({
                       key={h}
                       className="px-3.5 py-2.5 text-foreground/90 whitespace-nowrap font-mono text-xs tabular-nums"
                     >
-                      {row[h] || '—'}
+                      {row[h] || '-'}
                     </td>
                   ))}
                 </tr>

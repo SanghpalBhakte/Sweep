@@ -11,7 +11,7 @@ import {
 import { Subscription } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
-import { Button } from '../ui/Button';
+import { Button, ButtonLink } from '../ui/Button';
 import { AnimatedCurrency } from '../ui/AnimatedCurrency';
 import { CancellationReviewModal } from '../subscriptions/CancellationReviewModal';
 import { PriceHikeReviewModal } from '../subscriptions/PriceHikeReviewModal';
@@ -150,11 +150,9 @@ export function SubscriptionActionCenter() {
             </div>
           </div>
 
-          <Link href="/subscriptions" className="shrink-0 self-start sm:self-center">
-            <Button variant="outline" size="sm" className="text-xs gap-1">
-              View All Subscriptions <ArrowRight className="w-3 h-3" />
-            </Button>
-          </Link>
+          <ButtonLink href="/subscriptions" variant="outline" size="sm" className="shrink-0 self-start sm:self-center text-xs gap-1">
+            View All Subscriptions <ArrowRight className="w-3 h-3" />
+          </ButtonLink>
         </div>
       </Card>
     );
@@ -416,15 +414,9 @@ export function SubscriptionActionCenter() {
                       <Scissors className="w-3.5 h-3.5" /> Cancel Review
                     </Button>
                   ) : (
-                    <Link href={action.actionUrl || '/subscriptions'}>
-                      <Button
-                        variant={action.severity === 'urgent' ? 'primary' : 'outline'}
-                        size="sm"
-                        className="text-xs gap-1 shadow-xs"
-                      >
-                        {action.suggestedActionLabel} <ChevronRight className="w-3.5 h-3.5" />
-                      </Button>
-                    </Link>
+                    <ButtonLink href={action.actionUrl || '/subscriptions'} variant={action.severity === 'urgent' ? 'primary' : 'outline'} size="sm" className="text-xs gap-1 shadow-xs">
+                      {action.suggestedActionLabel} <ChevronRight className="w-3.5 h-3.5" />
+                    </ButtonLink>
                   )}
                 </div>
               </div>

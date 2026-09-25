@@ -91,6 +91,7 @@ export function CategoryBreakdown({
                     'h-full transition-opacity',
                     hoveredCategoryId && !isHovered ? 'opacity-40' : 'opacity-100'
                   )}
+                  role="img"
                   aria-label={`${item.category.name}: ${item.percentage}% (${formatCurrency(item.totalMonthly, currency)}/mo)`}
                 />
               );

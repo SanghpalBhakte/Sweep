@@ -6,8 +6,8 @@ import dynamic from 'next/dynamic';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { WelcomeScreen } from '@/components/dashboard/WelcomeScreen';
 import { SubscriptionCard } from '@/components/subscriptions/SubscriptionCard';
-import { Button } from '@/components/ui/Button';
-import { formatCurrency, normalizeMonthlyAmount } from '@/lib/utils/currency';
+import { Button, ButtonLink } from '@/components/ui/Button';
+import { convertCurrency, formatCurrency, normalizeMonthlyAmount } from '@/lib/utils/currency';
 import { formatDate, getCountdownBadge, getDaysUntil } from '@/lib/utils/dates';
 import {
   ArrowRight,
@@ -21,6 +21,7 @@ import {
   ShieldAlert,
   SlidersHorizontal,
   ChevronRight,
+  UploadCloud,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -35,6 +36,7 @@ export function DashboardClient() {
     categories,
     stats,
     displayCurrency,
+    exchangeRates,
     isLoading,
     toggleStatus,
     deleteSubscription,
@@ -61,8 +63,12 @@ export function DashboardClient() {
   }, [activeSubscriptions]);
 
   const next7DaysTotal = useMemo(() => {
-    return next7DaysRenewals.reduce((sum, s) => sum + s.amount, 0);
-  }, [next7DaysRenewals]);
+    return next7DaysRenewals.reduce(
+      (sum, s) =>
+        sum + convertCurrency(s.amount, s.currency || 'USD', targetCurrency, exchangeRates.rates),
+      0
+    );
+  }, [next7DaysRenewals, targetCurrency, exchangeRates.rates]);
 
   // 3. Chronological Upcoming 30 Days Renewals (Top 4)
   const upcomingChronological = useMemo(() => {
@@ -83,9 +89,13 @@ export function DashboardClient() {
       const catId = sub.category_id || 'unassigned';
       const catName = sub.category?.name || 'Unassigned';
       const catColor = sub.category?.color || 'hsl(var(--primary))';
-      const monthly =
+      const monthly = convertCurrency(
         sub.monthly_amount ||
-        normalizeMonthlyAmount(sub.amount, sub.billing_cycle, sub.custom_interval_days);
+          normalizeMonthlyAmount(sub.amount, sub.billing_cycle, sub.custom_interval_days),
+        sub.currency || 'USD',
+        targetCurrency,
+        exchangeRates.rates
+      );
       if (!catMap[catId]) {
         catMap[catId] = { categoryName: catName, color: catColor, monthlyAmount: 0 };
       }
@@ -102,7 +112,7 @@ export function DashboardClient() {
       }))
       .sort((a, b) => b.monthlyAmount - a.monthlyAmount)
       .slice(0, 4);
-  }, [activeSubscriptions, stats.monthlyTotal]);
+  }, [activeSubscriptions, stats.monthlyTotal, targetCurrency, exchangeRates.rates]);
 
   // 5. Category filter pills
   const topCategories = useMemo(() => {
@@ -113,16 +123,10 @@ export function DashboardClient() {
       }
     }
 
-    const activeCats = categories
+    return categories
       .filter((c) => (countMap[c.id] || 0) > 0)
-      .sort((a, b) => (countMap[b.id] || 0) - (countMap[a.id] || 0));
-
-    if (activeCats.length < 6) {
-      const remaining = categories.filter((c) => !activeCats.some((ac) => ac.id === c.id));
-      return [...activeCats, ...remaining].slice(0, 6);
-    }
-
-    return activeCats.slice(0, 6);
+      .sort((a, b) => (countMap[b.id] || 0) - (countMap[a.id] || 0))
+      .slice(0, 6);
   }, [categories, activeSubscriptions]);
 
   // 6. Filtered subscriptions for the dashboard ledger
@@ -169,14 +173,14 @@ export function DashboardClient() {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Recurring Spend Workspace
+              Overview
             </h1>
             <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-surface text-muted-foreground border border-border/80">
-              {activeSubscriptions.length} Active
+              {activeSubscriptions.length} active
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Real-time recurring commitments, 30-day cashflow horizon, and spend allocation.
+            What you pay, what renews soon, and where your money goes.
           </p>
         </div>
 
@@ -210,12 +214,15 @@ export function DashboardClient() {
             </button>
           </div>
 
-          <Link href="/subscriptions/new" className="hidden sm:inline-flex">
-            <Button variant="primary" size="sm" className="gap-1.5 shadow-xs px-3">
-              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Add Subscription</span>
-            </Button>
-          </Link>
+          <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="hidden sm:inline-flex gap-1.5 text-xs">
+            <UploadCloud className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+            <span>Import statement</span>
+          </ButtonLink>
+
+          <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="hidden sm:inline-flex gap-1.5 shadow-xs px-3">
+            <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Add Subscription</span>
+          </ButtonLink>
         </div>
       </div>
 
@@ -225,7 +232,7 @@ export function DashboardClient() {
         <div className="p-4 sm:p-5 flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">
-              {period === 'monthly' ? 'Monthly Commitment' : 'Annual Commitment'}
+              {period === 'monthly' ? 'You pay per month' : 'You pay per year'}
             </span>
             <span className="text-[11px] font-mono text-muted-foreground px-1.5 py-0.2 rounded bg-surface border border-border/40">
               {period === 'monthly' ? '/mo' : '/yr'}
@@ -240,12 +247,12 @@ export function DashboardClient() {
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Across {activeSubscriptions.length} active service{activeSubscriptions.length === 1 ? '' : 's'}
+              For {activeSubscriptions.length} active subscription{activeSubscriptions.length === 1 ? '' : 's'}
             </p>
           </div>
 
           <div className="pt-2 border-t border-border/40 text-xs text-muted-foreground flex items-center justify-between">
-            <span>Annual Run-Rate</span>
+            <span>Per year</span>
             <span className="font-mono font-semibold text-foreground">
               {formatCurrency(stats.yearlyProjected, targetCurrency)}/yr
             </span>
@@ -257,14 +264,14 @@ export function DashboardClient() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 opacity-60" />
-              <span>7-Day Cashflow</span>
+              <span>Next 7 days</span>
             </span>
             {next7DaysRenewals.length > 0 ? (
               <span className="text-xs font-semibold px-2 py-0.2 rounded-full bg-warning/12 text-warning">
                 {next7DaysRenewals.length} due
               </span>
             ) : (
-              <span className="text-xs text-muted-foreground">Clear</span>
+              <span className="text-xs text-muted-foreground">Nothing due</span>
             )}
           </div>
 
@@ -278,13 +285,13 @@ export function DashboardClient() {
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {next7DaysRenewals.length > 0
-                ? `${next7DaysRenewals.length} charge${next7DaysRenewals.length === 1 ? '' : 's'} scheduled this week`
-                : 'No charges in next 7 days'}
+                ? `${next7DaysRenewals.length} payment${next7DaysRenewals.length === 1 ? '' : 's'} this week`
+                : 'No payments in the next 7 days'}
             </p>
           </div>
 
           <div className="pt-2 border-t border-border/40 text-xs text-muted-foreground flex items-center justify-between">
-            <span>30-Day Outlook</span>
+            <span>Next 30 days</span>
             <span className="font-mono font-semibold text-foreground">
               {formatCurrency(stats.upcoming30DaysTotal, targetCurrency)}
             </span>
@@ -329,12 +336,12 @@ export function DashboardClient() {
           ) : (
             <div>
               <p className="text-base font-medium text-foreground">All caught up</p>
-              <p className="text-xs text-muted-foreground mt-0.5">No renewals pending</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Nothing renews soon</p>
             </div>
           )}
 
           <div className="pt-2 border-t border-border/40 text-xs text-muted-foreground flex items-center justify-between">
-            <span>Cycle</span>
+            <span>Billed</span>
             <span className="capitalize">{nextRenewal?.billing_cycle || 'None'}</span>
           </div>
         </div>
@@ -344,7 +351,7 @@ export function DashboardClient() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-primary opacity-80" />
-              <span>Ledger Health</span>
+              <span>Needs a look</span>
             </span>
             <Link
               href="/insights"
@@ -358,28 +365,28 @@ export function DashboardClient() {
           <div>
             <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums font-mono flex items-baseline gap-2">
               <span>{stats.cancelCandidateCount + stats.trialCount}</span>
-              <span className="text-xs font-normal text-muted-foreground font-sans">flagged</span>
+              <span className="text-xs font-normal text-muted-foreground font-sans">
+                {stats.cancelCandidateCount + stats.trialCount === 1 ? 'item' : 'items'}
+              </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {stats.trialCount > 0
-                ? `${stats.trialCount} free trial${stats.trialCount > 1 ? 's' : ''} active`
+                ? `${stats.trialCount} free trial${stats.trialCount > 1 ? 's' : ''} running`
                 : stats.cancelCandidateCount > 0
-                ? `${stats.cancelCandidateCount} candidate${stats.cancelCandidateCount > 1 ? 's' : ''} to review`
-                : 'All subscriptions optimal'}
+                ? 'Subscriptions you marked to cancel'
+                : 'Nothing needs your attention'}
             </p>
           </div>
 
           <div className="pt-2 border-t border-border/40 text-xs flex items-center justify-between">
-            <span className="text-muted-foreground">Audit Status</span>
+            <span className="text-muted-foreground">Marked to cancel</span>
             <span
               className={cn(
                 'font-semibold font-mono',
                 stats.cancelCandidateCount > 0 ? 'text-danger' : 'text-success'
               )}
             >
-              {stats.cancelCandidateCount > 0
-                ? `${stats.cancelCandidateCount} to review`
-                : 'Optimal'}
+              {stats.cancelCandidateCount > 0 ? stats.cancelCandidateCount : 'None'}
             </span>
           </div>
         </div>
@@ -401,7 +408,7 @@ export function DashboardClient() {
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Primary recurring commitments and services ledger.
+                Everything you are paying for right now.
               </p>
             </div>
 
@@ -410,7 +417,7 @@ export function DashboardClient() {
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
-                placeholder="Filter ledger…"
+                placeholder="Search…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="sweep-input pl-8 pr-3 py-1 text-xs"
@@ -524,13 +531,13 @@ export function DashboardClient() {
             {/* Footer summary row */}
             <div className="p-3 bg-surface/20 flex items-center justify-between text-xs px-4">
               <span className="text-muted-foreground">
-                Showing {filteredSubscriptions.length} of {activeSubscriptions.length} commitments
+                Showing {filteredSubscriptions.length} of {activeSubscriptions.length}
               </span>
               <Link
                 href="/subscriptions"
                 className="text-primary font-medium hover:underline flex items-center gap-1"
               >
-                <span>Full Ledger Management</span>
+                <span>See all subscriptions</span>
                 <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
@@ -546,7 +553,7 @@ export function DashboardClient() {
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-primary" />
                   <h3 className="text-sm font-bold tracking-tight text-foreground">
-                    Renewal Horizon
+                    Coming up
                   </h3>
                 </div>
                 <span className="text-[10px] uppercase font-mono text-muted-foreground">
@@ -562,7 +569,7 @@ export function DashboardClient() {
                       <Link
                         key={sub.id}
                         href={`/subscriptions/${sub.id}/edit`}
-                        className="py-2.5 flex items-center justify-between gap-3 hover:bg-surface/50 px-2 rounded-lg transition-colors group block"
+                        className="py-2.5 flex items-center justify-between gap-3 hover:bg-surface/50 px-2 rounded-lg transition-colors group"
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
@@ -604,7 +611,7 @@ export function DashboardClient() {
               )}
 
               <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">30-day projection</span>
+                <span className="text-muted-foreground">Total for next 30 days</span>
                 <span className="font-mono font-bold text-foreground">
                   {formatCurrency(stats.upcoming30DaysTotal, targetCurrency)}
                 </span>
@@ -659,7 +666,7 @@ export function DashboardClient() {
                 </div>
               ) : (
                 <div className="py-4 text-center text-xs text-muted-foreground">
-                  No categorized commitments recorded.
+                  No categories yet.
                 </div>
               )}
             </div>

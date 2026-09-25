@@ -488,8 +488,9 @@ export function SubscriptionForm({
             isLoading={isDeleting}
             disabled={isDeleting || isSubmitting}
             className="text-xs text-danger hover:bg-danger-subtle gap-1.5 cursor-pointer"
+            aria-label="Delete subscription"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">Delete</span>
           </Button>
         ) : null}
@@ -680,6 +681,8 @@ export function SubscriptionForm({
                   </button>
                 </div>
                 <Select
+                  id="subscription-category"
+                  aria-label="Category"
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
                 >
@@ -708,6 +711,8 @@ export function SubscriptionForm({
                   </button>
                 </div>
                 <Select
+                  id="subscription-payment-method"
+                  aria-label="Payment method"
                   value={paymentMethodId}
                   onChange={(e) => setPaymentMethodId(e.target.value)}
                 >
@@ -839,10 +844,10 @@ export function SubscriptionForm({
                 value={valueRating}
                 onChange={(e) => setValueRating(e.target.value as ValueRating)}
               >
-                <option value="essential">Essential — Core tool</option>
-                <option value="useful">Useful — Regular utility</option>
-                <option value="rarely_used">Rarely Used — Infrequent</option>
-                <option value="cancel_candidate">Cancel Candidate — Slated to cancel</option>
+                <option value="essential">Essential (use it all the time)</option>
+                <option value="useful">Useful (use it often)</option>
+                <option value="rarely_used">Rarely used (hardly use it)</option>
+                <option value="cancel_candidate">Cancel candidate (planning to cancel)</option>
               </Select>
 
               <Input
@@ -900,17 +905,16 @@ export function SubscriptionForm({
 
       {/* Form Action Buttons */}
       <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-2">
-        <Link href="/subscriptions" className="w-full sm:w-auto">
-          <Button
-            type="button"
-            variant="outline"
-            size="md"
-            disabled={isSubmitting || isDeleting}
-            className="w-full sm:w-auto text-xs cursor-pointer"
-          >
-            Cancel
-          </Button>
-        </Link>
+        <Button
+          type="button"
+          variant="outline"
+          size="md"
+          disabled={isSubmitting || isDeleting}
+          onClick={() => router.push('/subscriptions')}
+          className="w-full sm:w-auto text-xs cursor-pointer"
+        >
+          Cancel
+        </Button>
 
         {!isEditing ? (
           <Button

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Plus, Bell, Search, Sparkles } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
-import { Button } from '../ui/Button';
+import { ButtonLink } from '../ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { useSubscriptions } from '@/context/SubscriptionContext';
@@ -59,7 +59,7 @@ export function Header() {
               title="Currency preferences in Settings"
             >
               <span className="font-mono font-semibold text-foreground">{targetCurrency}</span>
-              <span className="text-[11px] opacity-60">Ledger</span>
+              <span className="text-[11px]">Ledger</span>
             </Link>
 
             {/* Reminders Bell with Active Alert Count */}
@@ -96,12 +96,10 @@ export function Header() {
 
             {/* Mobile Quick Add Button */}
             <div className="md:hidden">
-              <Link href="/subscriptions/new">
-                <Button variant="primary" size="sm" className="gap-1 shadow-xs px-2.5 py-1 text-xs">
-                  <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-                  <span>Add</span>
-                </Button>
-              </Link>
+              <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1 shadow-xs px-2.5 py-1 text-xs">
+                <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Add</span>
+              </ButtonLink>
             </div>
           </div>
         </div>

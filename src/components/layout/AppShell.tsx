@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Plus } from 'lucide-react';
 import { Header } from './Header';
 import { MobileNav } from './MobileNav';
 import { DesktopSidebar } from './DesktopSidebar';
@@ -44,14 +42,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* 3. Mobile Navigation Bottom Bar */}
       <MobileNav />
 
-      {/* 4. Accessible Mobile Floating Action Button (FAB) positioned safely above MobileNav */}
-      <Link
-        href="/subscriptions/new"
-        className="md:hidden fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] right-4 z-40 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:opacity-90 active:scale-[0.98] transition-all duration-instant focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer"
-        aria-label="Add Subscription"
-      >
-        <Plus className="w-5 h-5" aria-hidden="true" />
-      </Link>
+      {/* Mobile "Add" lives in the sticky header. The old floating + button duplicated it
+          and covered the last row of content. */}
 
       {/* 5. Global Quick Add Subscription Modal (keyboard shortcut "N") */}
       {isAddModalOpen && (

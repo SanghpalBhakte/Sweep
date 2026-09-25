@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Sweep — Your recurring life, in one clear view',
+    name: 'Sweep',
     short_name: 'Sweep',
-    description: 'A calm, tactile subscription and recurring spend workspace.',
+    description: 'Put all your subscriptions in one place and get a reminder before anything renews.',
     start_url: '/',
     display: 'standalone',
     orientation: 'portrait',

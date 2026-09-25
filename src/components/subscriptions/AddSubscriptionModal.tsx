@@ -138,7 +138,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
                 Add Subscription
               </h2>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Quick entry into your recurring payments ledger
+                Add the basics now. You can edit the rest later.
               </p>
             </div>
           </div>
@@ -164,7 +164,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
           <div className="space-y-3">
             <Input
               ref={firstInputRef}
-              label="Service or Tool Name *"
+              label="Name *"
               placeholder="e.g. GitHub Copilot, Spotify, Figma"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -173,7 +173,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
 
             <div className="grid grid-cols-2 gap-3">
               <Input
-                label="Price Amount *"
+                label="Price *"
                 type="number"
                 step="0.01"
                 min="0"
@@ -183,7 +183,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
                 required
               />
               <Select
-                label="Billing Currency"
+                label="Currency"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
               >
@@ -195,7 +195,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
 
             <div className="grid grid-cols-2 gap-3">
               <Select
-                label="Billing Cadence"
+                label="Billing cycle"
                 value={billingCycle}
                 onChange={(e) => setBillingCycle(e.target.value as BillingCycle)}
               >
@@ -242,9 +242,9 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
             {/* Free Trial Toggle */}
             <label className="flex items-center justify-between p-3 rounded-xl bg-surface/60 border border-border cursor-pointer hover:bg-surface transition-colors">
               <div className="space-y-0.5">
-                <span className="text-xs font-semibold text-foreground">This is a Free Trial</span>
+                <span className="text-xs font-semibold text-foreground">This is a free trial</span>
                 <p className="text-[11px] text-muted-foreground leading-snug">
-                  Receive advance warning before automatic billing conversion
+                  We will remind you before the trial ends and you get charged
                 </p>
               </div>
               <input
@@ -269,7 +269,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
               className="gap-1.5 shadow-xs font-semibold"
             >
               <Plus className="w-4 h-4" aria-hidden="true" />
-              Save to Ledger
+              Save subscription
             </Button>
           </div>
         </form>

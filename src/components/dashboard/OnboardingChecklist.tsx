@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Button, ButtonLink } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import {
   CheckCircle2,
@@ -72,12 +71,10 @@ export function OnboardingChecklist() {
       isDone: hasSubscriptions,
       action: (
         <div className="flex items-center gap-2 mt-2">
-          <Link href="/subscriptions/new">
-            <Button variant="primary" size="sm" className="gap-1 text-xs">
-              <Plus className="w-3.5 h-3.5" />
-              Add Subscription
-            </Button>
-          </Link>
+          <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1 text-xs">
+            <Plus className="w-3.5 h-3.5" />
+            Add Subscription
+          </ButtonLink>
           <Button
             type="button"
             variant="outline"
@@ -98,12 +95,10 @@ export function OnboardingChecklist() {
       isDone: hasMultipleOrImported,
       action: (
         <div className="mt-2">
-          <Link href="/subscriptions/import">
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-              <UploadCloud className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
-              Import Statement
-            </Button>
-          </Link>
+          <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="gap-1.5 text-xs">
+            <UploadCloud className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
+            Import Statement
+          </ButtonLink>
         </div>
       ),
     },
@@ -114,12 +109,10 @@ export function OnboardingChecklist() {
       isDone: hasCustomReminders,
       action: (
         <div className="mt-2">
-          <Link href="/settings">
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-              <Bell className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
-              Alert Preferences
-            </Button>
-          </Link>
+          <ButtonLink href="/settings" variant="outline" size="sm" className="gap-1.5 text-xs">
+            <Bell className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
+            Alert Preferences
+          </ButtonLink>
         </div>
       ),
     },
@@ -130,12 +123,10 @@ export function OnboardingChecklist() {
       isDone: hasCurrencyPreference,
       action: (
         <div className="mt-2">
-          <Link href="/settings">
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-              <Globe className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
-              Workspace Settings
-            </Button>
-          </Link>
+          <ButtonLink href="/settings" variant="outline" size="sm" className="gap-1.5 text-xs">
+            <Globe className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
+            Workspace Settings
+          </ButtonLink>
         </div>
       ),
     },

@@ -186,7 +186,8 @@ class SubscriptionService {
 
   async getSubscriptionById(id: string): Promise<Subscription | null> {
     const supabase = createClient();
-    if (supabase) {
+    const user = supabase ? await this.getAuthUser(supabase) : null;
+    if (supabase && user) {
       try {
         const { data, error } = await (supabase.from('subscriptions') as any)
           .select('*, category:categories(*), payment_method:payment_methods(*)')
@@ -335,7 +336,9 @@ class SubscriptionService {
       updated_at: new Date().toISOString(),
     };
 
-    if (supabase) {
+    const user = supabase ? await this.getAuthUser(supabase) : null;
+
+    if (supabase && user) {
       const updatePayload = buildSubscriptionUpdatePayload(existing, updates);
 
       // Foreign key check: verify category_id exists in DB table
@@ -348,11 +351,10 @@ class SubscriptionService {
         if (!catExists) {
           const canon = CANONICAL_CATEGORIES.find((c) => c.id === updatePayload.category_id);
           if (canon) {
-            const user = await this.getAuthUser(supabase);
             const { data: createdCat } = await (supabase.from('categories') as any)
               .insert({
                 id: canon.id,
-                user_id: user ? user.id : null,
+                user_id: user.id,
                 name: canon.name,
                 slug: canon.slug,
                 color: canon.color,
@@ -416,7 +418,8 @@ class SubscriptionService {
 
   async deleteSubscription(id: string): Promise<void> {
     const supabase = createClient();
-    if (supabase) {
+    const user = supabase ? await this.getAuthUser(supabase) : null;
+    if (supabase && user) {
       const { error } = await (supabase.from('subscriptions') as any).delete().eq('id', id);
       if (error) {
         console.error('Supabase subscription delete error:', error);
@@ -433,8 +436,11 @@ class SubscriptionService {
 
   async getCategories(): Promise<Category[]> {
     const supabase = createClient();
+    // Guests keep their categories in local storage. Asking Supabase without a session
+    // returns an empty list, which used to wipe the guest's own categories.
+    const user = supabase ? await this.getAuthUser(supabase) : null;
 
-    if (supabase) {
+    if (supabase && user) {
       try {
         const { data, error } = await (supabase.from('categories') as any)
           .select('id, user_id, name, slug, color, icon, created_at')
@@ -554,7 +560,8 @@ class SubscriptionService {
     };
 
     const supabase = createClient();
-    if (supabase) {
+    const user = supabase ? await this.getAuthUser(supabase) : null;
+    if (supabase && user) {
       try {
         await (supabase.from('categories') as any)
           .update({
@@ -577,8 +584,9 @@ class SubscriptionService {
 
   async getPaymentMethods(): Promise<PaymentMethod[]> {
     const supabase = createClient();
+    const user = supabase ? await this.getAuthUser(supabase) : null;
 
-    if (supabase) {
+    if (supabase && user) {
       try {
         const { data, error } = await (supabase.from('payment_methods') as any)
           .select('id, user_id, name, type, last4, color, is_default, created_at')

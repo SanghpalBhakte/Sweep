@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
+import { Card, CardHeader, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { cn } from '@/lib/utils/cn';
 
@@ -49,9 +49,9 @@ export function AuthShell({
               </div>
             ) : null}
             {title ? (
-              <CardTitle className="font-serif text-xl font-bold tracking-tight text-foreground">
+              <h1 className="font-serif text-xl font-bold tracking-tight text-foreground">
                 {title}
-              </CardTitle>
+              </h1>
             ) : null}
             {description ? (
               <CardDescription className="text-xs text-muted-foreground leading-relaxed max-w-xs mx-auto">

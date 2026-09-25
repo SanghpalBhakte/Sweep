@@ -173,7 +173,7 @@
     /* Status colors — calm, non-glaring tones */
     --color-success:          #4B6B3D;  /* Moss Green */
     --color-success-highlight:#E4EFE0;
-    --color-warning:          #9E5522;  /* Toasted Amber */
+    --color-warning:          #944F1F;  /* Toasted Amber (darkened a bit so small amber text passes 4.5:1) */
     --color-warning-highlight:#F7E9DE;
     --color-error:            #9E3A35;  /* Brick Red */
     --color-error-highlight:#F7DEDB;
@@ -263,6 +263,12 @@
     --color-brand:            #C889AD;  /* Muted Orchid for dark mode */
     --color-brand-hover:      #AF6E95;
     --color-brand-highlight:  #3A2731;
+
+    /* The light block sets these as fixed hex values, which also override the Tailwind
+       theme tokens. Point them back at the dark values so text-success / text-warning
+       stay readable on dark backgrounds. */
+    --color-success:          hsl(var(--success));
+    --color-warning:          hsl(var(--warning));
 
     /* Backgrounds — near-black espresso */
     --background:            345 9% 8.5%;      /* #181415 */

@@ -18,7 +18,7 @@ export const mockCategories: Category[] = [
   {
     id: '10000000-0000-0000-0000-000000000001',
     user_id: null,
-    name: 'Software & Dev',
+    name: 'Software & Development',
     slug: 'software-dev',
     color: 'moss',
     icon: 'terminal',

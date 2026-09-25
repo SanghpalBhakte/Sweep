@@ -4,7 +4,7 @@ import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient, isSupabaseConfigured } from '@/utils/supabase/client';
 import { AuthShell } from '@/components/auth/auth-shell';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -233,11 +233,9 @@ function MFAChallengeForm() {
               <p>{error}</p>
               {hasNoFactor ? (
                 <div className="pt-2">
-                  <Link href="/settings/mfa">
-                    <Button variant="outline" size="xs">
-                      Set up MFA in Settings
-                    </Button>
-                  </Link>
+                  <ButtonLink href="/settings/mfa" variant="outline" size="xs">
+                    Set up MFA in Settings
+                  </ButtonLink>
                 </div>
               ) : (
                 <button

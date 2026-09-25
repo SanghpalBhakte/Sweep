@@ -21,7 +21,7 @@ export function MobileNav() {
     },
     {
       href: '/subscriptions',
-      label: 'Ledger',
+      label: 'Subscriptions',
       icon: CreditCard,
       active: pathname.startsWith('/subscriptions') && pathname !== '/subscriptions/new',
       badge: stats.upcomingRenewalsCount > 0 ? stats.upcomingRenewalsCount : undefined,

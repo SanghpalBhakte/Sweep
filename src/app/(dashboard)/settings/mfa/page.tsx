@@ -12,7 +12,7 @@ import {
   CardContent,
 } from '@/components/ui/Card';
 import { Separator } from '@/components/ui/Separator';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
@@ -240,11 +240,9 @@ export default function MFASettingsPage() {
           </h1>
         </div>
 
-        <Link href="/settings/security">
-          <Button variant="outline" size="sm" className="text-xs">
-            Password Security
-          </Button>
-        </Link>
+        <ButtonLink href="/settings/security" variant="outline" size="sm" className="text-xs">
+          Password Security
+        </ButtonLink>
       </div>
 
       {/* Success Alert */}

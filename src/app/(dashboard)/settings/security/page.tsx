@@ -11,7 +11,7 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import {
@@ -155,11 +155,9 @@ export default function SecuritySettingsPage() {
           </h1>
         </div>
 
-        <Link href="/settings/mfa">
-          <Button variant="outline" size="sm" className="text-xs">
-            Manage 2FA
-          </Button>
-        </Link>
+        <ButtonLink href="/settings/mfa" variant="outline" size="sm" className="text-xs">
+          Manage 2FA
+        </ButtonLink>
       </div>
 
       {/* Success Alert */}
