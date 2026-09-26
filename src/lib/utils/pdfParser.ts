@@ -285,6 +285,11 @@ function parseTokenDate(token: string): string | null {
       const m = String(n1).padStart(2, '0');
       const d = String(n2).padStart(2, '0');
       return `${n3}-${m}-${d}`;
+    } else if (n3 > 1900 && n1 <= 31 && n2 <= 12) {
+      // DD/MM/YYYY
+      const d = String(n1).padStart(2, '0');
+      const m = String(n2).padStart(2, '0');
+      return `${n3}-${m}-${d}`;
     }
   }
 

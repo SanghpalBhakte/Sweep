@@ -274,5 +274,5 @@ export function suggestCategoryForMerchant(
     }
   }
 
-  return categories[0] || null;
+  return null;
 }

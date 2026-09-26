@@ -109,7 +109,7 @@ export default function StatementImportPage() {
 
   const trendBadgeText = isMultiAccountBatch
     ? `Statement ${currentBatchNum} of ${totalBatchNum}: price changes will be checked`
-    : 'Statement 2 of 2: price changes will be checked';
+    : 'Checking for price changes against your current subscriptions';
 
   // Step 1A: CSV File Loaded
   const handleCsvLoaded = (csvContent: string, name: string) => {
@@ -217,7 +217,7 @@ export default function StatementImportPage() {
 
       setNormalizedTransactions(result.transactions);
 
-      const detected = detectRecurringCandidates(result.transactions, categories);
+      const detected = detectRecurringCandidates(result.transactions, categories, profileCurrency);
       setCandidates(detected);
       setStep('review');
     } catch (err: any) {
@@ -258,7 +258,7 @@ export default function StatementImportPage() {
     );
     setNormalizedTransactions(normalized);
 
-    const detected = detectRecurringCandidates(normalized, categories);
+    const detected = detectRecurringCandidates(normalized, categories, activeBatchCurrency);
     setCandidates(detected);
     setStep('review');
   };
