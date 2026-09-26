@@ -5,7 +5,13 @@ import { useTheme } from '@/context/ThemeContext';
 import { Sun, Moon, Laptop } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
-export function ThemeToggle({ showLabels = false }: { showLabels?: boolean }) {
+export function ThemeToggle({
+  showLabels = false,
+  variant = 'segmented',
+}: {
+  showLabels?: boolean;
+  variant?: 'segmented' | 'cycle';
+}) {
   const { theme, setTheme } = useTheme();
 
   const options = [
@@ -13,6 +19,27 @@ export function ThemeToggle({ showLabels = false }: { showLabels?: boolean }) {
     { value: 'night-shelf', icon: Moon, label: 'Dark', title: 'Dark theme' },
     { value: 'system', icon: Laptop, label: 'Auto', title: 'Match my device' },
   ] as const;
+
+  if (variant === 'cycle') {
+    const currentIndex = options.findIndex((o) => o.value === theme);
+    const current = options[currentIndex === -1 ? 0 : currentIndex];
+    const CurrentIcon = current.icon;
+
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          const nextIndex = (Math.max(currentIndex, 0) + 1) % options.length;
+          setTheme(options[nextIndex].value);
+        }}
+        title={`Theme: ${current.label}. Tap to switch.`}
+        className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-surface rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+        aria-label={`Change theme, currently ${current.label}`}
+      >
+        <CurrentIcon className="w-4 h-4" aria-hidden="true" />
+      </button>
+    );
+  }
 
   return (
     <div

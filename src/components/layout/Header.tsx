@@ -91,7 +91,7 @@ export function Header() {
 
             {/* Mobile Theme Toggle */}
             <div className="md:hidden">
-              <ThemeToggle />
+              <ThemeToggle variant="cycle" />
             </div>
 
             {/* Mobile Quick Add Button */}

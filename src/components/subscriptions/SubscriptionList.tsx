@@ -174,7 +174,8 @@ export function SubscriptionList({
         </div>
 
         {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar" role="tablist" aria-label="Filter by status">
+        <div className="relative -mx-1 sm:mx-0">
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 px-1 sm:px-0 no-scrollbar" role="tablist" aria-label="Filter by status">
           {[
             { id: 'all', label: 'All', count: subscriptions.length },
             { id: 'active', label: 'Active', count: subscriptions.filter((s) => s.status === 'active').length },
@@ -200,6 +201,11 @@ export function SubscriptionList({
               </span>
             </button>
           ))}
+        </div>
+        <div
+          className="pointer-events-none absolute right-0 top-0 bottom-1 w-6 bg-gradient-to-l from-background to-transparent sm:hidden"
+          aria-hidden="true"
+        />
         </div>
       </div>
 

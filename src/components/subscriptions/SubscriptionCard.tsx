@@ -248,7 +248,7 @@ export function SubscriptionCard({
               ) : null}
             </div>
 
-            {subscription.status === 'active' ? (
+            {subscription.status === 'active' && !subscription.is_trial ? (
               <Badge
                 variant={
                   countdown.urgent ? 'danger' : countdown.warning ? 'warning' : 'outline'
@@ -272,7 +272,7 @@ export function SubscriptionCard({
                 className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ExternalLink className="w-3 h-3" aria-hidden="true" />
-                Cancel page
+                Billing site
               </a>
             ) : null}
           </div>

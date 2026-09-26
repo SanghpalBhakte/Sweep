@@ -409,7 +409,7 @@ export default function StatementImportPage() {
         <div className="p-4 rounded-xl bg-danger-subtle border border-danger/30 text-xs text-danger flex items-start gap-2.5">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <div className="font-semibold">Couldn't read the file</div>
+            <div className="font-semibold">Couldn&apos;t read the file</div>
             <p className="leading-relaxed text-[11px]">{uploadError}</p>
           </div>
         </div>
