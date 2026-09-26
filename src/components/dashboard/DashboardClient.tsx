@@ -227,7 +227,7 @@ export function DashboardClient() {
       </div>
 
       {/* ─── 2. Unified Desk Summary Band (Single cohesive band, NOT 4 cards) ── */}
-      <div className="rounded-xl bg-card border border-border/60 shadow-xs divide-y lg:divide-y-0 lg:divide-x divide-border/50 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs divide-y lg:divide-y-0 lg:divide-x divide-border/50 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* Metric 1: Total Recurring Commitment */}
         <div className="p-4 sm:p-5 flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
@@ -251,7 +251,7 @@ export function DashboardClient() {
             </p>
           </div>
 
-          <div className="pt-2 border-t border-border/40 text-xs text-muted-foreground flex items-center justify-between">
+          <div className="pt-2 border-t border-dotted [border-color:hsl(var(--chart-4)/0.4)] text-xs text-muted-foreground flex items-center justify-between">
             <span>Per year</span>
             <span className="font-mono font-semibold text-foreground">
               {formatCurrency(stats.yearlyProjected, targetCurrency)}/yr
@@ -290,7 +290,7 @@ export function DashboardClient() {
             </p>
           </div>
 
-          <div className="pt-2 border-t border-border/40 text-xs text-muted-foreground flex items-center justify-between">
+          <div className="pt-2 border-t border-dotted [border-color:hsl(var(--chart-4)/0.4)] text-xs text-muted-foreground flex items-center justify-between">
             <span>Next 30 days</span>
             <span className="font-mono font-semibold text-foreground">
               {formatCurrency(stats.upcoming30DaysTotal, targetCurrency)}
@@ -308,10 +308,10 @@ export function DashboardClient() {
             {nextRenewalCountdown && (
               <span
                 className={cn(
-                  'text-xs font-medium px-2 py-0.2 rounded-full',
+                  'text-xs font-medium px-2 py-0.2',
                   nextRenewalCountdown.urgent
-                    ? 'bg-danger/12 text-danger font-semibold'
-                    : 'bg-surface text-muted-foreground'
+                    ? 'stamp rounded-[3px] bg-danger/10 text-danger'
+                    : 'rounded-full bg-surface text-muted-foreground'
                 )}
               >
                 {nextRenewalCountdown.label}
@@ -340,7 +340,7 @@ export function DashboardClient() {
             </div>
           )}
 
-          <div className="pt-2 border-t border-border/40 text-xs text-muted-foreground flex items-center justify-between">
+          <div className="pt-2 border-t border-dotted [border-color:hsl(var(--chart-4)/0.4)] text-xs text-muted-foreground flex items-center justify-between">
             <span>Billed</span>
             <span className="capitalize">{nextRenewal?.billing_cycle || 'None'}</span>
           </div>
@@ -378,7 +378,7 @@ export function DashboardClient() {
             </p>
           </div>
 
-          <div className="pt-2 border-t border-border/40 text-xs flex items-center justify-between">
+          <div className="pt-2 border-t border-dotted [border-color:hsl(var(--chart-4)/0.4)] text-xs flex items-center justify-between">
             <span className="text-muted-foreground">Marked to cancel</span>
             <span
               className={cn(
@@ -486,7 +486,7 @@ export function DashboardClient() {
           )}
 
           {/* Composed Ledger List (Single cohesive container with dividing lines) */}
-          <div className="rounded-xl bg-card border border-border/60 shadow-xs divide-y divide-border/40 overflow-hidden">
+          <div className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs divide-y divide-border/40 overflow-hidden">
             {isLoading ? (
               [1, 2, 3].map((i) => (
                 <div key={i} className="p-4 flex items-center justify-between gap-4">
@@ -546,7 +546,7 @@ export function DashboardClient() {
 
         {/* Right Support Zone: Unified Intelligence & Horizon Panel (5/12 Cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-xl bg-card border border-border/60 shadow-xs p-4 sm:p-5 space-y-5">
+          <div className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs p-4 sm:p-5 space-y-5">
             {/* Section A: 30-Day Renewal Horizon */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">

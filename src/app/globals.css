@@ -615,6 +615,64 @@
       padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
     }
   }
+
+  /* ── Signature: Paper Grain ───────────────────────────────────────
+     A faint noise field over the whole app so flat color reads as
+     paper, not screen. Fixed, non-interactive, tuned per theme. ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.03;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+  .dark body::before,
+  [data-theme="night-shelf"] body::before,
+  [data-theme="espresso-desk"] body::before {
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+  }
+
+  /* ── Signature: Ink Stamp ──────────────────────────────────────────
+     Rubber-stamp treatment reserved for genuine urgency (a renewal
+     due now) — the one bold move tied directly to the ledger and
+     receipt metaphor the app is named after. Color comes from
+     whatever text-* utility is applied alongside it. ── */
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border: 1.5px solid currentColor;
+    box-shadow: 0 0 0 1.5px currentColor inset, 1px 1px 0 0 currentColor;
+    transform: rotate(-2deg);
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  /* ── Signature: Ledger Margin Rule ─────────────────────────────────
+     Echoes the ruled red margin of physical accounting paper, inset
+     from the edge the way a real ledger pad's rule sits. ── */
+  .ledger-margin {
+    position: relative;
+  }
+  .ledger-margin::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.85rem;
+    bottom: 0.85rem;
+    width: 3px;
+    border-radius: 3px;
+    background: hsl(var(--chart-4) / 0.5);
+  }
 }
 
 /* ================================================================
