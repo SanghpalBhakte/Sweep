@@ -180,7 +180,7 @@ export function OnboardingChecklist() {
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4" />
               <span>
-                <strong>Setup complete!</strong> Your recurring ledger and alert preferences are configured.
+                <strong>You're all set.</strong> Your subscriptions and reminders are ready to go.
               </span>
             </div>
             <Button

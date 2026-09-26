@@ -47,7 +47,7 @@ export function AccountGroupSelector({
         <div className="flex items-center gap-2 flex-wrap mb-1">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
             <Layers className="w-3.5 h-3.5" />
-            Multi-Account Statement Session
+            Multiple accounts found
           </div>
           {completedCount > 0 ? (
             <Badge variant="success" size="sm">

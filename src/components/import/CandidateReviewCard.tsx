@@ -122,7 +122,7 @@ export function CandidateReviewCard({
                   {existingSubscription ? (
                     <Badge variant="success" size="sm" className="gap-1 font-mono text-[10px]">
                       <TrendingUp className="w-3 h-3" />
-                      Prior Statement Record · Trend Comparison Active
+                      Already in your list
                     </Badge>
                   ) : null}
                 </div>

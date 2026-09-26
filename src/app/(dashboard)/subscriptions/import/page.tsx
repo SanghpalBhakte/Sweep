@@ -409,7 +409,7 @@ export default function StatementImportPage() {
         <div className="p-4 rounded-xl bg-danger-subtle border border-danger/30 text-xs text-danger flex items-start gap-2.5">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <div className="font-semibold">Statement Extraction Notice</div>
+            <div className="font-semibold">Couldn't read the file</div>
             <p className="leading-relaxed text-[11px]">{uploadError}</p>
           </div>
         </div>
@@ -467,7 +467,7 @@ export default function StatementImportPage() {
                     <FileType className="w-4 h-4 text-primary" />
                   ) : null}
                   <span>
-                    {candidates.length} Discovered Recurring Service{candidates.length === 1 ? '' : 's'}
+                    {candidates.length} subscription{candidates.length === 1 ? '' : 's'} found
                   </span>
                   <Badge variant="outline" size="sm" className="font-mono flex items-center gap-1">
                     <Coins className="w-3 h-3 text-primary" /> {activeBatchCurrency}
@@ -665,8 +665,8 @@ export default function StatementImportPage() {
           <div className="space-y-1.5">
             <h2 className="text-lg font-bold text-foreground">
               {accountGroups.length > 1 && remainingGroups.length > 0
-                ? 'Account Batch Imported Successfully!'
-                : 'All Subscriptions Imported!'}
+                ? 'Account imported'
+                : 'All done'}
             </h2>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
               Added <strong>{importedBatchCount} subscription{importedBatchCount === 1 ? '' : 's'}</strong>{' '}
@@ -694,7 +694,7 @@ export default function StatementImportPage() {
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-primary" />
                 <span className="text-xs font-bold text-foreground">
-                  Next Account Ready in This Statement
+                  More accounts in this file
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
