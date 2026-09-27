@@ -24,6 +24,7 @@ import { parsePdfStatement } from '@/lib/utils/pdfParser';
 import { detectRecurringCandidates } from '@/lib/utils/recurringDetector';
 import dynamic from 'next/dynamic';
 import { StatementDropzone } from '@/components/import/CsvDropzone';
+import { AddPaymentMethodModal } from '@/components/subscriptions/AddPaymentMethodModal';
 
 const AccountGroupSelector = dynamic(
   () => import('@/components/import/AccountGroupSelector').then((m) => m.AccountGroupSelector),
@@ -60,7 +61,7 @@ type ReviewFilter = 'all' | 'selected' | 'unselected' | 'flagged';
 
 export default function StatementImportPage() {
   const router = useRouter();
-  const { subscriptions, categories, profile, addSubscription } = useSubscriptions();
+  const { subscriptions, categories, profile, addSubscription, paymentMethods } = useSubscriptions();
 
   const [step, setStep] = useState<ImportStep>('upload');
   const [fileName, setFileName] = useState<string>('');
@@ -92,6 +93,8 @@ export default function StatementImportPage() {
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('all');
   const [isRememberedFormat, setIsRememberedFormat] = useState(false);
   const [bankName, setBankName] = useState('Custom Statement Format');
+  const [importPaymentMethodId, setImportPaymentMethodId] = useState('');
+  const [isAddPmModalOpen, setIsAddPmModalOpen] = useState(false);
 
   const profileCurrency = profile?.currency_preference || 'USD';
   const activeBatchCurrency =
@@ -164,6 +167,7 @@ export default function StatementImportPage() {
   // Step 1B: Account Group Selected
   const startAccountBatch = (groupKey: string | 'ALL') => {
     setSelectedGroupKey(groupKey);
+    setImportPaymentMethodId('');
     let rowsToUse = csvRows;
     if (groupKey !== 'ALL' && accountColumn) {
       rowsToUse = csvRows.filter((r) => r[accountColumn] === groupKey);
@@ -307,6 +311,7 @@ export default function StatementImportPage() {
           trial_end_date: null,
           reminder_offsets: profile?.default_reminder_days || [7, 3, 1],
           value_rating: item.valueRating,
+          payment_method_id: importPaymentMethodId || null,
         });
       }
 
@@ -501,6 +506,36 @@ export default function StatementImportPage() {
                   {selectedCount} of {candidates.length} selected to save
                 </div>
               </div>
+            </div>
+
+            {/* Batch Payment Method Assignment */}
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <label htmlFor="import-payment-method" className="font-medium text-foreground shrink-0">
+                Charged to
+              </label>
+              <select
+                id="import-payment-method"
+                value={importPaymentMethodId}
+                onChange={(e) => setImportPaymentMethodId(e.target.value)}
+                className="sweep-input h-8 px-2 py-1 text-xs flex-1 min-w-[140px] max-w-[240px]"
+              >
+                <option value="">None / Unassigned</option>
+                {paymentMethods.map((pm) => (
+                  <option key={pm.id} value={pm.id}>
+                    {pm.name} {pm.last4 ? `(•••• ${pm.last4})` : ''}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setIsAddPmModalOpen(true)}
+                className="text-primary hover:underline font-semibold cursor-pointer shrink-0"
+              >
+                + Add
+              </button>
+              <span className="text-[11px] text-muted-foreground w-full sm:w-auto">
+                Applied to every subscription you save from this statement.
+              </span>
             </div>
 
             {/* Quick Filter Tabs */}
@@ -737,6 +772,12 @@ export default function StatementImportPage() {
           </div>
         </Card>
       ) : null}
+
+      <AddPaymentMethodModal
+        isOpen={isAddPmModalOpen}
+        onClose={() => setIsAddPmModalOpen(false)}
+        onCreated={(pm) => setImportPaymentMethodId(pm.id)}
+      />
     </div>
   );
 }

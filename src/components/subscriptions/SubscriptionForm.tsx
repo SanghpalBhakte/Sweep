@@ -101,7 +101,7 @@ export function SubscriptionForm({
   // Category & Payment Method State
   const [categoryId, setCategoryId] = useState<string>(initialData?.category_id || '');
   const [paymentMethodId, setPaymentMethodId] = useState<string>(
-    initialData?.payment_method_id || ''
+    initialData?.payment_method_id || paymentMethods.find((pm) => pm.is_default)?.id || ''
   );
 
   // Optional / Advanced State
@@ -456,6 +456,7 @@ export function SubscriptionForm({
   };
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-5 max-w-xl mx-auto pb-12">
       {/* Header with clear back/cancel path */}
       <div className="flex items-center justify-between gap-4 pb-2 border-b border-border">
@@ -942,6 +943,8 @@ export function SubscriptionForm({
         </Button>
       </div>
 
+    </form>
+
       <AddPaymentMethodModal
         isOpen={isAddPmModalOpen}
         onClose={() => setIsAddPmModalOpen(false)}
@@ -959,6 +962,6 @@ export function SubscriptionForm({
           setCategoryId(cat.id);
         }}
       />
-    </form>
+    </>
   );
 }
