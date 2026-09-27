@@ -26,9 +26,12 @@ export async function parsePdfStatement(file: File): Promise<PdfParseResult> {
     // Dynamic import to prevent SSR build issues
     const pdfjsLib = await import('pdfjs-dist');
 
-    // Configure client-side worker
+    // Configure client-side worker. Served from our own origin (public/pdf.worker.min.mjs,
+    // copied from node_modules by scripts/copy-pdf-worker.mjs) instead of a third-party CDN,
+    // so it isn't blocked by the site's Content-Security-Policy, an ad blocker, or a flaky
+    // network, and doesn't depend on that CDN being reachable at all.
     if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
     }
 
     const arrayBuffer = await file.arrayBuffer();

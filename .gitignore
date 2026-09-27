@@ -32,6 +32,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# generated: synced from node_modules by scripts/copy-pdf-worker.mjs (postinstall)
+/public/pdf.worker.min.mjs
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

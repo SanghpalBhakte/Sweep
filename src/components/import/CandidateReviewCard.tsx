@@ -72,6 +72,7 @@ export function CandidateReviewCard({
             <input
               type="checkbox"
               id={`candidate-checkbox-${candidate.id}`}
+              aria-label={`Include ${candidate.merchantName} in this import`}
               checked={candidate.selected}
               onChange={() => onToggleSelect(candidate.id)}
               className="w-4 h-4 rounded text-primary border-border accent-primary mt-1 cursor-pointer shrink-0"
@@ -176,6 +177,7 @@ export function CandidateReviewCard({
                 onChange={(e) =>
                   onUpdateCandidate(candidate.id, { suggestedCategoryId: e.target.value || null })
                 }
+                aria-label="Category"
                 className="sweep-input w-full h-8 px-2 py-1 text-xs"
               >
                 <option value="">General & Other</option>
@@ -199,6 +201,7 @@ export function CandidateReviewCard({
                     billingCycle: e.target.value as RecurringCandidate['billingCycle'],
                   })
                 }
+                aria-label="Cadence"
                 className="sweep-input w-full h-8 px-2 py-1 text-xs"
               >
                 <option value="monthly">Monthly</option>
@@ -219,6 +222,7 @@ export function CandidateReviewCard({
                     valueRating: e.target.value as ValueRating,
                   })
                 }
+                aria-label="Value Tier"
                 className="sweep-input w-full h-8 px-2 py-1 text-xs"
               >
                 <option value="essential">Essential</option>

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "postinstall": "node scripts/copy-pdf-worker.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
