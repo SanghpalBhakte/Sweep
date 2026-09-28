@@ -51,8 +51,8 @@ export function formatCurrency(
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: curr,
-      minimumFractionDigits: isZeroDecimal ? 0 : showCents && amount % 1 !== 0 ? 2 : amount % 1 === 0 ? 0 : 2,
-      maximumFractionDigits: isZeroDecimal ? 0 : 2,
+      minimumFractionDigits: isZeroDecimal || !showCents ? 0 : amount % 1 === 0 ? 0 : 2,
+      maximumFractionDigits: isZeroDecimal || !showCents ? 0 : 2,
     }).format(amount);
   } catch {
     return `${curr} ${amount.toFixed(isZeroDecimal ? 0 : 2)}`;

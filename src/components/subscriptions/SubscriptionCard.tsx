@@ -84,17 +84,11 @@ export function SubscriptionCard({
       >
         {/* Left: Icon Badge & Name & Next Billing Date */}
         <div className="flex items-center gap-3 min-w-0">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 transition-transform group-hover:scale-105 border border-border/40 shadow-2xs"
-            style={{
-              backgroundColor: subscription.category?.color
-                ? `${subscription.category.color}15`
-                : 'hsl(var(--surface))',
-              color: subscription.category?.color || 'hsl(var(--primary))',
-            }}
-          >
-            {subscription.name.charAt(0).toUpperCase()}
-          </div>
+          <span
+            aria-hidden="true"
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ backgroundColor: subscription.category?.color || 'hsl(var(--primary))' }}
+          />
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">

@@ -7,6 +7,7 @@ import { useSubscriptions } from '@/context/SubscriptionContext';
 import { WelcomeScreen } from '@/components/dashboard/WelcomeScreen';
 import { SubscriptionCard } from '@/components/subscriptions/SubscriptionCard';
 import { Button, ButtonLink } from '@/components/ui/Button';
+import { AnimatedCurrency } from '@/components/ui/AnimatedCurrency';
 import { convertCurrency, formatCurrency, normalizeMonthlyAmount } from '@/lib/utils/currency';
 import { formatDate, getCountdownBadge, getDaysUntil } from '@/lib/utils/dates';
 import {
@@ -14,7 +15,6 @@ import {
   Plus,
   Sparkles,
   Calendar,
-  Receipt,
   Search,
   Layers,
   TrendingUp,
@@ -29,6 +29,35 @@ const RestoreModal = dynamic(
   () => import('@/components/backup/RestoreModal').then((m) => m.RestoreModal),
   { ssr: false }
 );
+
+// One ruled line of the statement: label, dotted leader, value.
+function LedgerLine({
+  label,
+  children,
+  muted = false,
+}: {
+  label: string;
+  children: React.ReactNode;
+  muted?: boolean;
+}) {
+  return (
+    <div className="flex items-baseline gap-3 py-2.5">
+      <p className="text-sm text-muted-foreground shrink-0">{label}</p>
+      <span
+        aria-hidden="true"
+        className="flex-1 border-b border-dotted border-[hsl(var(--chart-4)/0.45)] -translate-y-[3px]"
+      />
+      <p
+        className={cn(
+          'text-sm tabular-nums font-mono',
+          muted ? 'text-muted-foreground' : 'text-foreground font-medium'
+        )}
+      >
+        {children}
+      </p>
+    </div>
+  );
+}
 
 export function DashboardClient() {
   const {
@@ -150,6 +179,14 @@ export function DashboardClient() {
   // Overdue renewals are the most urgent signal on the dashboard - fold them into
   // "Needs a look" so a lapsed renewal is never silently absent from every summary card.
   const needsLookCount = stats.overdueCount + stats.cancelCandidateCount + stats.trialCount;
+  const attentionSummary = [
+    stats.overdueCount > 0 ? `${stats.overdueCount} overdue` : null,
+    stats.trialCount > 0 ? `${stats.trialCount} free trial${stats.trialCount > 1 ? 's' : ''}` : null,
+    stats.cancelCandidateCount > 0 ? `${stats.cancelCandidateCount} marked to cancel` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const heroValue = period === 'monthly' ? stats.monthlyTotal : stats.yearlyProjected;
 
   const nextRenewal = stats.nextUpcomingRenewal;
   const nextRenewalCountdown = nextRenewal
@@ -172,229 +209,130 @@ export function DashboardClient() {
 
   return (
     <div className="space-y-6 sm:space-y-7 animate-in fade-in duration-150">
-      {/* ─── 1. Top Workspace Command Header ─────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Overview
-            </h1>
-            <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-surface text-muted-foreground border border-border/80">
-              {activeSubscriptions.length} active
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            What you pay, what renews soon, and where your money goes.
-          </p>
-        </div>
+      {/* ─── 1. Page header ─────────────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          Overview
+        </h1>
 
-        {/* Header Action Controls */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          {/* Period Toggle */}
-          <div className="flex items-center gap-0.5 p-1 bg-surface border border-border/80 rounded-lg text-xs">
-            <button
-              type="button"
-              onClick={() => setPeriod('monthly')}
-              className={cn(
-                'px-2.5 py-1 rounded-md font-medium text-xs transition-all cursor-pointer',
-                period === 'monthly'
-                  ? 'bg-card text-foreground font-semibold shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Monthly
-            </button>
-            <button
-              type="button"
-              onClick={() => setPeriod('yearly')}
-              className={cn(
-                'px-2.5 py-1 rounded-md font-medium text-xs transition-all cursor-pointer',
-                period === 'yearly'
-                  ? 'bg-card text-foreground font-semibold shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Yearly
-            </button>
-          </div>
-
-          <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="hidden sm:inline-flex gap-1.5 text-xs">
+        <div className="hidden sm:flex items-center gap-2">
+          <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="gap-1.5 text-xs">
             <UploadCloud className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
             <span>Import statement</span>
           </ButtonLink>
 
-          <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="hidden sm:inline-flex gap-1.5 shadow-xs px-3">
+          <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1.5 shadow-xs px-3">
             <Plus className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Add Subscription</span>
           </ButtonLink>
         </div>
       </div>
 
-      {/* ─── 2. Unified Desk Summary Band (Single cohesive band, NOT 4 cards) ── */}
-      <div className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs divide-y lg:divide-y-0 lg:divide-x divide-border/50 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Metric 1: Total Recurring Commitment */}
-        <div className="p-4 sm:p-5 flex flex-col justify-between space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">
-              {period === 'monthly' ? 'You pay per month' : 'You pay per year'}
-            </span>
-            <span className="text-[11px] font-mono text-muted-foreground px-1.5 py-0.2 rounded bg-surface border border-border/40">
+      {/* ─── 2. The statement: one hero figure, then ruled lines ─────── */}
+      <section
+        aria-label="Spending summary"
+        className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs overflow-hidden"
+      >
+        <div className="px-5 pt-2 pb-5 sm:px-6">
+          <div className="flex items-center justify-between gap-3">
+            <span className="sweep-editorial-label">You pay</span>
+            <div role="group" aria-label="Show total per" className="flex items-center -mr-2">
+              {(['monthly', 'yearly'] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  aria-pressed={period === p}
+                  onClick={() => setPeriod(p)}
+                  className="inline-flex items-center min-h-[44px] px-2 text-xs font-medium cursor-pointer"
+                >
+                  <span
+                    className={cn(
+                      'pb-0.5 border-b-2 transition-colors',
+                      period === p
+                        ? 'text-foreground border-primary'
+                        : 'text-muted-foreground border-transparent hover:text-foreground'
+                    )}
+                  >
+                    {p === 'monthly' ? 'Monthly' : 'Yearly'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-baseline gap-1.5 text-foreground">
+            <AnimatedCurrency
+              value={heroValue}
+              currency={targetCurrency}
+              showCents={false}
+              className="font-serif text-[2.75rem] sm:text-6xl font-semibold leading-none tracking-tight"
+            />
+            <span className="text-sm text-muted-foreground">
               {period === 'monthly' ? '/mo' : '/yr'}
             </span>
           </div>
 
-          <div>
-            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums font-mono">
-              {formatCurrency(
-                period === 'monthly' ? stats.monthlyTotal : stats.yearlyProjected,
-                targetCurrency
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              For {activeSubscriptions.length} active subscription{activeSubscriptions.length === 1 ? '' : 's'}
-            </p>
-          </div>
-
-          <div className="pt-2 border-t border-dotted [border-color:hsl(var(--chart-4)/0.4)] text-xs text-muted-foreground flex items-center justify-between">
-            <span>Per year</span>
-            <span className="font-mono font-semibold text-foreground">
-              {formatCurrency(stats.yearlyProjected, targetCurrency)}/yr
-            </span>
-          </div>
+          <p className="mt-2.5 text-sm text-muted-foreground">
+            {formatCurrency(
+              period === 'monthly' ? stats.yearlyProjected : stats.monthlyTotal,
+              targetCurrency,
+              { showCents: false }
+            )}
+            {period === 'monthly' ? ' a year' : ' a month'} · {activeSubscriptions.length}{' '}
+            subscription{activeSubscriptions.length === 1 ? '' : 's'}
+          </p>
         </div>
 
-        {/* Metric 2: 7-Day Renewal Window */}
-        <div className="p-4 sm:p-5 flex flex-col justify-between space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 opacity-60" />
-              <span>Next 7 days</span>
-            </span>
-            {next7DaysRenewals.length > 0 ? (
-              <span className="text-xs font-semibold px-2 py-0.2 rounded-full bg-warning/12 text-warning">
-                {next7DaysRenewals.length} due
-              </span>
-            ) : null}
-          </div>
-
-          <div>
-            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums font-mono">
-              {next7DaysRenewals.length > 0 ? (
-                formatCurrency(next7DaysTotal, targetCurrency)
-              ) : (
-                <span className="text-muted-foreground">—</span>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {next7DaysRenewals.length > 0
-                ? `${next7DaysRenewals.length} payment${next7DaysRenewals.length === 1 ? '' : 's'} this week`
-                : 'Nothing due this week'}
-            </p>
-          </div>
-
-          <div className="pt-2 border-t border-dotted [border-color:hsl(var(--chart-4)/0.4)] text-xs text-muted-foreground flex items-center justify-between">
-            <span>Next 30 days</span>
-            <span className="font-mono font-semibold text-foreground">
-              {formatCurrency(stats.upcoming30DaysTotal, targetCurrency)}
-            </span>
-          </div>
+        <div className="border-t border-border/60 px-5 sm:px-6">
+          <LedgerLine label="Next 7 days" muted={next7DaysRenewals.length === 0}>
+            {next7DaysRenewals.length > 0
+              ? `${formatCurrency(next7DaysTotal, targetCurrency)} (${next7DaysRenewals.length})`
+              : 'Nothing due'}
+          </LedgerLine>
+          <LedgerLine label="Next 30 days" muted={stats.upcoming30DaysTotal === 0}>
+            {formatCurrency(stats.upcoming30DaysTotal, targetCurrency)}
+          </LedgerLine>
         </div>
 
-        {/* Metric 3: Next Up Imminent Renewal */}
-        <div className="p-4 sm:p-5 flex flex-col justify-between space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Receipt className="w-3.5 h-3.5 opacity-60" />
-              <span>Next Renewal</span>
-            </span>
-            {nextRenewalCountdown && (
+        {nextRenewal ? (
+          <div className="border-t border-border/60 px-5 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Up next</p>
+              <p className="mt-0.5 text-sm text-foreground truncate">
+                <span className="font-semibold">{nextRenewal.name}</span>
+                <span className="ml-2 font-mono tabular-nums">
+                  {formatCurrency(nextRenewal.amount, nextRenewal.currency)}
+                </span>
+              </p>
+            </div>
+            {nextRenewalCountdown ? (
               <span
                 className={cn(
-                  'text-xs font-medium px-2 py-0.2',
+                  'shrink-0 text-xs font-medium',
                   nextRenewalCountdown.urgent
                     ? 'stamp rounded-[3px] bg-danger/10 text-danger'
-                    : 'rounded-full bg-surface text-muted-foreground'
+                    : 'text-muted-foreground'
                 )}
               >
                 {nextRenewalCountdown.label}
               </span>
-            )}
+            ) : null}
           </div>
+        ) : null}
 
-          {nextRenewal ? (
+        {needsLookCount > 0 ? (
+          <Link
+            href="/subscriptions"
+            className="border-t border-border/60 px-5 sm:px-6 py-3 flex items-center justify-between gap-3 hover:bg-surface/50 transition-colors"
+          >
             <div className="min-w-0">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-base font-semibold text-foreground truncate block">
-                  {nextRenewal.name}
-                </span>
-                <span className="text-base font-mono font-bold text-foreground tabular-nums shrink-0">
-                  {formatCurrency(nextRenewal.amount, nextRenewal.currency)}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                Due {formatDate(nextRenewal.next_renewal_date)}
-              </p>
+              <p className="text-xs text-muted-foreground">Needs a look</p>
+              <p className="mt-0.5 text-sm text-foreground truncate">{attentionSummary}</p>
             </div>
-          ) : (
-            <div>
-              <p className="text-base font-medium text-foreground">All caught up</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Nothing renews soon</p>
-            </div>
-          )}
-
-          <div className="pt-2 border-t border-dotted [border-color:hsl(var(--chart-4)/0.4)] text-xs text-muted-foreground flex items-center justify-between">
-            <span>Billed</span>
-            <span className="capitalize">{nextRenewal?.billing_cycle || 'None'}</span>
-          </div>
-        </div>
-
-        {/* Metric 4: Ledger Health & Optimization */}
-        <div className="p-4 sm:p-5 flex flex-col justify-between space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-primary opacity-80" />
-              <span>Needs a look</span>
-            </span>
-            <Link
-              href="/insights"
-              className="text-xs text-primary font-medium hover:underline flex items-center gap-0.5"
-            >
-              <span>Insights</span>
-              <ChevronRight className="w-2.5 h-2.5" />
-            </Link>
-          </div>
-
-          <div>
-            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums font-mono flex items-baseline gap-2">
-              <span>{needsLookCount}</span>
-              <span className="text-xs font-normal text-muted-foreground font-sans">
-                {needsLookCount === 1 ? 'item' : 'items'}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {stats.overdueCount > 0
-                ? `${stats.overdueCount} renewal${stats.overdueCount > 1 ? 's' : ''} overdue`
-                : stats.trialCount > 0
-                ? `${stats.trialCount} free trial${stats.trialCount > 1 ? 's' : ''} running`
-                : stats.cancelCandidateCount > 0
-                ? 'Subscriptions you marked to cancel'
-                : 'Nothing needs your attention'}
-            </p>
-          </div>
-
-          <div className="pt-2 border-t border-dotted [border-color:hsl(var(--chart-4)/0.4)] text-xs flex items-center justify-between">
-            <span className="text-muted-foreground">Marked to cancel</span>
-            <span
-              className={cn(
-                'font-semibold font-mono',
-                stats.cancelCandidateCount > 0 ? 'text-danger' : 'text-success'
-              )}
-            >
-              {stats.cancelCandidateCount > 0 ? stats.cancelCandidateCount : 'None'}
-            </span>
-          </div>
-        </div>
-      </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
+          </Link>
+        ) : null}
+      </section>
 
       {/* ─── 3. Composed Two-Zone Workspace (7:5 Split) ──────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -402,19 +340,12 @@ export function DashboardClient() {
         <div className="lg:col-span-7 space-y-3">
           {/* Section Header & Search Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold tracking-tight text-foreground">
-                  Active Subscriptions
-                </h2>
-                <span className="text-xs font-mono font-medium px-2 py-0.2 rounded-md bg-surface text-muted-foreground border border-border/60">
-                  {filteredSubscriptions.length}
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Everything you are paying for right now.
-              </p>
-            </div>
+            <h2 className="font-serif text-lg font-semibold tracking-tight text-foreground">
+              Subscriptions
+              <span className="ml-2 font-sans text-sm font-normal text-muted-foreground tabular-nums">
+                {filteredSubscriptions.length}
+              </span>
+            </h2>
 
             {/* Instant Filter Search */}
             <div className="relative w-full sm:w-56">
@@ -490,7 +421,7 @@ export function DashboardClient() {
           )}
 
           {/* Composed Ledger List (Single cohesive container with dividing lines) */}
-          <div className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs divide-y divide-border/40 overflow-hidden">
+          <div className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs divide-y divide-dotted divide-[hsl(var(--chart-4)/0.3)] overflow-hidden">
             {isLoading ? (
               [1, 2, 3].map((i) => (
                 <div key={i} className="p-4 flex items-center justify-between gap-4">
@@ -556,7 +487,7 @@ export function DashboardClient() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-primary" />
-                  <h3 className="text-sm font-bold tracking-tight text-foreground">
+                  <h3 className="font-serif text-base font-semibold tracking-tight text-foreground">
                     Coming up
                   </h3>
                 </div>
@@ -627,7 +558,7 @@ export function DashboardClient() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Layers className="w-4 h-4 text-primary" />
-                  <h3 className="text-sm font-bold tracking-tight text-foreground">
+                  <h3 className="font-serif text-base font-semibold tracking-tight text-foreground">
                     Spend by Category
                   </h3>
                 </div>

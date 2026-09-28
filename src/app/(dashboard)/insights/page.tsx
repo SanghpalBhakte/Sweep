@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { useSubscriptions } from '@/context/SubscriptionContext';
-import { MetricCard } from '@/components/ui/MetricCard';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/Skeleton';
 
@@ -188,48 +187,38 @@ export default function InsightsPage() {
         </div>
       </div>
 
-      {/* 1. Top-Level Stat Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <MetricCard
-          label="Per month"
-          value={<AnimatedCurrency value={stats.monthlyTotal} currency={currency} />}
-          subtitle="All active subscriptions"
-          trend={{
-            text: `${stats.activeCount} active`,
-            type: 'accent',
-          }}
-        />
-
-        <MetricCard
-          label="Per year"
-          value={<AnimatedCurrency value={stats.yearlyProjected} currency={currency} />}
-          subtitle="If nothing changes"
-          trend={{
-            text: '12 months',
-            type: 'neutral',
-          }}
-        />
-
-        <MetricCard
-          label="Average cost"
-          value={<AnimatedCurrency value={stats.averageMonthlySpend} currency={currency} />}
-          subtitle="Per subscription, each month"
-          trend={{
-            text: 'Active ones only',
-            type: 'neutral',
-          }}
-        />
-
-        <MetricCard
-          label="Due in 30 days"
-          value={<AnimatedCurrency value={stats.upcoming30DaysTotal} currency={currency} />}
-          subtitle={`${upcoming30Days.length} upcoming charges`}
-          trend={{
-            text: 'Coming up soon',
-            type: upcoming30Days.some((u) => u.isUrgent) ? 'warning' : 'neutral',
-          }}
-        />
-      </div>
+      {/* 1. Summary: one statement, not four boxes */}
+      <section
+        aria-label="Spending summary"
+        className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs grid grid-cols-2 lg:grid-cols-4 overflow-hidden"
+      >
+        {[
+          { label: 'Per month', value: stats.monthlyTotal, note: `${stats.activeCount} active` },
+          { label: 'Per year', value: stats.yearlyProjected, note: 'if nothing changes' },
+          { label: 'Average', value: stats.averageMonthlySpend, note: 'per subscription, monthly' },
+          {
+            label: 'Next 30 days',
+            value: stats.upcoming30DaysTotal,
+            note: `${upcoming30Days.length} charge${upcoming30Days.length === 1 ? '' : 's'}`,
+          },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className="p-4 sm:p-5 border-dotted border-[hsl(var(--chart-4)/0.35)] [&:nth-child(even)]:border-l [&:nth-child(n+3)]:border-t lg:[&:nth-child(n+3)]:border-t-0 lg:[&:not(:first-child)]:border-l"
+          >
+            <p className="sweep-editorial-label">{item.label}</p>
+            <p className="mt-1.5 text-foreground">
+              <AnimatedCurrency
+                value={item.value}
+                currency={currency}
+                showCents={false}
+                className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight"
+              />
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">{item.note}</p>
+          </div>
+        ))}
+      </section>
 
       {/* 2. Calm Spend Trend Chart */}
       <section>
