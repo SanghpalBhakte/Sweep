@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Fraunces } from 'next/font/google';
+import { Plus_Jakarta_Sans, Young_Serif, Spline_Sans_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/app/providers';
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -20,14 +20,23 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: '--font-sans',
 });
 
-const fraunces = Fraunces({
+const youngSerif = Young_Serif({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: '400',
   display: 'swap',
   preload: true,
   fallback: ['Georgia', 'serif'],
   adjustFontFallback: true,
-  variable: '--font-fraunces',
+  variable: '--font-young-serif',
+});
+
+const splineMono = Spline_Sans_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  fallback: ['ui-monospace', 'Menlo', 'Consolas', 'monospace'],
+  adjustFontFallback: true,
+  variable: '--font-spline-mono',
 });
 
 const SITE_URL = 'https://sift-sand.vercel.app';
@@ -127,8 +136,17 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${plusJakartaSans.variable} ${fraunces.variable} font-sans antialiased min-h-screen bg-background text-foreground`}
+        className={`${plusJakartaSans.variable} ${youngSerif.variable} ${splineMono.variable} font-sans antialiased min-h-screen bg-background text-foreground`}
       >
+        {/* Worn-ink edge used by .stamp (see globals.css) */}
+        <svg width="0" height="0" aria-hidden="true" focusable="false" className="absolute">
+          <filter id="ink-worn" x="-5%" y="-10%" width="110%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n" />
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -3.2 0 0 0 2.35" result="m" />
+            <feComposite in="SourceGraphic" in2="m" operator="in" result="s" />
+            <feDisplacementMap in="s" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </svg>
         <Providers>
           <ThemeProvider>
             <AuthProvider>

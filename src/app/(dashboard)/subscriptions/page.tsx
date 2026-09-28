@@ -15,30 +15,30 @@ export default function SubscriptionsPage() {
 
   return (
     <AppErrorBoundary fallback={<SubscriptionScreenErrorFallback title="Unable to render Subscriptions Ledger" />}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[hsl(var(--border))]">
+      <div className="space-y-6 max-w-3xl mx-auto">
+        {/* Header (phones use the Add button in the top bar) */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="font-serif text-3xl sm:text-4xl tracking-tight text-foreground">
               Subscriptions
             </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {subscriptions.length} tracked · You pay{' '}
-              <span className="font-semibold text-[hsl(var(--foreground))]">
-                {formatCurrency(stats.monthlyTotal, profile?.currency_preference || 'USD')}/mo
+            <p className="font-mono text-xs text-muted-foreground mt-1.5">
+              {subscriptions.length} tracked · you pay{' '}
+              <span className="font-semibold text-foreground">
+                {formatCurrency(stats.monthlyTotal, profile?.currency_preference || 'USD', { showCents: false })} a month
               </span>
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="gap-1.5 text-xs">
-              <UploadCloud className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
-              Import Statement
+          <div className="hidden sm:flex items-center gap-2">
+            <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="gap-1.5">
+              <UploadCloud className="w-3.5 h-3.5" aria-hidden="true" />
+              Import statement
             </ButtonLink>
 
-            <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1.5 shadow-xs">
-              <Plus className="w-3.5 h-3.5" />
-              Add Subscription
+            <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1.5">
+              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+              Add subscription
             </ButtonLink>
           </div>
         </div>

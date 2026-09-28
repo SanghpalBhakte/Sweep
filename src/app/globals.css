@@ -7,21 +7,11 @@
    ─────────────────────────────────────────────────────────────────
    Refined "paper, ink, and receipt / desk tool" aesthetic.
    
-   Light Mode ("Warm Ledger"):
-     Background: Warm Parchment (#F6F1E8)
-     Card: Soft Cream (#FCF9F3)
-     Muted Surface: Muted Oat (#EEE6DA)
-     Ink Text: Deep Charcoal Brown (#24201E)
-     Primary Accent: Rich Ink Plum (#5B294A)
-     Secondary Tint: Muted Dusty Rose Wash (#E8D7DF)
-     
-   Dark Mode ("Espresso Desk"):
-     Background: Near-Black Espresso (#191516)
-     Card: Dark Warm Graphite (#211C1E)
-     Muted Surface: Dark Cocoa (#2C2527)
-     Ink Text: Warm Ivory (#F3EDE5)
-     Primary Accent: Muted Orchid/Plum (#C98AAE)
-     Secondary Tint: Deep Mulberry Wash (#3C2933)
+   Idea: paper sheets lying on a desk. Ink is the only "brand" color.
+   Stamp red = overdue / destructive. Biro blue = focus + hand marks.
+
+   Light: desk putty (#D9D2C4), paper (#F8F6F0), ink (#1F1815)
+   Dark:  desk near-black (#0F0B0A), dark paper (#211A17), ivory ink (#EFE6D4)
    ================================================================ */
 
 /* ── Token API: declared once. Values reference runtime CSS vars. ── */
@@ -89,19 +79,19 @@
 
   /* ── Border Radius: --radius-* namespace (calm desk tool geometry) ── */
   --radius-none:   0px;
-  --radius-xs:     0.2rem;
-  --radius-sm:     0.375rem;
-  --radius-md:     0.5rem;
-  --radius-lg:     0.75rem;
-  --radius-xl:     1rem;
-  --radius-2xl:    1.25rem;
-  --radius-3xl:    1.5rem;
+  --radius-xs:     0.09375rem;
+  --radius-sm:     0.125rem;
+  --radius-md:     0.1875rem;
+  --radius-lg:     0.25rem;
+  --radius-xl:     0.25rem;
+  --radius-2xl:    0.3125rem;
+  --radius-3xl:    0.375rem;
   --radius-full:   9999px;
-  --radius-card:   0.75rem;
-  --radius-btn:    0.5rem;
-  --radius-badge:  0.375rem;
-  --radius-input:  0.5rem;
-  --radius-modal:  1rem;
+  --radius-card:   0.25rem;
+  --radius-btn:    0.1875rem;
+  --radius-badge:  0.125rem;
+  --radius-input:  0.1875rem;
+  --radius-modal:  0.3125rem;
 
   /* ── Shadows: theme-aware via CSS vars ──── */
   --shadow-xs:      var(--_shadow-xs);
@@ -137,10 +127,15 @@
   --tracking-widest:   0.1em;
 
   /* ── Font Families ─────────────────────────── */
-  --font-serif: var(--font-fraunces), 'Fraunces', Georgia, serif;
-  --font-display: var(--font-fraunces), 'Fraunces', Georgia, serif;
   --font-sans: var(--font-sans), 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+}
+
+/* Font variables come from next/font on <body>, so these must be inlined
+   (a plain @theme would resolve them on :root, where they do not exist). */
+@theme inline {
+  --font-serif: var(--font-young-serif), 'Young Serif', Georgia, serif;
+  --font-display: var(--font-young-serif), 'Young Serif', Georgia, serif;
+  --font-mono: var(--font-spline-mono), 'Spline Sans Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 }
 
 /* ================================================================
@@ -152,189 +147,172 @@
   :root,
   [data-theme="paper-ledger"],
   [data-theme="warm-ledger"] {
-    /* Sweep — Receipt Fold Direct Hex Variables */
-    --color-brand:            #5B294A;  /* Rich Ink Plum — primary accent */
-    --color-brand-hover:      #421C35;  /* Deep Aubergine — hover/active */
-    --color-brand-highlight:  #E8D7DF;  /* Dusty Rose — subtle highlight */
+    /* Direct hex variables (these also feed the Tailwind color tokens) */
+    --color-brand:            #1F1815;  /* Ink */
+    --color-brand-hover:      #3A2F2A;
+    --color-brand-highlight:  #E9E3D8;
 
-    /* Light mode surfaces — softened warm stationery */
-    --color-bg:               #F5F0E6;  /* Soft Warm Parchment */
-    --color-surface:          #FAF6EE;  /* Muted Cream Paper */
-    --color-surface-2:        #F4EFE6;
-    --color-surface-offset:   #EDE6DA;
-    --color-border:           #DDD5C9;  /* Quiet Low-Contrast Oat */
-    --color-divider:          #E6DFD3;
+    --color-bg:               #D9D2C4;  /* Desk */
+    --color-surface:          #EBE6DB;  /* Slightly darker paper (chips, hovers) */
+    --color-surface-2:        #F1EDE3;
+    --color-surface-offset:   #E4DED2;
+    --color-border:           #CFC8BA;
+    --color-divider:          #DDD7CA;
 
-    /* Text — crisp deep ink, reduced glare */
-    --color-text:             #221E1C;  /* Deep charcoal-brown */
-    --color-text-muted:       #736A64;  /* Comfortable reading contrast */
-    --color-text-faint:       #B0A69E;
+    --color-text:             #1F1815;
+    --color-text-muted:       #5E554A;
+    --color-text-faint:       #9A8F81;
 
-    /* Status colors — calm, non-glaring tones */
-    --color-success:          #4B6B3D;  /* Moss Green */
+    --color-success:          #4B6B3D;
     --color-success-highlight:#E4EFE0;
-    --color-warning:          #944F1F;  /* Toasted Amber (darkened a bit so small amber text passes 4.5:1) */
+    --color-warning:          #944F1F;
     --color-warning-highlight:#F7E9DE;
-    --color-error:            #9E3A35;  /* Brick Red */
-    --color-error-highlight:#F7DEDB;
+    --color-error:            #B02A14;
+    --color-error-highlight:  #F9E1DC;
 
-    /* Backgrounds — soft stationery paper */
-    --background:            38 30% 93.5%;     /* #F5F0E6 */
-    --card:                  40 33% 96%;       /* #FAF6EE */
-    --card-foreground:       20 10% 12%;       /* #221E1C */
-    --popover:               40 33% 96%;       /* #FAF6EE */
-    --popover-foreground:    20 10% 12%;       /* #221E1C */
-    --surface:               36 22% 88.5%;     /* #EBE3D7 */
-    --surface-muted:         35 18% 84.5%;     /* #E0D7CB */
-    --surface-raised:        0 0% 100%;
+    /* Desk + paper */
+    --background:            40 22% 81%;       /* #D9D2C4 desk */
+    --card:                  44 35% 96%;       /* #F8F6F0 paper */
+    --card-foreground:       18 19% 10%;       /* #1F1815 ink */
+    --popover:               44 35% 96%;
+    --popover-foreground:    18 19% 10%;
+    --surface:               40 22% 90%;
+    --surface-muted:         38 18% 85%;
+    --surface-raised:        44 40% 98%;
 
-    /* Text */
-    --foreground:            20 10% 12%;       /* #221E1C Deep crisp charcoal */
-    --muted:                 36 22% 88.5%;     /* #EBE3D7 */
-    --muted-foreground:      30 7% 42%;        /* #736A64 */
+    --foreground:            18 19% 10%;
+    --muted:                 40 20% 89%;
+    --muted-foreground:      33 12% 33%;       /* #5E554A */
 
-    /* Borders — soft low-contrast hairlines */
-    --border:                34 16% 83%;       /* #DDD5C9 */
-    --border-strong:         32 10% 68%;       /* #B4ABA1 */
-    --input:                 35 20% 86%;       /* #E5DDD1 */
-    --ring:                  321 38% 26%;      /* #5B294A Ink plum */
+    --border:                34 12% 76%;
+    --border-strong:         33 10% 55%;
+    --input:                 36 16% 82%;
+    --ring:                  223 58% 40%;      /* Biro blue */
 
-    /* Primary — rich ink plum */
-    --primary:               321 38% 26%;      /* #5B294A */
-    --primary-hover:         321 41% 18%;      /* #421C35 Deep aubergine */
-    --primary-foreground:    40 43% 97%;       /* #FCF9F3 Cream */
+    /* Primary is plain ink */
+    --primary:               18 19% 10%;
+    --primary-hover:         18 19% 22%;
+    --primary-foreground:    44 35% 96%;
 
-    /* Secondary */
-    --secondary:             36 22% 88.5%;     /* #EBE3D7 */
-    --secondary-hover:       37 20% 83.5%;     /* #DFD6C9 */
-    --secondary-foreground:  20 10% 12%;       /* #221E1C */
+    --secondary:             40 20% 88%;
+    --secondary-hover:       40 18% 82%;
+    --secondary-foreground:  18 19% 10%;
 
-    /* Accent tint — dusty rose/plum wash */
-    --accent:                327 20% 89%;      /* #E9D9E1 */
-    --accent-foreground:     321 38% 26%;      /* #5B294A */
+    --accent:                36 30% 86%;
+    --accent-foreground:     18 19% 10%;
 
-    /* Semantic */
-    --success:               100 27% 33%;      /* #4B6B3D */
-    --success-subtle:        102 24% 94%;      /* #EAF1E7 */
-    --success-foreground:    40 43% 97%;
+    --success:               100 27% 33%;
+    --success-subtle:        102 24% 94%;
+    --success-foreground:    44 35% 96%;
 
-    --warning:               25 65% 38%;       /* #9E5522 */
-    --warning-subtle:        25 50% 95%;       /* #F9EFE7 */
-    --warning-foreground:    40 43% 97%;
+    --warning:               25 65% 38%;
+    --warning-subtle:        25 50% 95%;
+    --warning-foreground:    44 35% 96%;
 
-    --danger:                3 50% 41%;        /* #9E3A35 */
-    --danger-subtle:         4 50% 95.5%;      /* #FBEBEA */
-    --danger-foreground:     40 43% 97%;
+    /* Stamp red */
+    --danger:                8 80% 38%;        /* #B02A14 */
+    --danger-subtle:         8 55% 93%;
+    --danger-foreground:     44 35% 96%;
 
-    /* Chart palette — restrained, editorial warm palette */
-    --chart-1:               321 38% 26%;      /* Rich Ink Plum */
-    --chart-2:               100 26% 35%;      /* Moss Green */
-    --chart-3:               25 64% 40%;       /* Toasted Amber */
-    --chart-4:               3 48% 44%;        /* Brick Clay */
-    --chart-5:               30 7% 43%;        /* Warm Slate */
-    --chart-6:               324 26% 59%;      /* Dusty Rose */
+    /* Charts: ink, moss, ochre, stamp red, warm slate, biro blue */
+    --chart-1:               18 19% 14%;
+    --chart-2:               100 26% 35%;
+    --chart-3:               35 70% 38%;
+    --chart-4:               8 72% 42%;
+    --chart-5:               33 12% 40%;
+    --chart-6:               223 55% 46%;
 
-    /* Theme-aware shadow values — quiet natural elevation */
-    --_shadow-xs:      0 1px 2px 0 rgb(34 30 28 / 0.03);
-    --_shadow-sm:      0 1px 3px 0 rgb(34 30 28 / 0.04), 0 1px 2px -1px rgb(34 30 28 / 0.02);
-    --_shadow-md:      0 4px 6px -1px rgb(34 30 28 / 0.05), 0 2px 4px -2px rgb(34 30 28 / 0.03);
-    --_shadow-lg:      0 10px 15px -3px rgb(34 30 28 / 0.06), 0 4px 6px -4px rgb(34 30 28 / 0.03);
-    --_shadow-xl:      0 20px 25px -5px rgb(34 30 28 / 0.07), 0 8px 10px -6px rgb(34 30 28 / 0.04);
-    --_shadow-card:    0 1px 2px 0 rgb(34 30 28 / 0.03), 0 2px 6px -2px rgb(34 30 28 / 0.02);
-    --_shadow-popover: 0 8px 20px -4px rgb(34 30 28 / 0.08), 0 2px 6px -2px rgb(34 30 28 / 0.05);
-    --_shadow-modal:   0 16px 24px -4px rgb(34 30 28 / 0.10), 0 8px 8px -4px rgb(34 30 28 / 0.03);
+    --_shadow-xs:      0 1px 0 0 rgb(31 24 21 / 0.06);
+    --_shadow-sm:      0 1px 2px 0 rgb(31 24 21 / 0.08);
+    --_shadow-md:      0 4px 8px -2px rgb(31 24 21 / 0.12);
+    --_shadow-lg:      0 10px 15px -3px rgb(31 24 21 / 0.14);
+    --_shadow-xl:      0 20px 25px -5px rgb(31 24 21 / 0.16);
+    --_shadow-card:    0 1px 0 0 rgb(31 24 21 / 0.06), 0 8px 16px -10px rgb(31 24 21 / 0.28);
+    --_shadow-popover: 0 8px 20px -4px rgb(31 24 21 / 0.20), 0 2px 6px -2px rgb(31 24 21 / 0.12);
+    --_shadow-modal:   0 16px 30px -6px rgb(31 24 21 / 0.28), 0 8px 8px -4px rgb(31 24 21 / 0.10);
   }
 
   /* ─── Dark Mode: "Espresso Desk" (Warm Graphite & Plum) ────────── */
+  /* ─── Dark: dark paper on a near-black desk ──────────────────── */
   .dark,
   [data-theme="dark"],
   [data-theme="night-shelf"],
   [data-theme="espresso-desk"] {
-    /* Sweep — Dark Mode Direct Hex Variables */
-    --color-bg:               #181415;
-    --color-surface:          #201B1D;
-    --color-surface-2:        #251E20;
-    --color-surface-offset:   #1C1618;
-    --color-border:           #332B2E;
-    --color-divider:          #2B2326;
-    --color-text:             #F2ECE4;
-    --color-text-muted:       #A49791;
-    --color-text-faint:       #685C57;
-    --color-brand:            #C889AD;  /* Muted Orchid for dark mode */
-    --color-brand-hover:      #AF6E95;
-    --color-brand-highlight:  #3A2731;
+    --color-bg:               #0F0B0A;
+    --color-surface:          #2A2320;
+    --color-surface-2:        #241E1B;
+    --color-surface-offset:   #1A1412;
+    --color-border:           #3A312D;
+    --color-divider:          #2E2622;
+    --color-text:             #EFE6D4;
+    --color-text-muted:       #A09484;
+    --color-text-faint:       #6E6357;
+    --color-brand:            #EFE6D4;
+    --color-brand-hover:      #FBF5E9;
+    --color-brand-highlight:  #2E2622;
+    --color-error:            #EE6047;
+    --color-error-highlight:  #361F1E;
 
-    /* The light block sets these as fixed hex values, which also override the Tailwind
-       theme tokens. Point them back at the dark values so text-success / text-warning
-       stay readable on dark backgrounds. */
+    /* Keep the semantic colors pointed at the dark values */
     --color-success:          hsl(var(--success));
     --color-warning:          hsl(var(--warning));
 
-    /* Backgrounds — near-black espresso */
-    --background:            345 9% 8.5%;      /* #181415 */
-    --card:                  336 8% 11.5%;     /* #201B1D */
-    --card-foreground:       34 28% 92%;       /* #F2ECE4 */
-    --popover:               336 8% 11.5%;     /* #201B1D */
-    --popover-foreground:    34 28% 92%;       /* #F2ECE4 */
-    --surface:               340 7% 15.5%;     /* #2A2325 */
-    --surface-muted:         340 7% 19.5%;     /* #342C2E */
-    --surface-raised:        340 7% 13.5%;     /* #241E20 */
+    --background:            12 20% 5%;        /* #0F0B0A desk */
+    --card:                  18 18% 11%;       /* #211A17 dark paper */
+    --card-foreground:       40 46% 88%;       /* #EFE6D4 */
+    --popover:               18 18% 11%;
+    --popover-foreground:    40 46% 88%;
+    --surface:               18 15% 15%;
+    --surface-muted:         18 14% 19%;
+    --surface-raised:        18 17% 13%;
 
-    /* Text */
-    --foreground:            34 28% 92%;       /* #F2ECE4 Warm ivory */
-    --muted:                 340 7% 15.5%;     /* #2A2325 */
-    --muted-foreground:      24 9% 68%;        /* #B6ACA5 Soft mushroom */
+    --foreground:            40 46% 88%;
+    --muted:                 18 15% 15%;
+    --muted-foreground:      34 13% 57%;       /* #A09484 */
 
-    /* Borders */
-    --border:                340 8% 19%;       /* #332B2E */
-    --border-strong:         340 9% 26%;       /* #483C40 */
-    --input:                 340 7% 16%;       /* #2C2527 */
-    --ring:                  326 38% 66%;      /* #C98AAE Muted orchid */
+    --border:                18 12% 22%;
+    --border-strong:         20 10% 30%;
+    --input:                 18 14% 16%;
+    --ring:                  225 78% 76%;      /* Biro blue, light */
 
-    /* Primary — muted orchid / plum */
-    --primary:               326 38% 66%;      /* #C98AAE */
-    --primary-hover:         326 48% 78%;      /* #E3ACC9 Pale rose */
-    --primary-foreground:    345 9% 9%;        /* #191516 */
+    --primary:               40 46% 88%;       /* Ivory ink */
+    --primary-hover:         40 46% 94%;
+    --primary-foreground:    18 18% 11%;
 
-    /* Secondary */
-    --secondary:             340 7% 16%;       /* #2C2527 Dark cocoa */
-    --secondary-hover:       340 9% 20%;       /* #382F32 */
-    --secondary-foreground:  34 30% 92%;       /* #F3EDE5 */
+    --secondary:             18 14% 17%;
+    --secondary-hover:       18 14% 21%;
+    --secondary-foreground:  40 46% 88%;
 
-    /* Accent tint — deep mulberry wash */
-    --accent:                328 19% 20%;      /* #3C2933 */
-    --accent-foreground:     326 48% 78%;      /* #E3ACC9 */
+    --accent:                18 15% 20%;
+    --accent-foreground:     40 46% 88%;
 
-    /* Semantic */
-    --success:               91 26% 59%;       /* #94B17A Sage green */
-    --success-subtle:        98 20% 15%;       /* #232D1E */
-    --success-foreground:    345 9% 9%;
+    --success:               91 26% 59%;
+    --success-subtle:        98 20% 15%;
+    --success-foreground:    12 20% 5%;
 
-    --warning:               28 71% 66%;       /* #E6A56B Warm apricot */
-    --warning-subtle:        28 36% 16%;       /* #37271A */
-    --warning-foreground:    345 9% 9%;
+    --warning:               28 71% 66%;
+    --warning-subtle:        28 36% 16%;
+    --warning-foreground:    12 20% 5%;
 
-    --danger:                3 59% 70%;        /* #E08B85 Soft coral */
-    --danger-subtle:         3 28% 16%;        /* #361F1E */
-    --danger-foreground:     345 9% 9%;
+    --danger:                9 83% 61%;        /* #EE6047 */
+    --danger-subtle:         9 35% 16%;
+    --danger-foreground:     12 20% 5%;
 
-    /* Chart palette — luminous contrast in dark */
-    --chart-1:               326 38% 66%;      /* Muted Plum */
-    --chart-2:               91 26% 59%;       /* Sage Green */
-    --chart-3:               28 71% 66%;       /* Warm Apricot */
-    --chart-4:               3 59% 70%;        /* Soft Coral */
-    --chart-5:               24 10% 69%;       /* Soft Mushroom */
-    --chart-6:               326 48% 78%;      /* Pale Rose */
+    --chart-1:               40 30% 80%;
+    --chart-2:               91 26% 59%;
+    --chart-3:               28 71% 66%;
+    --chart-4:               9 83% 61%;
+    --chart-5:               34 13% 62%;
+    --chart-6:               225 78% 76%;
 
-    /* Theme-aware shadow values */
     --_shadow-xs:      0 1px 2px 0 rgb(0 0 0 / 0.35);
     --_shadow-sm:      0 1px 3px 0 rgb(0 0 0 / 0.40), 0 1px 2px -1px rgb(0 0 0 / 0.30);
     --_shadow-md:      0 4px 6px -1px rgb(0 0 0 / 0.45), 0 2px 4px -2px rgb(0 0 0 / 0.35);
     --_shadow-lg:      0 10px 15px -3px rgb(0 0 0 / 0.50), 0 4px 6px -4px rgb(0 0 0 / 0.40);
     --_shadow-xl:      0 20px 25px -5px rgb(0 0 0 / 0.55), 0 8px 10px -6px rgb(0 0 0 / 0.45);
-    --_shadow-card:    0 1px 3px 0 rgb(0 0 0 / 0.28), 0 2px 8px -2px rgb(0 0 0 / 0.22);
-    --_shadow-popover: 0 8px 24px -4px rgb(0 0 0 / 0.45), 0 2px 8px -2px rgb(0 0 0 / 0.35);
-    --_shadow-modal:   0 25px 50px -12px rgb(0 0 0 / 0.70);
+    --_shadow-card:    0 1px 3px 0 rgb(0 0 0 / 0.35), 0 8px 16px -10px rgb(0 0 0 / 0.5);
+    --_shadow-popover: 0 8px 24px -4px rgb(0 0 0 / 0.55), 0 2px 8px -2px rgb(0 0 0 / 0.40);
+    --_shadow-modal:   0 25px 50px -12px rgb(0 0 0 / 0.75);
   }
 
   /* Base body styles */
@@ -350,9 +328,31 @@
     overflow-x: hidden;
   }
 
+  /* Young Serif only has a regular weight, so never fake-bold it */
+  .font-serif,
+  .font-display,
+  h1, h2, h3 {
+    font-synthesis: none;
+  }
+
+  /* Money reads better with lining figures than old-style ones */
+  .font-serif,
+  .font-display {
+    font-variant-numeric: lining-nums;
+    font-feature-settings: 'lnum' 1;
+  }
+
+  /* Every page title is set in the serif */
+  h1 {
+    font-family: var(--font-young-serif), 'Young Serif', Georgia, serif;
+    font-weight: 400;
+    font-variant-numeric: lining-nums;
+    font-feature-settings: 'lnum' 1;
+  }
+
   /* Selection highlight */
   ::selection {
-    background-color: hsl(var(--primary) / 0.2);
+    background-color: hsl(var(--ring) / 0.25);
     color: hsl(var(--foreground));
   }
 
@@ -399,7 +399,7 @@
     background-color: hsl(var(--card));
     color: hsl(var(--card-foreground));
     border: 1px solid hsl(var(--border));
-    border-radius: 0.75rem;
+    border-radius: var(--radius-card);
     box-shadow: var(--_shadow-card);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
@@ -416,8 +416,8 @@
   .sweep-input {
     background-color: hsl(var(--card));
     color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--border));
-    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--border-strong) / 0.7);
+    border-radius: var(--radius-input);
     padding: 0.55rem 0.85rem;
     font-size: 0.9375rem;
     line-height: 1.4;
@@ -444,9 +444,12 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    font-weight: 500;
-    font-size: 0.875rem;
-    border-radius: 0.5rem;
+    font-family: var(--font-spline-mono), 'Spline Sans Mono', ui-monospace, Consolas, monospace;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: var(--radius-btn);
     padding: 0.55rem 1rem;
     min-height: 2.5rem;
     cursor: pointer;
@@ -531,7 +534,8 @@
     font-size: 0.6875rem;
     font-weight: 500;
     padding: 0.2rem 0.5rem;
-    border-radius: 0.375rem;
+    border-radius: var(--radius-badge);
+    font-family: var(--font-spline-mono), 'Spline Sans Mono', ui-monospace, Consolas, monospace;
     line-height: 1;
     white-space: nowrap;
     letter-spacing: 0.01em;
@@ -539,9 +543,10 @@
 
   /* ── Editorial Section Labels ─────────────────────────────────── */
   .sweep-editorial-label {
+    font-family: var(--font-spline-mono), 'Spline Sans Mono', ui-monospace, Consolas, monospace;
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: hsl(var(--muted-foreground));
   }
@@ -551,7 +556,7 @@
     background-color: hsl(var(--card));
     color: hsl(var(--card-foreground));
     border: 1px solid hsl(var(--border));
-    border-radius: 0.875rem;
+    border-radius: var(--radius-card);
     padding: 1.15rem 1.25rem;
     box-shadow: var(--_shadow-xs);
     transition: border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -569,7 +574,7 @@
   .sweep-table-card {
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
-    border-radius: 0.875rem;
+    border-radius: var(--radius-card);
     box-shadow: var(--_shadow-xs);
     overflow: hidden;
   }
@@ -585,7 +590,7 @@
     color: hsl(var(--card-foreground));
     border: 1px solid hsl(var(--border) / 0.6);
     box-shadow: var(--_shadow-sm);
-    border-radius: 0.5rem;
+    border-radius: var(--radius-md);
     padding: 0.35rem 0.65rem;
     font-size: 0.75rem;
     line-height: 1.25;
@@ -638,28 +643,148 @@
   }
 
   /* ── Signature: Ink Stamp ──────────────────────────────────────────
-     Rubber-stamp treatment reserved for genuine urgency (a renewal
-     due now) — the one bold move tied directly to the ledger and
-     receipt metaphor the app is named after. Color comes from
-     whatever text-* utility is applied alongside it. ── */
+     Worn rubber stamp for genuine urgency (overdue). Colour comes from
+     the text-* utility used with it. The #ink-worn filter lives in
+     layout.tsx. ── */
   .stamp {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    font-family: var(--font-spline-mono), 'Spline Sans Mono', ui-monospace, Consolas, monospace;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    padding: 0.2rem 0.55rem;
-    border: 1.5px solid currentColor;
-    box-shadow: 0 0 0 1.5px currentColor inset, 1px 1px 0 0 currentColor;
-    transform: rotate(-2deg);
-    line-height: 1.1;
+    padding: 0.125rem 0.5rem 0.0625rem;
+    border: 2px solid currentColor;
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+    border-radius: 3px;
+    transform: rotate(-7deg);
+    line-height: 1.2;
     white-space: nowrap;
+    filter: url(#ink-worn);
+    mix-blend-mode: multiply;
+    opacity: 0.92;
+    pointer-events: none;
+  }
+  .dark .stamp,
+  [data-theme="night-shelf"] .stamp {
+    mix-blend-mode: normal;
+    opacity: 1;
   }
 
-  /* ── Signature: Ledger Margin Rule ─────────────────────────────────
-     Echoes the ruled red margin of physical accounting paper, inset
-     from the edge the way a real ledger pad's rule sits. ── */
+  /* ── Signature: Paper sheet ────────────────────────────────────────
+     A torn strip lying on the desk. Wrap .paper in .paper-sheet so the
+     drop shadow follows the zigzag edge instead of the box. ── */
+  .paper-sheet {
+    filter: drop-shadow(0 10px 12px rgb(31 24 21 / 0.16)) drop-shadow(0 0 1px rgb(31 24 21 / 0.25));
+  }
+  .dark .paper-sheet,
+  [data-theme="night-shelf"] .paper-sheet {
+    filter: drop-shadow(0 10px 14px rgb(0 0 0 / 0.55)) drop-shadow(0 0 1px rgb(255 245 225 / 0.08));
+  }
+  .paper {
+    --s: 7px;
+    position: relative;
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    -webkit-mask:
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) top / calc(var(--s) * 2) var(--s) repeat-x,
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(var(--s) * 2) var(--s) repeat-x,
+      linear-gradient(#000 0 0) center / 100% calc(100% - 2 * var(--s)) no-repeat;
+    mask:
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) top / calc(var(--s) * 2) var(--s) repeat-x,
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(var(--s) * 2) var(--s) repeat-x,
+      linear-gradient(#000 0 0) center / 100% calc(100% - 2 * var(--s)) no-repeat;
+  }
+  .paper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.1;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .25 0 0 0 0 .2 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .dark .paper::after,
+  [data-theme="night-shelf"] .paper::after {
+    opacity: 0.16;
+    mix-blend-mode: soft-light;
+  }
+
+  /* Receipt bits */
+  .ink-label {
+    font-family: var(--font-spline-mono), 'Spline Sans Mono', ui-monospace, Consolas, monospace;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
+  .leader {
+    flex: 1;
+    height: 0;
+    min-width: 0.625rem;
+    margin: 0 0.5rem;
+    align-self: baseline;
+    border-bottom: 2px dotted hsl(var(--foreground) / 0.3);
+  }
+  .rule-double {
+    border-top: 4px double hsl(var(--foreground));
+  }
+  .rule-single {
+    border-top: 1.5px solid hsl(var(--foreground));
+  }
+  .rule-dashed {
+    border-top: 1.5px dashed hsl(var(--foreground) / 0.32);
+  }
+
+  /* Hand-drawn pen circle around an amount that is due soon */
+  .biro-circle {
+    position: absolute;
+    left: -0.8rem;
+    top: -0.55rem;
+    width: calc(100% + 1.6rem);
+    height: calc(100% + 1.1rem);
+    overflow: visible;
+    pointer-events: none;
+  }
+  .biro-circle path {
+    fill: none;
+    stroke: hsl(var(--ring));
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.9;
+  }
+
+  /* Ledger page: red double margin rule after the date column */
+  .ledger-paper {
+    --ledger-pad: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .ledger-paper {
+      --ledger-pad: 1.75rem;
+    }
+  }
+  .ledger-rows {
+    position: relative;
+  }
+  .ledger-rows::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--ledger-pad) + 3.5rem);
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    border-left: 1.5px solid hsl(var(--danger));
+    border-right: 1.5px solid hsl(var(--danger));
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* Kept for pages that still use the old class name */
   .ledger-margin {
     position: relative;
   }
@@ -671,7 +796,7 @@
     bottom: 0.85rem;
     width: 3px;
     border-radius: 3px;
-    background: hsl(var(--chart-4) / 0.5);
+    background: hsl(var(--danger) / 0.5);
   }
 }
 

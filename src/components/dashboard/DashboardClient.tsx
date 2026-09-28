@@ -3,26 +3,20 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { format } from 'date-fns';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { WelcomeScreen } from '@/components/dashboard/WelcomeScreen';
-import { SubscriptionCard } from '@/components/subscriptions/SubscriptionCard';
-import { Button, ButtonLink } from '@/components/ui/Button';
+import { ButtonLink } from '@/components/ui/Button';
 import { AnimatedCurrency } from '@/components/ui/AnimatedCurrency';
-import { convertCurrency, formatCurrency, normalizeMonthlyAmount } from '@/lib/utils/currency';
-import { formatDate, getCountdownBadge, getDaysUntil } from '@/lib/utils/dates';
+import { Subscription } from '@/lib/types';
 import {
-  ArrowRight,
-  Plus,
-  Sparkles,
-  Calendar,
-  Search,
-  Layers,
-  TrendingUp,
-  ShieldAlert,
-  SlidersHorizontal,
-  ChevronRight,
-  UploadCloud,
-} from 'lucide-react';
+  convertCurrency,
+  formatCurrency,
+  formatCycle,
+  normalizeMonthlyAmount,
+} from '@/lib/utils/currency';
+import { formatShortDate, getCountdownBadge, getDaysUntil } from '@/lib/utils/dates';
+import { Plus, UploadCloud } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 const RestoreModal = dynamic(
@@ -30,8 +24,16 @@ const RestoreModal = dynamic(
   { ssr: false }
 );
 
-// One ruled line of the statement: label, dotted leader, value.
-function LedgerLine({
+type GroupKey = 'overdue' | 'week' | 'month' | 'later';
+
+const CYCLE_WORD: Record<string, string> = {
+  monthly: 'monthly',
+  quarterly: 'every 3 months',
+  yearly: 'yearly',
+};
+
+// One ruled line at the bottom of the statement: label, dotted leader, value.
+function TallyLine({
   label,
   children,
   muted = false,
@@ -41,83 +43,144 @@ function LedgerLine({
   muted?: boolean;
 }) {
   return (
-    <div className="flex items-baseline gap-3 py-2.5">
-      <p className="text-sm text-muted-foreground shrink-0">{label}</p>
+    <div className="flex items-baseline py-1.5">
+      <span className="font-mono text-[13px]">{label}</span>
+      <i aria-hidden="true" className="leader" />
       <span
-        aria-hidden="true"
-        className="flex-1 border-b border-dotted border-[hsl(var(--chart-4)/0.45)] -translate-y-[3px]"
-      />
-      <p
         className={cn(
-          'text-sm tabular-nums font-mono',
-          muted ? 'text-muted-foreground' : 'text-foreground font-medium'
+          'font-mono text-sm tabular-nums',
+          muted ? 'text-muted-foreground' : 'font-semibold'
         )}
       >
         {children}
-      </p>
+      </span>
     </div>
   );
 }
 
+// One subscription on the statement.
+function StatementLine({ sub, group }: { sub: Subscription; group: GroupKey }) {
+  const countdown = getCountdownBadge(sub.next_renewal_date);
+  const cycle = sub.billing_cycle !== 'monthly' ? formatCycle(sub.billing_cycle, sub.custom_interval_days) : '';
+  const dateText = formatShortDate(sub.next_renewal_date);
+
+  const notes: string[] = [];
+  if (group === 'overdue') notes.push(`Was due ${dateText}`);
+  else if (group === 'week') notes.push(`${dateText} · ${countdown.label}`);
+  else notes.push(dateText);
+  if (sub.is_trial) notes.push('Free trial');
+  notes.push(
+    sub.billing_cycle === 'custom'
+      ? `every ${sub.custom_interval_days || 30} days`
+      : CYCLE_WORD[sub.billing_cycle] || 'recurring'
+  );
+
+  return (
+    <Link
+      href={`/subscriptions/${sub.id}/edit`}
+      className={cn(
+        'relative block min-h-[56px] py-2.5 hover:bg-foreground/[0.04] transition-colors',
+        group === 'overdue' && 'pb-5'
+      )}
+    >
+      <span className="flex items-baseline">
+        <span className="font-serif text-[17px] leading-tight">{sub.name}</span>
+        <i aria-hidden="true" className="leader" />
+        <span className="relative font-mono text-[15px] font-semibold tabular-nums whitespace-nowrap">
+          {formatCurrency(sub.amount, sub.currency)}
+          {cycle ? (
+            <span className="ml-1 text-xs font-normal text-muted-foreground">{cycle}</span>
+          ) : null}
+          {group === 'week' ? (
+            <svg
+              className="biro-circle"
+              viewBox="0 0 100 40"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M14 8 C34 -1 86 0 95 14 C102 27 64 39 30 35 C6 32 -2 17 12 9 C20 5 31 3 42 3" />
+            </svg>
+          ) : null}
+        </span>
+      </span>
+      <span className="mt-0.5 block font-mono text-xs text-muted-foreground pr-24">
+        {notes.join(' · ')}
+      </span>
+      {group === 'overdue' ? (
+        <span aria-hidden="true" className="stamp text-danger absolute right-1 bottom-1">
+          Overdue
+        </span>
+      ) : null}
+    </Link>
+  );
+}
+
 export function DashboardClient() {
-  const {
-    subscriptions,
-    categories,
-    stats,
-    displayCurrency,
-    exchangeRates,
-    isLoading,
-    toggleStatus,
-    deleteSubscription,
-  } = useSubscriptions();
+  const { subscriptions, stats, displayCurrency, exchangeRates, isLoading } = useSubscriptions();
 
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [period, setPeriod] = useState<'monthly' | 'yearly'>('monthly');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const targetCurrency = stats.displayCurrency || displayCurrency || 'USD';
 
-  // 1. Active subscriptions
-  const activeSubscriptions = useMemo(() => {
-    return subscriptions.filter((s) => s.status === 'active');
-  }, [subscriptions]);
+  const activeSubscriptions = useMemo(
+    () => subscriptions.filter((s) => s.status === 'active'),
+    [subscriptions]
+  );
 
-  // 2. Upcoming Renewals in Next 7 Days
-  const next7DaysRenewals = useMemo(() => {
-    return activeSubscriptions.filter((s) => {
+  // Next 7 days total (charges due today through a week from now)
+  const next7 = useMemo(() => {
+    const due = activeSubscriptions.filter((s) => {
       const days = getDaysUntil(s.next_renewal_date);
       return days >= 0 && days <= 7;
     });
-  }, [activeSubscriptions]);
-
-  const next7DaysTotal = useMemo(() => {
-    return next7DaysRenewals.reduce(
+    const total = due.reduce(
       (sum, s) =>
         sum + convertCurrency(s.amount, s.currency || 'USD', targetCurrency, exchangeRates.rates),
       0
     );
-  }, [next7DaysRenewals, targetCurrency, exchangeRates.rates]);
+    return { count: due.length, total };
+  }, [activeSubscriptions, targetCurrency, exchangeRates.rates]);
 
-  // 3. Chronological Upcoming 30 Days Renewals (Top 4)
-  const upcomingChronological = useMemo(() => {
-    return [...activeSubscriptions]
-      .filter((s) => getDaysUntil(s.next_renewal_date) >= 0)
-      .sort(
-        (a, b) =>
-          new Date(a.next_renewal_date).getTime() - new Date(b.next_renewal_date).getTime()
-      )
-      .slice(0, 4);
-  }, [activeSubscriptions]);
+  // Statement sections, in date order: overdue, this week, later this month, later
+  const groups = useMemo(() => {
+    const sorted = [...activeSubscriptions].sort(
+      (a, b) => new Date(a.next_renewal_date).getTime() - new Date(b.next_renewal_date).getTime()
+    );
+    const buckets: Record<GroupKey, Subscription[]> = { overdue: [], week: [], month: [], later: [] };
+    for (const sub of sorted) {
+      const days = getDaysUntil(sub.next_renewal_date);
+      if (days < 0) buckets.overdue.push(sub);
+      else if (days <= 7) buckets.week.push(sub);
+      else if (days <= 30) buckets.month.push(sub);
+      else buckets.later.push(sub);
+    }
+    const titles: Record<GroupKey, string> = {
+      overdue: 'Overdue',
+      week: 'This week',
+      month: 'Later this month',
+      later: 'Later',
+    };
+    return (['overdue', 'week', 'month', 'later'] as GroupKey[])
+      .filter((key) => buckets[key].length > 0)
+      .map((key) => ({
+        key,
+        title: titles[key],
+        items: buckets[key],
+        total: buckets[key].reduce(
+          (sum, s) =>
+            sum + convertCurrency(s.amount, s.currency || 'USD', targetCurrency, exchangeRates.rates),
+          0
+        ),
+      }));
+  }, [activeSubscriptions, targetCurrency, exchangeRates.rates]);
 
-  // 4. Top Spend by Category Breakdown
-  const categorySpendDistribution = useMemo(() => {
+  // Spend by category (desktop side panel)
+  const categorySpend = useMemo(() => {
     if (stats.monthlyTotal === 0 || activeSubscriptions.length === 0) return [];
-    const catMap: Record<string, { categoryName: string; color: string; monthlyAmount: number }> = {};
+    const map: Record<string, { name: string; color: string; monthly: number }> = {};
     for (const sub of activeSubscriptions) {
-      const catId = sub.category_id || 'unassigned';
-      const catName = sub.category?.name || 'Unassigned';
-      const catColor = sub.category?.color || 'hsl(var(--primary))';
+      const id = sub.category_id || 'unassigned';
       const monthly = convertCurrency(
         sub.monthly_amount ||
           normalizeMonthlyAmount(sub.amount, sub.billing_cycle, sub.custom_interval_days),
@@ -125,73 +188,27 @@ export function DashboardClient() {
         targetCurrency,
         exchangeRates.rates
       );
-      if (!catMap[catId]) {
-        catMap[catId] = { categoryName: catName, color: catColor, monthlyAmount: 0 };
+      if (!map[id]) {
+        map[id] = {
+          name: sub.category?.name || 'Unassigned',
+          color: sub.category?.color || 'hsl(var(--chart-5))',
+          monthly: 0,
+        };
       }
-      catMap[catId].monthlyAmount += monthly;
+      map[id].monthly += monthly;
     }
-
-    return Object.entries(catMap)
-      .map(([id, data]) => ({
-        categoryId: id,
-        categoryName: data.categoryName,
-        color: data.color,
-        monthlyAmount: data.monthlyAmount,
-        percentage: Math.min(100, Math.round((data.monthlyAmount / stats.monthlyTotal) * 100)),
+    return Object.entries(map)
+      .map(([id, d]) => ({
+        id,
+        ...d,
+        percentage: Math.min(100, Math.round((d.monthly / stats.monthlyTotal) * 100)),
       }))
-      .sort((a, b) => b.monthlyAmount - a.monthlyAmount)
-      .slice(0, 4);
+      .sort((a, b) => b.monthly - a.monthly)
+      .slice(0, 5);
   }, [activeSubscriptions, stats.monthlyTotal, targetCurrency, exchangeRates.rates]);
 
-  // 5. Category filter pills
-  const topCategories = useMemo(() => {
-    const countMap: Record<string, number> = {};
-    for (const sub of activeSubscriptions) {
-      if (sub.category_id) {
-        countMap[sub.category_id] = (countMap[sub.category_id] || 0) + 1;
-      }
-    }
-
-    return categories
-      .filter((c) => (countMap[c.id] || 0) > 0)
-      .sort((a, b) => (countMap[b.id] || 0) - (countMap[a.id] || 0))
-      .slice(0, 6);
-  }, [categories, activeSubscriptions]);
-
-  // 6. Filtered subscriptions for the dashboard ledger
-  const filteredSubscriptions = useMemo(() => {
-    let list = activeSubscriptions;
-    if (selectedCategoryId !== 'all') {
-      list = list.filter((s) => s.category_id === selectedCategoryId);
-    }
-    if (searchQuery.trim() !== '') {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (s) =>
-          s.name.toLowerCase().includes(q) ||
-          s.description?.toLowerCase().includes(q) ||
-          s.category?.name.toLowerCase().includes(q)
-      );
-    }
-    return list;
-  }, [activeSubscriptions, selectedCategoryId, searchQuery]);
-
-  // Overdue renewals are the most urgent signal on the dashboard - fold them into
-  // "Needs a look" so a lapsed renewal is never silently absent from every summary card.
-  const needsLookCount = stats.overdueCount + stats.cancelCandidateCount + stats.trialCount;
-  const attentionSummary = [
-    stats.overdueCount > 0 ? `${stats.overdueCount} overdue` : null,
-    stats.trialCount > 0 ? `${stats.trialCount} free trial${stats.trialCount > 1 ? 's' : ''}` : null,
-    stats.cancelCandidateCount > 0 ? `${stats.cancelCandidateCount} marked to cancel` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
   const heroValue = period === 'monthly' ? stats.monthlyTotal : stats.yearlyProjected;
-
-  const nextRenewal = stats.nextUpcomingRenewal;
-  const nextRenewalCountdown = nextRenewal
-    ? getCountdownBadge(nextRenewal.next_renewal_date)
-    : null;
+  const now = new Date();
 
   // Zero-subscription state
   if (!isLoading && subscriptions.length === 0) {
@@ -208,405 +225,209 @@ export function DashboardClient() {
   }
 
   return (
-    <div className="space-y-6 sm:space-y-7 animate-in fade-in duration-150">
-      {/* ─── 1. Page header ─────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-          Overview
-        </h1>
-
-        <div className="hidden sm:flex items-center gap-2">
-          <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="gap-1.5 text-xs">
-            <UploadCloud className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-            <span>Import statement</span>
-          </ButtonLink>
-
-          <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1.5 shadow-xs px-3">
-            <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Add Subscription</span>
-          </ButtonLink>
-        </div>
+    <div className="animate-in fade-in duration-150">
+      {/* Desktop actions (phones use the Add button in the top bar) */}
+      <div className="hidden sm:flex items-center justify-end gap-2 mb-5">
+        <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="gap-1.5">
+          <UploadCloud className="w-3.5 h-3.5" aria-hidden="true" />
+          <span>Import statement</span>
+        </ButtonLink>
+        <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1.5 px-3">
+          <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+          <span>Add subscription</span>
+        </ButtonLink>
       </div>
 
-      {/* ─── 2. The statement: one hero figure, then ruled lines ─────── */}
-      <section
-        aria-label="Spending summary"
-        className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs overflow-hidden"
-      >
-        <div className="px-5 pt-2 pb-5 sm:px-6">
-          <div className="flex items-center justify-between gap-3">
-            <span className="sweep-editorial-label">You pay</span>
-            <div role="group" aria-label="Show total per" className="flex items-center -mr-2">
-              {(['monthly', 'yearly'] as const).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  aria-pressed={period === p}
-                  onClick={() => setPeriod(p)}
-                  className="inline-flex items-center min-h-[44px] px-2 text-xs font-medium cursor-pointer"
-                >
-                  <span
-                    className={cn(
-                      'pb-0.5 border-b-2 transition-colors',
-                      period === p
-                        ? 'text-foreground border-primary'
-                        : 'text-muted-foreground border-transparent hover:text-foreground'
-                    )}
-                  >
-                    {p === 'monthly' ? 'Monthly' : 'Yearly'}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-baseline gap-1.5 text-foreground">
-            <AnimatedCurrency
-              value={heroValue}
-              currency={targetCurrency}
-              showCents={false}
-              className="font-serif text-[2.75rem] sm:text-6xl font-semibold leading-none tracking-tight"
-            />
-            <span className="text-sm text-muted-foreground">
-              {period === 'monthly' ? '/mo' : '/yr'}
-            </span>
-          </div>
-
-          <p className="mt-2.5 text-sm text-muted-foreground">
-            {formatCurrency(
-              period === 'monthly' ? stats.yearlyProjected : stats.monthlyTotal,
-              targetCurrency,
-              { showCents: false }
-            )}
-            {period === 'monthly' ? ' a year' : ' a month'} · {activeSubscriptions.length}{' '}
-            subscription{activeSubscriptions.length === 1 ? '' : 's'}
-          </p>
-        </div>
-
-        <div className="border-t border-border/60 px-5 sm:px-6">
-          <LedgerLine label="Next 7 days" muted={next7DaysRenewals.length === 0}>
-            {next7DaysRenewals.length > 0
-              ? `${formatCurrency(next7DaysTotal, targetCurrency)} (${next7DaysRenewals.length})`
-              : 'Nothing due'}
-          </LedgerLine>
-          <LedgerLine label="Next 30 days" muted={stats.upcoming30DaysTotal === 0}>
-            {formatCurrency(stats.upcoming30DaysTotal, targetCurrency)}
-          </LedgerLine>
-        </div>
-
-        {nextRenewal ? (
-          <div className="border-t border-border/60 px-5 sm:px-6 py-3.5 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Up next</p>
-              <p className="mt-0.5 text-sm text-foreground truncate">
-                <span className="font-semibold">{nextRenewal.name}</span>
-                <span className="ml-2 font-mono tabular-nums">
-                  {formatCurrency(nextRenewal.amount, nextRenewal.currency)}
-                </span>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* ─── The statement ─────────────────────────────────────── */}
+        <div className="paper-sheet lg:col-span-7">
+          <section aria-label="Spending statement" className="paper px-5 sm:px-8 pt-10 pb-10">
+            <header className="flex flex-col items-center gap-1 text-center">
+              <h1 className="ink-label">Statement · {format(now, 'MMM yyyy')}</h1>
+              <p className="font-mono text-xs text-muted-foreground">
+                Printed {format(now, 'd MMM')} · {activeSubscriptions.length} subscription
+                {activeSubscriptions.length === 1 ? '' : 's'}
               </p>
-            </div>
-            {nextRenewalCountdown ? (
-              <span
-                className={cn(
-                  'shrink-0 text-xs font-medium',
-                  nextRenewalCountdown.urgent
-                    ? 'stamp rounded-[3px] bg-danger/10 text-danger'
-                    : 'text-muted-foreground'
-                )}
+            </header>
+
+            <div className="rule-dashed my-4" />
+
+            <div className="text-center">
+              <div
+                role="group"
+                aria-label="Show total per"
+                className="flex items-center justify-center gap-1"
               >
-                {nextRenewalCountdown.label}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-
-        {needsLookCount > 0 ? (
-          <Link
-            href="/subscriptions"
-            className="border-t border-border/60 px-5 sm:px-6 py-3 flex items-center justify-between gap-3 hover:bg-surface/50 transition-colors"
-          >
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Needs a look</p>
-              <p className="mt-0.5 text-sm text-foreground truncate">{attentionSummary}</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
-          </Link>
-        ) : null}
-      </section>
-
-      {/* ─── 3. Composed Two-Zone Workspace (7:5 Split) ──────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Primary Zone: Active Operational Ledger (7/12 Cols) */}
-        <div className="lg:col-span-7 space-y-3">
-          {/* Section Header & Search Bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
-            <h2 className="font-serif text-lg font-semibold tracking-tight text-foreground">
-              Subscriptions
-              <span className="ml-2 font-sans text-sm font-normal text-muted-foreground tabular-nums">
-                {filteredSubscriptions.length}
-              </span>
-            </h2>
-
-            {/* Instant Filter Search */}
-            <div className="relative w-full sm:w-56">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="sweep-input pl-8 pr-3 py-1 text-xs"
-                aria-label="Filter active subscriptions"
-              />
-            </div>
-          </div>
-
-          {/* Category Filter Pills (Inline Strip) */}
-          {activeSubscriptions.length > 2 && (
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 whitespace-nowrap">
-              <button
-                type="button"
-                onClick={() => setSelectedCategoryId('all')}
-                className={cn(
-                  'px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0',
-                  selectedCategoryId === 'all'
-                    ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
-                    : 'bg-surface/50 hover:bg-surface text-muted-foreground hover:text-foreground border border-border/40'
-                )}
-              >
-                All ({activeSubscriptions.length})
-              </button>
-
-              {topCategories.map((category) => {
-                const count = activeSubscriptions.filter(
-                  (s) => s.category_id === category.id
-                ).length;
-                const isSelected = selectedCategoryId === category.id;
-
-                return (
+                <span className="ink-label mr-1">You pay</span>
+                {(['monthly', 'yearly'] as const).map((p) => (
                   <button
-                    key={category.id}
+                    key={p}
                     type="button"
-                    onClick={() => setSelectedCategoryId(category.id)}
+                    aria-pressed={period === p}
+                    onClick={() => setPeriod(p)}
                     className={cn(
-                      'px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 flex items-center gap-1.5',
-                      isSelected
-                        ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
-                        : 'bg-surface/50 hover:bg-surface text-muted-foreground hover:text-foreground border border-border/40'
+                      'relative inline-flex items-center min-h-[44px] px-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] cursor-pointer transition-colors',
+                      period === p ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
-                    {category.color ? (
+                    {p === 'monthly' ? 'Each month' : 'Each year'}
+                    {period === p ? (
                       <span
-                        className="w-1.5 h-1.5 rounded-full shrink-0"
-                        style={{
-                          backgroundColor: isSelected ? 'currentColor' : category.color,
-                        }}
+                        aria-hidden="true"
+                        className="absolute left-2 right-2 bottom-2 h-[2px] bg-danger"
                       />
                     ) : null}
-                    <span>{category.name}</span>
-                    {count > 0 ? (
-                      <span
-                        className={cn(
-                          'text-[11px] tabular-nums font-mono',
-                          isSelected ? 'opacity-80' : 'text-muted-foreground'
-                        )}
-                      >
-                        ({count})
-                      </span>
-                    ) : null}
                   </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Composed Ledger List (Single cohesive container with dividing lines) */}
-          <div className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs divide-y divide-dotted divide-[hsl(var(--chart-4)/0.3)] overflow-hidden">
-            {isLoading ? (
-              [1, 2, 3].map((i) => (
-                <div key={i} className="p-4 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-surface-muted sweep-skeleton" />
-                    <div className="space-y-1.5">
-                      <div className="w-24 h-3.5 bg-surface-muted sweep-skeleton" />
-                      <div className="w-36 h-2.5 bg-surface-muted sweep-skeleton" />
-                    </div>
-                  </div>
-                  <div className="w-16 h-4 bg-surface-muted sweep-skeleton" />
-                </div>
-              ))
-            ) : filteredSubscriptions.length === 0 ? (
-              <div className="p-8 text-center space-y-2 text-xs">
-                <p className="text-muted-foreground">No subscriptions match your search or filter.</p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedCategoryId('all');
-                    setSearchQuery('');
-                  }}
-                  className="text-xs text-primary cursor-pointer"
-                >
-                  Reset filters
-                </Button>
+                ))}
               </div>
+
+              <div className="text-foreground">
+                {isLoading ? (
+                  <div className="mx-auto my-2 h-[3.25rem] w-48 sweep-skeleton" aria-hidden="true" />
+                ) : (
+                  <AnimatedCurrency
+                    value={heroValue}
+                    currency={targetCurrency}
+                    showCents={false}
+                    className="font-serif text-[3.25rem] sm:text-[4.25rem] leading-none tracking-tight"
+                  />
+                )}
+              </div>
+
+              {!isLoading ? (
+                <p className="mt-2 font-mono text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">
+                    {formatCurrency(
+                      period === 'monthly' ? stats.yearlyProjected : stats.monthlyTotal,
+                      targetCurrency,
+                      { showCents: false }
+                    )}
+                  </span>
+                  {period === 'monthly' ? ' a year' : ' a month'}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="rule-double mt-5 mb-2" />
+
+            {isLoading ? (
+              <div className="space-y-4 pt-3" aria-hidden="true">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="h-4 w-40 sweep-skeleton" />
+                    <div className="h-3 w-28 sweep-skeleton" />
+                  </div>
+                ))}
+              </div>
+            ) : groups.length === 0 ? (
+              <p className="py-6 text-center font-mono text-xs text-muted-foreground">
+                No active subscriptions. Resume one or add a new one.
+              </p>
             ) : (
-              filteredSubscriptions.map((sub) => (
-                <SubscriptionCard
-                  key={sub.id}
-                  subscription={sub}
-                  onToggleStatus={toggleStatus}
-                  onDelete={deleteSubscription}
-                  compact={true}
-                />
+              groups.map((group) => (
+                <section key={group.key} aria-labelledby={`group-${group.key}`} className="mt-4">
+                  <div className="flex items-baseline justify-between pt-2 pb-0.5">
+                    <h2
+                      id={`group-${group.key}`}
+                      className={cn(
+                        'font-mono text-[11px] font-bold uppercase tracking-[0.14em]',
+                        group.key === 'overdue' ? 'text-danger' : 'text-foreground'
+                      )}
+                    >
+                      {group.title}
+                    </h2>
+                    <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                      {formatCurrency(group.total, targetCurrency, { showCents: false })}
+                    </span>
+                  </div>
+                  {group.items.map((sub) => (
+                    <StatementLine key={sub.id} sub={sub} group={group.key} />
+                  ))}
+                </section>
               ))
             )}
 
-            {/* Footer summary row */}
-            <div className="p-3 bg-surface/20 flex items-center justify-between text-xs px-4">
-              <span className="text-muted-foreground">
-                Showing {filteredSubscriptions.length} of {activeSubscriptions.length}
-              </span>
+            {!isLoading ? (
+              <>
+                <div className="rule-single mt-6 mb-1" />
+                <TallyLine label="Next 7 days" muted={next7.count === 0}>
+                  {next7.count > 0 ? formatCurrency(next7.total, targetCurrency) : 'Nothing due'}
+                </TallyLine>
+                <TallyLine label="Next 30 days" muted={stats.upcoming30DaysTotal === 0}>
+                  {formatCurrency(stats.upcoming30DaysTotal, targetCurrency)}
+                </TallyLine>
+                {stats.cancelCandidateCount > 0 ? (
+                  <Link
+                    href="/subscriptions"
+                    className="flex items-baseline py-1.5 hover:bg-foreground/[0.04] transition-colors"
+                  >
+                    <span className="font-mono text-[13px]">Marked to cancel</span>
+                    <i aria-hidden="true" className="leader" />
+                    <span className="font-mono text-sm font-semibold tabular-nums">
+                      {stats.cancelCandidateCount}
+                    </span>
+                  </Link>
+                ) : null}
+                <div className="rule-double mt-2" />
+              </>
+            ) : null}
+
+            <Link
+              href="/subscriptions/new"
+              className="mt-6 flex min-h-[48px] items-center justify-center gap-2 border-[1.5px] border-dashed border-foreground font-mono text-[13px] font-semibold tracking-[0.04em] hover:bg-foreground/[0.05] transition-colors"
+            >
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Add a subscription
+            </Link>
+            <Link
+              href="/subscriptions/import"
+              className="mt-1 flex min-h-[44px] items-center justify-center font-mono text-[13px] text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+            >
+              Import from a bank statement
+            </Link>
+          </section>
+        </div>
+
+        {/* ─── Desktop side note: where the money goes ────────────── */}
+        <aside className="hidden lg:block lg:col-span-5">
+          <div className="sweep-card p-5 space-y-4">
+            <div className="flex items-baseline justify-between">
+              <h2 className="font-serif text-lg">Spend by category</h2>
               <Link
-                href="/subscriptions"
-                className="text-primary font-medium hover:underline flex items-center gap-1"
+                href="/insights"
+                className="font-mono text-xs underline underline-offset-4 text-muted-foreground hover:text-foreground"
               >
-                <span>See all subscriptions</span>
-                <ArrowRight className="w-3 h-3" />
+                Insights
               </Link>
             </div>
-          </div>
-        </div>
 
-        {/* Right Support Zone: Unified Intelligence & Horizon Panel (5/12 Cols) */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs p-4 sm:p-5 space-y-5">
-            {/* Section A: 30-Day Renewal Horizon */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  <h3 className="font-serif text-base font-semibold tracking-tight text-foreground">
-                    Coming up
-                  </h3>
-                </div>
-                <span className="text-[10px] uppercase font-mono text-muted-foreground">
-                  Next 30 Days
-                </span>
-              </div>
-
-              {upcomingChronological.length > 0 ? (
-                <div className="divide-y divide-border/50">
-                  {upcomingChronological.map((sub) => {
-                    const countdown = getCountdownBadge(sub.next_renewal_date);
-                    return (
-                      <Link
-                        key={sub.id}
-                        href={`/subscriptions/${sub.id}/edit`}
-                        className="py-2.5 flex items-center justify-between gap-3 hover:bg-surface/50 px-2 rounded-lg transition-colors group"
-                      >
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-                              {sub.name}
-                            </span>
-                            {sub.is_trial ? (
-                              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-warning-subtle text-warning border border-warning/30">
-                                Trial
-                              </span>
-                            ) : null}
-                          </div>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">
-                            {formatDate(sub.next_renewal_date)}
-                          </p>
-                        </div>
-
-                        <div className="text-right shrink-0">
-                          <div className="text-xs font-bold font-mono text-foreground tabular-nums">
-                            {formatCurrency(sub.amount, sub.currency)}
-                          </div>
-                          <span
-                            className={cn(
-                              'text-[10px] block mt-0.5',
-                              countdown.urgent ? 'text-danger font-bold' : 'text-muted-foreground'
-                            )}
-                          >
-                            {countdown.label}
-                          </span>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="py-4 text-center text-xs text-muted-foreground">
-                  No renewals in the next 30 days.
-                </div>
-              )}
-
-              <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">Total for next 30 days</span>
-                <span className="font-mono font-bold text-foreground">
-                  {formatCurrency(stats.upcoming30DaysTotal, targetCurrency)}
-                </span>
-              </div>
-            </div>
-
-            {/* Section B: Category Spend Distribution (Divided quietly, not separate box) */}
-            <div className="pt-4 border-t border-border/70 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-primary" />
-                  <h3 className="font-serif text-base font-semibold tracking-tight text-foreground">
-                    Spend by Category
-                  </h3>
-                </div>
-                <Link
-                  href="/insights"
-                  className="text-[10px] text-primary hover:underline font-medium"
-                >
-                  Insights
-                </Link>
-              </div>
-
-              {categorySpendDistribution.length > 0 ? (
-                <div className="space-y-2.5">
-                  {categorySpendDistribution.map((cat) => (
-                    <div key={cat.categoryId} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-medium text-foreground truncate pr-2">
-                          {cat.categoryName}
+            {categorySpend.length > 0 ? (
+              <div className="space-y-3">
+                {categorySpend.map((cat) => (
+                  <div key={cat.id} className="space-y-1">
+                    <div className="flex items-baseline justify-between text-sm">
+                      <span className="truncate pr-2">{cat.name}</span>
+                      <span className="font-mono text-xs tabular-nums shrink-0">
+                        <span className="text-muted-foreground">{cat.percentage}%</span>{' '}
+                        <span className="font-semibold">
+                          {formatCurrency(cat.monthly, targetCurrency, { showCents: false })}
                         </span>
-                        <div className="flex items-center gap-2 font-mono text-[11px] tabular-nums shrink-0">
-                          <span className="text-muted-foreground">{cat.percentage}%</span>
-                          <span className="font-semibold text-foreground">
-                            {formatCurrency(cat.monthlyAmount, targetCurrency)}/mo
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="w-full h-1.5 bg-surface rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-300"
-                          style={{
-                            width: `${cat.percentage}%`,
-                            backgroundColor: cat.color || 'hsl(var(--primary))',
-                          }}
-                        />
-                      </div>
+                      </span>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-4 text-center text-xs text-muted-foreground">
-                  No categories yet.
-                </div>
-              )}
-            </div>
+                    <div className="h-1.5 w-full bg-surface overflow-hidden" aria-hidden="true">
+                      <div
+                        className="h-full"
+                        style={{ width: `${cat.percentage}%`, backgroundColor: cat.color }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="py-4 text-center text-xs text-muted-foreground">No categories yet.</p>
+            )}
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );
