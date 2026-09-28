@@ -53,6 +53,7 @@ import {
   Layers,
   Coins,
   TrendingUp,
+  Lock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -95,6 +96,9 @@ export default function StatementImportPage() {
   const [bankName, setBankName] = useState('Custom Statement Format');
   const [importPaymentMethodId, setImportPaymentMethodId] = useState('');
   const [isAddPmModalOpen, setIsAddPmModalOpen] = useState(false);
+  const [pdfNeedsPassword, setPdfNeedsPassword] = useState(false);
+  const [pdfPassword, setPdfPassword] = useState('');
+  const [pendingPdfFile, setPendingPdfFile] = useState<File | null>(null);
 
   const profileCurrency = profile?.currency_preference || 'USD';
   const activeBatchCurrency =
@@ -200,25 +204,34 @@ export default function StatementImportPage() {
     }));
   };
 
-  // Step 1C: PDF File Loaded
-  const handlePdfLoaded = async (file: File) => {
+  // Step 1C: PDF File Loaded (password is only passed when retrying an unlocked PDF)
+  const handlePdfLoaded = async (file: File, password?: string) => {
     setUploadError(null);
+    setPdfNeedsPassword(false);
     setFileName(file.name);
     setFileType('pdf');
     setIsProcessingPdf(true);
+    setPendingPdfFile(file);
 
     try {
-      const result = await parsePdfStatement(file);
+      const result = await parsePdfStatement(file, password);
+
+      if (result.needsPassword) {
+        setPdfNeedsPassword(true);
+        setUploadError(result.error || 'This PDF is password protected.');
+        return;
+      }
 
       if (!result.success || result.transactions.length === 0) {
         setUploadError(
           result.error ||
             'Could not extract transactions from this PDF. Please ensure it is a digital text statement rather than a scanned image.'
         );
-        setIsProcessingPdf(false);
         return;
       }
 
+      setPdfPassword('');
+      setPendingPdfFile(null);
       setNormalizedTransactions(result.transactions);
 
       const detected = detectRecurringCandidates(result.transactions, categories, profileCurrency);
@@ -228,6 +241,13 @@ export default function StatementImportPage() {
       setUploadError(err.message || 'Failed to process PDF statement.');
     } finally {
       setIsProcessingPdf(false);
+    }
+  };
+
+  const handlePdfPasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pendingPdfFile && pdfPassword) {
+      handlePdfLoaded(pendingPdfFile, pdfPassword);
     }
   };
 
@@ -410,13 +430,47 @@ export default function StatementImportPage() {
       </div>
 
       {/* Upload Error Banner */}
-      {uploadError ? (
+      {uploadError && !pdfNeedsPassword ? (
         <div className="p-4 rounded-xl bg-danger-subtle border border-danger/30 text-xs text-danger flex items-start gap-2.5">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <div className="font-semibold">Couldn&apos;t read the file</div>
             <p className="leading-relaxed text-[11px]">{uploadError}</p>
           </div>
+        </div>
+      ) : null}
+
+      {/* Password-protected PDF: ask for the password instead of a dead-end error */}
+      {pdfNeedsPassword && pendingPdfFile ? (
+        <div className="p-4 rounded-xl bg-warning-subtle border border-warning/30 text-xs space-y-3">
+          <div className="flex items-start gap-2.5">
+            <Lock className="w-4 h-4 shrink-0 mt-0.5 text-warning" />
+            <div className="space-y-1">
+              <div className="font-semibold text-foreground">This PDF is password protected</div>
+              <p className="leading-relaxed text-[11px] text-muted-foreground">{uploadError}</p>
+            </div>
+          </div>
+          <form onSubmit={handlePdfPasswordSubmit} className="flex items-center gap-2 pl-6">
+            <input
+              type="password"
+              value={pdfPassword}
+              onChange={(e) => setPdfPassword(e.target.value)}
+              placeholder="PDF password"
+              autoFocus
+              className="sweep-input flex-1 py-1.5 text-xs"
+              aria-label="PDF password"
+            />
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              isLoading={isProcessingPdf}
+              disabled={!pdfPassword}
+              className="shrink-0"
+            >
+              Unlock
+            </Button>
+          </form>
         </div>
       ) : null}
 

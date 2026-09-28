@@ -19,7 +19,7 @@ export default function SubscriptionsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[hsl(var(--border))]">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               Subscriptions
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">

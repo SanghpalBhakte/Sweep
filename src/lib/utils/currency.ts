@@ -26,6 +26,9 @@ export function formatCurrency(
 ): string {
   const { showCents = true, compact = false } = options;
   const curr = (currency || 'USD').toUpperCase().trim();
+  // Digit grouping is locale-specific (e.g. India groups as 1,23,456 not 123,456) - 'en-US'
+  // alone renders every currency with Western thousands grouping, which is wrong for INR.
+  const locale = curr === 'INR' ? 'en-IN' : 'en-US';
 
   // Special rounding for zero-decimal currencies like JPY / KRW
   const isZeroDecimal = ['JPY', 'KRW'].includes(curr);
@@ -33,7 +36,7 @@ export function formatCurrency(
   // Handle compact formatting for large numbers if needed
   if (compact && amount >= 1000) {
     try {
-      return new Intl.NumberFormat('en-US', {
+      return new Intl.NumberFormat(locale, {
         style: 'currency',
         currency: curr,
         notation: 'compact',
@@ -45,7 +48,7 @@ export function formatCurrency(
   }
 
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: curr,
       minimumFractionDigits: isZeroDecimal ? 0 : showCents && amount % 1 !== 0 ? 2 : amount % 1 === 0 ? 0 : 2,

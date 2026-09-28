@@ -27,6 +27,7 @@ export function calculateDashboardStats(
   const cancelCandidates = subscriptions.filter(
     (s) => s.value_rating === 'cancel_candidate' && s.status === 'active'
   );
+  const overdueSubs = activeSubs.filter((s) => getDaysUntil(s.next_renewal_date) < 0);
 
   const monthlyTotal = activeSubs.reduce((acc, sub) => {
     const rawMonthly =
@@ -72,6 +73,7 @@ export function calculateDashboardStats(
     pausedCount: pausedSubs.length,
     trialCount: trialSubs.length,
     cancelCandidateCount: cancelCandidates.length,
+    overdueCount: overdueSubs.length,
     potentialMonthlySavings: Math.round(potentialMonthlySavings * 100) / 100,
     upcomingRenewalsCount,
     upcoming30DaysTotal: Math.round(upcoming30DaysTotal * 100) / 100,

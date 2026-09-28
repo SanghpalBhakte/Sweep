@@ -31,8 +31,11 @@ export function AnimatedCurrency({
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    const currencyChanged = prevCurrencyRef.current !== currency;
+
     if (
       prefersReducedMotion ||
+      currencyChanged ||
       (prevValueRef.current === value && prevCurrencyRef.current === currency)
     ) {
       setDisplayValue(value);

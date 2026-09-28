@@ -125,7 +125,7 @@ export default function InsightsPage() {
     return (
       <div className="space-y-6 max-w-2xl mx-auto py-6">
         <div className="text-center space-y-1">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             Insights
           </h1>
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
@@ -175,7 +175,7 @@ export default function InsightsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             Insights
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">

@@ -187,6 +187,7 @@ export interface DashboardStats {
   pausedCount: number;
   trialCount: number;
   cancelCandidateCount: number;
+  overdueCount: number;
   potentialMonthlySavings: number;
   upcomingRenewalsCount: number;
   upcoming30DaysTotal: number;

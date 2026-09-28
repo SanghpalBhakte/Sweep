@@ -8,6 +8,7 @@ export interface PdfParseResult {
   totalTextLines: number;
   error?: string;
   isScannedOrImageOnly?: boolean;
+  needsPassword?: boolean;
 }
 
 interface TextToken {
@@ -21,7 +22,7 @@ interface TextToken {
 /**
  * Client-side PDF Statement text extractor and transaction parser using pdf.js
  */
-export async function parsePdfStatement(file: File): Promise<PdfParseResult> {
+export async function parsePdfStatement(file: File, password?: string): Promise<PdfParseResult> {
   try {
     // Dynamic import to prevent SSR build issues
     const pdfjsLib = await import('pdfjs-dist');
@@ -39,6 +40,7 @@ export async function parsePdfStatement(file: File): Promise<PdfParseResult> {
       data: new Uint8Array(arrayBuffer),
       useWorkerFetch: true,
       isEvalSupported: false,
+      ...(password ? { password } : {}),
     });
 
     const pdfDoc = await loadingTask.promise;
@@ -118,6 +120,24 @@ export async function parsePdfStatement(file: File): Promise<PdfParseResult> {
       totalTextLines: allLines.length,
     };
   } catch (err: any) {
+    // Many bank e-statements (especially in India) are password-protected with the
+    // account holder's PAN, mobile number, or date of birth. pdf.js throws a
+    // PasswordException instead of a generic error - surface it as something the
+    // user can actually act on instead of the raw "No password given" message.
+    if (err?.name === 'PasswordException') {
+      const isIncorrect = err.code === 2; // pdfjsLib.PasswordResponses.INCORRECT_PASSWORD
+      return {
+        success: false,
+        transactions: [],
+        pageCount: 0,
+        totalTextLines: 0,
+        needsPassword: true,
+        error: isIncorrect
+          ? "That password didn't work. Check it and try again."
+          : 'This PDF is password protected. Banks usually set it to your PAN, mobile number, or date of birth - enter it below to continue.',
+      };
+    }
+
     console.error('PDF parsing error:', err);
     return {
       success: false,

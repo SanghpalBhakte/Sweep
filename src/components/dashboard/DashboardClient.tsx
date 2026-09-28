@@ -147,6 +147,10 @@ export function DashboardClient() {
     return list;
   }, [activeSubscriptions, selectedCategoryId, searchQuery]);
 
+  // Overdue renewals are the most urgent signal on the dashboard - fold them into
+  // "Needs a look" so a lapsed renewal is never silently absent from every summary card.
+  const needsLookCount = stats.overdueCount + stats.cancelCandidateCount + stats.trialCount;
+
   const nextRenewal = stats.nextUpcomingRenewal;
   const nextRenewalCountdown = nextRenewal
     ? getCountdownBadge(nextRenewal.next_renewal_date)
@@ -172,7 +176,7 @@ export function DashboardClient() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               Overview
             </h1>
             <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-surface text-muted-foreground border border-border/80">
@@ -270,9 +274,7 @@ export function DashboardClient() {
               <span className="text-xs font-semibold px-2 py-0.2 rounded-full bg-warning/12 text-warning">
                 {next7DaysRenewals.length} due
               </span>
-            ) : (
-              <span className="text-xs text-muted-foreground">Nothing due</span>
-            )}
+            ) : null}
           </div>
 
           <div>
@@ -280,13 +282,13 @@ export function DashboardClient() {
               {next7DaysRenewals.length > 0 ? (
                 formatCurrency(next7DaysTotal, targetCurrency)
               ) : (
-                <span className="text-muted-foreground text-xl font-normal font-sans">None due</span>
+                <span className="text-muted-foreground">—</span>
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {next7DaysRenewals.length > 0
                 ? `${next7DaysRenewals.length} payment${next7DaysRenewals.length === 1 ? '' : 's'} this week`
-                : 'No payments in the next 7 days'}
+                : 'Nothing due this week'}
             </p>
           </div>
 
@@ -364,13 +366,15 @@ export function DashboardClient() {
 
           <div>
             <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums font-mono flex items-baseline gap-2">
-              <span>{stats.cancelCandidateCount + stats.trialCount}</span>
+              <span>{needsLookCount}</span>
               <span className="text-xs font-normal text-muted-foreground font-sans">
-                {stats.cancelCandidateCount + stats.trialCount === 1 ? 'item' : 'items'}
+                {needsLookCount === 1 ? 'item' : 'items'}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {stats.trialCount > 0
+              {stats.overdueCount > 0
+                ? `${stats.overdueCount} renewal${stats.overdueCount > 1 ? 's' : ''} overdue`
+                : stats.trialCount > 0
                 ? `${stats.trialCount} free trial${stats.trialCount > 1 ? 's' : ''} running`
                 : stats.cancelCandidateCount > 0
                 ? 'Subscriptions you marked to cancel'
