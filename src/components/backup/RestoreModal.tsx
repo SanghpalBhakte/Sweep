@@ -718,19 +718,19 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
               {/* Key Summary Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div className="p-2.5 rounded-lg border border-border bg-surface/50 text-center">
-                  <div className="text-[10px] text-muted-foreground">Subscriptions</div>
+                  <div className="text-[11px] text-muted-foreground">Subscriptions</div>
                   <div className="text-sm font-bold text-foreground font-mono">
                     {restoreResult.subscriptionCount}
                   </div>
                 </div>
                 <div className="p-2.5 rounded-lg border border-border bg-surface/50 text-center">
-                  <div className="text-[10px] text-muted-foreground">Global Benchmark</div>
+                  <div className="text-[11px] text-muted-foreground">Global Benchmark</div>
                   <div className="text-sm font-bold text-foreground font-mono">
                     {restoreResult.globalBenchmark}%
                   </div>
                 </div>
                 <div className="p-2.5 rounded-lg border border-border bg-surface/50 text-center col-span-2 sm:col-span-1">
-                  <div className="text-[10px] text-muted-foreground">Category Overrides</div>
+                  <div className="text-[11px] text-muted-foreground">Category Overrides</div>
                   <div className="text-sm font-bold text-foreground font-mono">
                     {restoreResult.activeOverridesCount} Active
                   </div>
@@ -740,32 +740,32 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
               {/* Category Override Breakdown Chips */}
               {restoreResult.items.length > 0 ? (
                 <div className="p-2.5 rounded-xl border border-border bg-surface/30 space-y-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block">
                     Category Mapping Breakdown
                   </span>
                   <div className="flex flex-wrap gap-1.5 text-[11px]">
                     {restoreResult.matchedByUuid > 0 ? (
-                      <Badge variant="primary" size="sm" className="font-mono text-[10px]">
+                      <Badge variant="primary" size="sm" className="font-mono text-[11px]">
                         {restoreResult.matchedByUuid} by ID
                       </Badge>
                     ) : null}
                     {restoreResult.matchedBySlug > 0 ? (
-                      <Badge variant="outline" size="sm" className="font-mono text-[10px]">
+                      <Badge variant="outline" size="sm" className="font-mono text-[11px]">
                         {restoreResult.matchedBySlug} by Slug Fallback
                       </Badge>
                     ) : null}
                     {restoreResult.manuallyRemapped > 0 ? (
-                      <Badge variant="primary" size="sm" className="font-mono text-[10px]">
+                      <Badge variant="primary" size="sm" className="font-mono text-[11px]">
                         {restoreResult.manuallyRemapped} Manually Remapped
                       </Badge>
                     ) : null}
                     {restoreResult.skippedCollisionCount > 0 ? (
-                      <Badge variant="warning" size="sm" className="font-mono text-[10px]">
+                      <Badge variant="warning" size="sm" className="font-mono text-[11px]">
                         {restoreResult.skippedCollisionCount} Collisions Skipped
                       </Badge>
                     ) : null}
                     {restoreResult.skippedUnmatchedCount > 0 ? (
-                      <Badge variant="outline" size="sm" className="font-mono text-[10px] text-muted-foreground">
+                      <Badge variant="outline" size="sm" className="font-mono text-[11px] text-muted-foreground">
                         {restoreResult.skippedUnmatchedCount} Unmatched Skipped
                       </Badge>
                     ) : null}
@@ -829,7 +829,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                             <div className="font-semibold text-foreground truncate min-w-0 flex items-center gap-1.5">
                               <span>{item.name}</span>
                               {item.slug ? (
-                                <span className="font-mono text-muted-foreground font-normal text-[10px]">
+                                <span className="font-mono text-muted-foreground font-normal text-[11px]">
                                   ({item.slug})
                                 </span>
                               ) : null}
@@ -846,16 +846,16 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                         : 'outline'
                                 }
                                 size="sm"
-                                className="font-mono text-[10px]"
+                                className="font-mono text-[11px]"
                               >
                                 {item.statusLabel}
                               </Badge>
-                              <span className="font-mono font-semibold text-foreground text-[10px]">
+                              <span className="font-mono font-semibold text-foreground text-[11px]">
                                 {item.benchmark}%
                               </span>
                             </div>
                           </div>
-                          <div className="text-[10px] text-muted-foreground leading-relaxed">
+                          <div className="text-[11px] text-muted-foreground leading-relaxed">
                             {item.details}
                           </div>
                         </div>
@@ -961,7 +961,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                         if (rep.skippedMissing > 0) parts.push(`${rep.skippedMissing} missing skipped`);
 
                         return (
-                          <div className="col-span-2 text-[10px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-[hsl(var(--border)/0.5)]">
+                          <div className="col-span-2 text-[11px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-[hsl(var(--border)/0.5)]">
                             <span className="font-semibold text-[hsl(var(--foreground))]">
                               Category Overrides ({Object.keys(validation.data.profile.category_annual_benchmarks).length}):{' '}
                             </span>
@@ -998,7 +998,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                           <Badge
                             variant={manuallyRemappedCount > 0 ? 'primary' : 'outline'}
                             size="sm"
-                            className="text-[10px] font-mono"
+                            className="text-[11px] font-mono"
                           >
                             {manuallyRemappedCount} of {rep.collisions.length + rep.unmatched.length} Remapped
                           </Badge>
@@ -1011,7 +1011,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                         {/* Collisions List */}
                         {rep.collisions.length > 0 ? (
                           <div className="space-y-2 pt-1">
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block">
                               Ambiguous Matches ({rep.collisions.length})
                             </span>
                             {rep.collisions.map((col) => {
@@ -1030,25 +1030,25 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                     <div className="space-y-0.5 min-w-0">
                                       <div className="font-semibold text-foreground text-[11px] truncate flex items-center gap-1.5">
                                         <span>{col.sourceName}</span>
-                                        <span className="font-mono text-muted-foreground font-normal text-[10px]">
+                                        <span className="font-mono text-muted-foreground font-normal text-[11px]">
                                           ({col.sourceSlug})
                                         </span>
                                       </div>
-                                      <div className="text-[10px] text-muted-foreground">
+                                      <div className="text-[11px] text-muted-foreground">
                                         Matched {col.conflictingCategories.length} local categories ({col.conflictingCategories.map((c) => `"${c.name}"`).join(', ')})
                                       </div>
                                     </div>
                                     <Badge
                                       variant={isCustom ? 'primary' : 'warning'}
                                       size="sm"
-                                      className="font-mono text-[10px] shrink-0"
+                                      className="font-mono text-[11px] shrink-0"
                                     >
                                       {col.configuredBenchmark}% {isCustom ? 'Remapped' : 'Skipped'}
                                     </Badge>
                                   </div>
 
                                   <div className="flex items-center gap-2 pt-1.5 border-t border-border/50">
-                                    <span className="text-[10px] text-muted-foreground shrink-0 font-medium">
+                                    <span className="text-[11px] text-muted-foreground shrink-0 font-medium">
                                       Map to:
                                     </span>
                                     <select
@@ -1095,14 +1095,14 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                         {rep.unmatched.length > 0 ? (
                           <div className="space-y-2.5 pt-1">
                             <div className="flex items-center justify-between gap-2 flex-wrap">
-                              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block">
                                 Unmatched Categories ({rep.unmatched.length})
                               </span>
                               {creatableBatchItems.length > 0 && !isBatchPreviewOpen ? (
                                 <button
                                   type="button"
                                   onClick={() => setIsBatchPreviewOpen(true)}
-                                  className="text-[10px] font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer py-0.5"
+                                  className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer py-0.5"
                                 >
                                   <FolderPlus className="w-3.5 h-3.5" />
                                   <span>Create All Missing ({creatableBatchItems.length})</span>
@@ -1137,7 +1137,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                         type="button"
                                         title="Reset all edits to imported defaults"
                                         onClick={() => setEditedBatchRows({})}
-                                        className="text-muted-foreground hover:text-foreground p-1 rounded cursor-pointer flex items-center gap-1 text-[10px] hover:bg-surface/60 transition-colors"
+                                        className="text-muted-foreground hover:text-foreground p-1 rounded cursor-pointer flex items-center gap-1 text-[11px] hover:bg-surface/60 transition-colors"
                                       >
                                         <RotateCcw className="w-3 h-3" />
                                         <span>Reset edits</span>
@@ -1172,7 +1172,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                             className="w-2.5 h-2.5 rounded-full shrink-0"
                                             style={{ backgroundColor: item.color }}
                                           />
-                                          <span className="text-[10px] text-muted-foreground font-medium truncate">
+                                          <span className="text-[11px] text-muted-foreground font-medium truncate">
                                             Imported Key: {item.sourceKey}
                                           </span>
                                         </div>
@@ -1181,7 +1181,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                           <Badge
                                             variant="outline"
                                             size="sm"
-                                            className="font-mono text-[10px]"
+                                            className="font-mono text-[11px]"
                                           >
                                             {item.configuredBenchmark}% Override
                                           </Badge>
@@ -1189,19 +1189,19 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                             <Badge
                                               variant="danger"
                                               size="sm"
-                                              className="text-[9px] font-normal"
+                                              className="text-[11px] font-normal"
                                             >
                                               Conflict: {item.conflictReason}
                                             </Badge>
                                           ) : item.isAlreadyRemapped ? (
-                                            <Badge variant="muted" size="sm" className="text-[9px]">
+                                            <Badge variant="muted" size="sm" className="text-[11px]">
                                               Remapped
                                             </Badge>
                                           ) : (
                                             <Badge
                                               variant="primary"
                                               size="sm"
-                                              className="text-[9px]"
+                                              className="text-[11px]"
                                             >
                                               Will Create
                                             </Badge>
@@ -1211,7 +1211,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
 
                                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
                                         <div>
-                                          <label className="text-[9px] font-medium text-muted-foreground block mb-0.5">
+                                          <label className="text-[11px] font-medium text-muted-foreground block mb-0.5">
                                             Category Name
                                           </label>
                                           <input
@@ -1230,7 +1230,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                           />
                                         </div>
                                         <div>
-                                          <label className="text-[9px] font-medium text-muted-foreground block mb-0.5">
+                                          <label className="text-[11px] font-medium text-muted-foreground block mb-0.5">
                                             Slug (Normalized)
                                           </label>
                                           <input
@@ -1254,14 +1254,14 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                 </div>
 
                                 {batchPreviewItems.length > creatableBatchItems.length ? (
-                                  <div className="p-2 rounded-lg bg-warning-subtle border border-warning/30 text-[10px] text-warning flex items-center gap-1.5">
+                                  <div className="p-2 rounded-lg bg-warning-subtle border border-warning/30 text-[11px] text-warning flex items-center gap-1.5">
                                     <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                                     <span>
                                       {batchPreviewItems.length - creatableBatchItems.length} row(s) have conflicts or are already remapped. Only the {creatableBatchItems.length} valid row(s) will be created.
                                     </span>
                                   </div>
                                 ) : (
-                                  <div className="p-2 rounded-lg bg-surface/60 border border-border/60 text-[10px] text-muted-foreground flex items-center gap-1.5">
+                                  <div className="p-2 rounded-lg bg-surface/60 border border-border/60 text-[11px] text-muted-foreground flex items-center gap-1.5">
                                     <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
                                     <span>
                                       Imported colors & icons will be preserved. You can customize them anytime in Settings.
@@ -1314,26 +1314,26 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                       <div className="font-semibold text-foreground text-[11px] truncate flex items-center gap-1.5">
                                         <span>{un.sourceName || un.sourceSlug || un.sourceKey}</span>
                                         {un.sourceSlug ? (
-                                          <span className="font-mono text-muted-foreground font-normal text-[10px]">
+                                          <span className="font-mono text-muted-foreground font-normal text-[11px]">
                                             ({un.sourceSlug})
                                           </span>
                                         ) : null}
                                       </div>
-                                      <div className="text-[10px] text-muted-foreground">
+                                      <div className="text-[11px] text-muted-foreground">
                                         Category not present in current workspace
                                       </div>
                                     </div>
                                     <Badge
                                       variant={isCustom ? 'primary' : 'outline'}
                                       size="sm"
-                                      className="font-mono text-[10px] shrink-0"
+                                      className="font-mono text-[11px] shrink-0"
                                     >
                                       {un.configuredBenchmark}% {isCustom ? 'Remapped' : 'Skipped'}
                                     </Badge>
                                   </div>
 
                                   <div className="flex items-center gap-2 pt-1.5 border-t border-border/50">
-                                    <span className="text-[10px] text-muted-foreground shrink-0 font-medium">
+                                    <span className="text-[11px] text-muted-foreground shrink-0 font-medium">
                                       Map to:
                                     </span>
                                     <select
@@ -1385,14 +1385,14 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                             setCreatingCategoryFor(null);
                                             setCreateCategoryError(null);
                                           }}
-                                          className="text-muted-foreground hover:text-foreground text-[10px] cursor-pointer"
+                                          className="text-muted-foreground hover:text-foreground text-[11px] cursor-pointer"
                                         >
                                           Cancel
                                         </button>
                                       </div>
 
                                       {createCategoryError ? (
-                                        <div className="p-2 rounded bg-danger-subtle border border-danger/30 text-danger text-[10px] flex items-center gap-1.5">
+                                        <div className="p-2 rounded bg-danger-subtle border border-danger/30 text-danger text-[11px] flex items-center gap-1.5">
                                           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                                           <span>{createCategoryError}</span>
                                         </div>
@@ -1400,7 +1400,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
 
                                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                         <div>
-                                          <label className="text-[10px] font-medium text-muted-foreground block mb-0.5">
+                                          <label className="text-[11px] font-medium text-muted-foreground block mb-0.5">
                                             Category Name
                                           </label>
                                           <input
@@ -1412,7 +1412,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                           />
                                         </div>
                                         <div>
-                                          <label className="text-[10px] font-medium text-muted-foreground block mb-0.5">
+                                          <label className="text-[11px] font-medium text-muted-foreground block mb-0.5">
                                             Category Slug
                                           </label>
                                           <input
@@ -1426,7 +1426,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                       </div>
 
                                       <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/50">
-                                        <div className="text-[10px] text-muted-foreground">
+                                        <div className="text-[11px] text-muted-foreground">
                                           Will create category & map {un.configuredBenchmark}% benchmark override.
                                         </div>
                                         <Button
@@ -1435,7 +1435,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                           size="sm"
                                           isLoading={isCreatingCategory}
                                           onClick={() => handleConfirmCreateCategory(un.sourceKey)}
-                                          className="h-6 text-[10px] px-2.5 gap-1 shrink-0"
+                                          className="h-6 text-[11px] px-2.5 gap-1 shrink-0"
                                         >
                                           <Plus className="w-3 h-3" />
                                           Create & Map
@@ -1447,7 +1447,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                       <button
                                         type="button"
                                         onClick={() => handleStartCreateCategory(un)}
-                                        className="text-[10px] font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer py-0.5"
+                                        className="text-[11px] font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer py-0.5"
                                       >
                                         <Plus className="w-3 h-3" />
                                         <span>Create &quot;{un.sourceName || un.sourceSlug || 'Category'}&quot; inline</span>

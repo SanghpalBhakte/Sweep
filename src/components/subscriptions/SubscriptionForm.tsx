@@ -463,13 +463,13 @@ export function SubscriptionForm({
         <div className="flex items-center gap-2.5">
           <Link
             href="/subscriptions"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center p-1.5 max-md:min-h-[44px] max-md:min-w-[44px] max-md:-ml-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors cursor-pointer"
             aria-label="Back to subscriptions"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+            <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground">
               {isEditing ? `Edit ${initialData?.name}` : 'New Subscription'}
             </h1>
             <p className="text-xs text-muted-foreground">
@@ -545,7 +545,7 @@ export function SubscriptionForm({
               >
                 <span>Service / Tool Name *</span>
                 {!isEditing && (
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-normal">
+                  <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-normal">
                     <Search className="w-2.5 h-2.5" />
                     Quick search or type custom
                   </span>
@@ -578,7 +578,7 @@ export function SubscriptionForm({
                 ref={dropdownRef}
                 className="absolute z-20 top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-md overflow-hidden animate-in fade-in duration-100"
               >
-                <div className="px-2.5 py-1.5 bg-surface/50 border-b border-border/60 text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+                <div className="px-2.5 py-1.5 bg-surface/50 border-b border-border/60 text-[11px] text-muted-foreground font-medium flex items-center gap-1">
                   <Sparkles className="w-3 h-3 text-primary" />
                   <span>Popular suggestions</span>
                 </div>
@@ -595,7 +595,7 @@ export function SubscriptionForm({
                           {service.name}
                         </span>
                         {service.description && (
-                          <span className="text-[10px] text-muted-foreground block truncate">
+                          <span className="text-[11px] text-muted-foreground block truncate">
                             {service.description}
                           </span>
                         )}
@@ -676,7 +676,7 @@ export function SubscriptionForm({
                       e.stopPropagation();
                       setIsAddCatModalOpen(true);
                     }}
-                    className="text-[11px] font-medium text-primary hover:underline cursor-pointer flex items-center gap-0.5"
+                    className="tap max-md:-my-3 text-[11px] font-medium text-primary hover:underline cursor-pointer gap-0.5"
                   >
                     + Add New
                   </button>
@@ -706,7 +706,7 @@ export function SubscriptionForm({
                       e.stopPropagation();
                       setIsAddPmModalOpen(true);
                     }}
-                    className="text-[11px] font-medium text-primary hover:underline cursor-pointer flex items-center gap-0.5"
+                    className="tap max-md:-my-3 text-[11px] font-medium text-primary hover:underline cursor-pointer gap-0.5"
                   >
                     + Add New
                   </button>
@@ -738,7 +738,7 @@ export function SubscriptionForm({
                         e.stopPropagation();
                         setIsAddPmModalOpen(true);
                       }}
-                      className="text-primary hover:underline font-semibold cursor-pointer"
+                      className="tap max-md:-my-3 min-w-[44px] justify-center px-1 text-primary hover:underline font-semibold cursor-pointer"
                     >
                       + Add
                     </button>
@@ -814,12 +814,12 @@ export function SubscriptionForm({
 
             {/* Free Trial Toggle */}
             <div className="p-3 rounded-lg bg-surface/40 border border-border/60 space-y-2.5">
-              <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer">
+              <label className="flex items-center gap-2 max-md:min-h-[44px] text-xs font-medium text-foreground cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isTrial}
                   onChange={(e) => setIsTrial(e.target.checked)}
-                  className="w-4 h-4 rounded text-primary border-border accent-primary"
+                  className="w-5 h-5 md:w-4 md:h-4 rounded text-primary border-border accent-primary"
                 />
                 <span>Free trial period</span>
               </label>
@@ -874,7 +874,7 @@ export function SubscriptionForm({
                       type="button"
                       onClick={() => toggleReminderDay(day)}
                       className={cn(
-                        'px-2.5 py-1 rounded-md border text-xs font-medium transition-all cursor-pointer',
+                        'px-2.5 py-1 max-md:min-h-[44px] rounded-md border text-xs font-medium transition-all cursor-pointer',
                         isSelected
                           ? 'border-primary bg-primary/10 text-primary font-semibold'
                           : 'border-border bg-surface text-muted-foreground hover:text-foreground'

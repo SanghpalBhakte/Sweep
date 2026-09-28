@@ -126,7 +126,7 @@ export function AnnualArbitrageBatchModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors cursor-pointer shrink-0"
+              className="max-md:min-h-[44px] max-md:min-w-[44px] max-md:-mr-2 inline-flex items-center justify-center p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors cursor-pointer shrink-0"
               aria-label="Close modal"
             >
               <X className="w-4 h-4" />
@@ -194,14 +194,14 @@ export function AnnualArbitrageBatchModal({
                         <Badge
                           variant={subscription.value_rating === 'essential' ? 'primary' : 'outline'}
                           size="sm"
-                          className="text-[10px] capitalize"
+                          className="text-[11px] capitalize"
                         >
                           {subscription.value_rating}
                         </Badge>
                         <Badge
                           variant={confidence === 'high' ? 'success' : 'outline'}
                           size="sm"
-                          className="text-[10px]"
+                          className="text-[11px]"
                         >
                           {confidence === 'high' ? 'High Confidence' : 'Medium Confidence'}
                         </Badge>
@@ -231,7 +231,7 @@ export function AnnualArbitrageBatchModal({
                     <div className="text-muted-foreground leading-relaxed">
                       {whyExplanation}
                     </div>
-                    <div className="text-[10px] font-mono text-muted-foreground/80 flex items-center gap-1">
+                    <div className="text-[11px] font-mono text-muted-foreground/80 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary/60" />
                       {eligibilityRule}
                     </div>

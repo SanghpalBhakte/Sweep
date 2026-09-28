@@ -38,10 +38,17 @@ export function MobileNav() {
             )}
           >
             <span className="relative">
-              {item.label}
+              {item.href === '/subscriptions' ? (
+                <>
+                  <span aria-hidden="true" className="min-[360px]:hidden">Subs</span>
+                  <span className="max-[359px]:sr-only">Subscriptions</span>
+                </>
+              ) : (
+                item.label
+              )}
               {item.badge ? (
                 <span
-                  className="absolute -top-2 -right-3 min-w-[14px] text-[10px] font-bold text-danger tabular-nums"
+                  className="absolute -top-2 -right-3 min-w-[14px] text-[11px] font-bold text-danger tabular-nums"
                   aria-label={`${item.badge} upcoming renewals`}
                 >
                   {item.badge}

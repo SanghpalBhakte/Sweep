@@ -229,13 +229,13 @@ export default function MFASettingsPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/settings"
-              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs transition-colors"
+              className="tap text-muted-foreground hover:text-foreground gap-1 text-xs transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Settings</span>
             </Link>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mt-1">
+          <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground mt-1">
             Two-Factor Authentication
           </h1>
         </div>

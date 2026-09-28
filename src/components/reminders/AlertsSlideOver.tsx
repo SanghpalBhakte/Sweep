@@ -73,7 +73,7 @@ export function AlertsSlideOver() {
             <button
               type="button"
               onClick={closeAlertPanel}
-              className="p-1.5 rounded-lg text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--surface))] transition-colors cursor-pointer"
+              className="max-md:min-h-[44px] max-md:min-w-[44px] max-md:-mr-2 inline-flex items-center justify-center p-1.5 rounded-lg text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--surface))] transition-colors cursor-pointer"
               aria-label="Close panel"
             >
               <X className="w-4 h-4" />
@@ -157,7 +157,8 @@ export function AlertsSlideOver() {
                           type="button"
                           onClick={() => dismissAlert(alert.id)}
                           title="Dismiss"
-                          className="p-1 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                          aria-label="Dismiss alert"
+                          className="inline-flex items-center justify-center p-1 max-md:min-h-[44px] max-md:min-w-[44px] max-md:-mt-3 max-md:-mr-3 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -178,7 +179,7 @@ export function AlertsSlideOver() {
                               href={alert.cancelUrl}
                               target="_blank"
                               rel="noreferrer noopener"
-                              className="text-[11px] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] flex items-center gap-1"
+                              className="max-md:py-3.5 max-md:-my-3.5 text-[11px] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] flex items-center gap-1"
                             >
                               Cancel page <ExternalLink className="w-2.5 h-2.5" />
                             </a>
@@ -187,7 +188,7 @@ export function AlertsSlideOver() {
                           <Link
                             href={`/subscriptions/${alert.subscriptionId}/edit`}
                             onClick={closeAlertPanel}
-                            className="text-[11px] font-medium text-[hsl(var(--primary))] hover:underline"
+                            className="max-md:py-3.5 max-md:-my-3.5 text-[11px] font-medium text-[hsl(var(--primary))] hover:underline"
                           >
                             Edit
                           </Link>
@@ -208,7 +209,7 @@ export function AlertsSlideOver() {
             <Link
               href="/settings"
               onClick={closeAlertPanel}
-              className="text-[11px] font-medium text-[hsl(var(--primary))] hover:underline flex items-center gap-1"
+              className="max-md:py-3.5 max-md:-my-3.5 text-[11px] font-medium text-[hsl(var(--primary))] hover:underline flex items-center gap-1"
             >
               <Settings className="w-3 h-3" /> Reminder Settings
             </Link>

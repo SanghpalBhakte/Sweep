@@ -28,15 +28,15 @@ export default function PrivacyPolicyPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <ButtonLink href="/settings" variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Back to settings">
-              <ArrowLeft className="w-4 h-4" />
-            </ButtonLink>
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          <ButtonLink href="/settings" variant="ghost" size="sm" className="-ml-2 gap-1.5 text-muted-foreground hover:text-foreground" aria-label="Back to settings">
+            <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Settings
+          </ButtonLink>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground">
               Privacy & Data Policy
             </h1>
-            <Badge variant="success" size="sm" className="font-mono text-[10px]">
-              Client-Side & Privacy-First
+            <Badge variant="success" size="sm" className="font-mono text-[11px]">
+              Stays on your device
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -151,7 +151,7 @@ export default function PrivacyPolicyPage() {
               <div className="space-y-0.5">
                 <div className="text-xs font-semibold text-foreground">Underutilization & Value Ratings</div>
                 <div className="text-[11px] leading-relaxed">
-                  Utilization suggestions come directly from your assigned value tags (<code className="px-1 py-0.5 rounded bg-surface font-mono text-[10px]">rarely_used</code> or <code className="px-1 py-0.5 rounded bg-surface font-mono text-[10px]">cancel_candidate</code>).
+                  Utilization suggestions come directly from your assigned value tags (<code className="px-1 py-0.5 rounded bg-surface font-mono text-[11px]">rarely_used</code> or <code className="px-1 py-0.5 rounded bg-surface font-mono text-[11px]">cancel_candidate</code>).
                   Because Sweep does not monitor your browser or device activity, value signals reflect your own periodic reviews.
                 </div>
               </div>

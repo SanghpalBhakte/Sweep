@@ -31,7 +31,7 @@ export function Header() {
         <div className="w-full px-4 sm:px-6 lg:px-8 h-13 sm:h-14 flex items-center justify-between gap-4">
           {/* Mobile Brand (visible only on mobile where sidebar is hidden) */}
           <div className="flex md:hidden items-center gap-2.5">
-            <Link href="/" className="flex items-center gap-2" aria-label="Sweep home">
+            <Link href="/" className="flex items-center gap-2 min-h-[44px]" aria-label="Sweep home">
               <SweepLogo size="sm" />
             </Link>
           </div>
@@ -44,7 +44,7 @@ export function Header() {
             >
               <Search className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
               <span className="flex-1 text-left">Search subscriptions, categories, payment methods…</span>
-              <kbd className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-card border border-border/60 text-muted-foreground">
+              <kbd className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-card border border-border/60 text-muted-foreground">
                 /
               </kbd>
             </Link>
@@ -71,13 +71,13 @@ export function Header() {
                   ? `${totalAlertsCount} upcoming renewals & alerts`
                   : 'Upcoming reminders & alerts'
               }
-              className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-surface rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+              className="relative p-2 max-md:min-h-[44px] max-md:min-w-[44px] text-muted-foreground hover:text-foreground hover:bg-surface rounded-lg transition-colors cursor-pointer flex items-center justify-center"
               aria-label="Alerts and Reminders"
             >
               <Bell className="w-4 h-4" aria-hidden="true" />
               {totalAlertsCount > 0 ? (
                 <span
-                  className={`absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[10px] font-bold shadow-xs ${
+                  className={`absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[11px] font-bold shadow-xs ${
                     urgentAlertsCount > 0
                       ? 'bg-danger text-danger-foreground'
                       : 'bg-primary text-primary-foreground'

@@ -156,7 +156,7 @@ export function SubscriptionList({
               className="sweep-input pl-9 pr-8"
               aria-label="Search subscriptions"
             />
-            <kbd className="hidden sm:inline-flex absolute right-2.5 top-1/2 -translate-y-1/2 items-center justify-center text-[10px] font-mono text-muted-foreground bg-surface border border-border rounded px-1.5 py-0.5 pointer-events-none">
+            <kbd className="hidden sm:inline-flex absolute right-2.5 top-1/2 -translate-y-1/2 items-center justify-center text-[11px] font-mono text-muted-foreground bg-surface border border-border rounded px-1.5 py-0.5 pointer-events-none">
               /
             </kbd>
           </div>
@@ -188,7 +188,7 @@ export function SubscriptionList({
         </div>
 
         {/* Status tabs */}
-        <div className="mt-2 mb-1 px-[calc(var(--ledger-pad)-0.625rem)] flex items-center overflow-x-auto no-scrollbar" role="tablist" aria-label="Filter by status">
+        <div className="tabs-fade mt-2 mb-1 px-[calc(var(--ledger-pad)-0.625rem)] flex items-center overflow-x-auto no-scrollbar" role="tablist" aria-label="Filter by status">
           {tabs
             .filter((tab) => tab.id === 'all' || tab.count > 0 || activeTab === tab.id)
             .map((tab) => (

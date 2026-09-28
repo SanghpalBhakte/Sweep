@@ -28,7 +28,7 @@ export function WelcomeScreen({ onRestoreClick }: WelcomeScreenProps) {
       {/* Sweep Wordmark & Icon */}
       <div className="flex flex-col items-center mb-2">
         <SweepLogo variant="icon" size="lg" className="mb-4 shadow-sm" />
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+        <h1 className="font-serif text-3xl sm:text-4xl tracking-tight text-foreground">
           Sweep
         </h1>
       </div>

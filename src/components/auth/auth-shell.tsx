@@ -33,7 +33,7 @@ export function AuthShell({
     <div className={cn('w-full max-w-md mx-auto space-y-5', className)}>
       {showHeaderLogo ? (
         <div className="flex items-center justify-between px-1">
-          <Link href="/" className="flex items-center gap-2 group" aria-label="Sweep home">
+          <Link href="/" className="flex items-center gap-2 group min-h-[44px]" aria-label="Sweep home">
             <SweepLogo size="sm" />
           </Link>
           <ThemeToggle />
@@ -49,7 +49,7 @@ export function AuthShell({
               </div>
             ) : null}
             {title ? (
-              <h1 className="font-serif text-xl font-bold tracking-tight text-foreground">
+              <h1 className="font-serif text-2xl tracking-tight text-foreground">
                 {title}
               </h1>
             ) : null}

@@ -33,7 +33,7 @@ export function ThemeToggle({
           setTheme(options[nextIndex].value);
         }}
         title={`Theme: ${current.label}. Tap to switch.`}
-        className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-surface rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+        className="relative p-2 max-md:min-h-[44px] max-md:min-w-[44px] text-muted-foreground hover:text-foreground hover:bg-surface rounded-lg transition-colors cursor-pointer flex items-center justify-center"
         aria-label={`Change theme, currently ${current.label}`}
       >
         <CurrentIcon className="w-4 h-4" aria-hidden="true" />
@@ -55,7 +55,7 @@ export function ThemeToggle({
           title={title}
           aria-pressed={theme === value}
           className={cn(
-            'flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-colors duration-fast cursor-pointer',
+            'flex items-center gap-1.5 px-2.5 py-1 max-md:min-h-[44px] max-md:min-w-[44px] justify-center text-xs font-medium rounded-md transition-colors duration-fast cursor-pointer',
             theme === value
               ? 'bg-card text-foreground shadow-xs border border-border'
               : 'text-muted-foreground hover:text-foreground'

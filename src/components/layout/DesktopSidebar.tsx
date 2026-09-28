@@ -63,7 +63,7 @@ export function DesktopSidebar() {
         <Link href="/" className="flex items-center gap-2.5 group" aria-label="Sweep home">
           <SweepLogo size="sm" />
         </Link>
-        <span className="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-md bg-surface text-muted-foreground border border-border/60">
+        <span className="text-[11px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-md bg-surface text-muted-foreground border border-border/60">
           v1.0
         </span>
       </div>
@@ -78,7 +78,7 @@ export function DesktopSidebar() {
             <Plus className="w-3.5 h-3.5 transition-transform group-hover:rotate-90" aria-hidden="true" />
             <span>Add Subscription</span>
           </span>
-          <kbd className="text-[9px] bg-primary-foreground/20 border border-primary-foreground/20 rounded px-1.5 py-0.2 font-mono font-normal">
+          <kbd className="text-[11px] bg-primary-foreground/20 border border-primary-foreground/20 rounded px-1.5 py-0.2 font-mono font-normal">
             N
           </kbd>
         </Link>

@@ -32,7 +32,7 @@ export function SpendProjection({
             <div className="text-lg sm:text-xl font-bold text-foreground mt-1 font-mono">
               {formatCurrency(yearlyCurrent, 'USD')}
             </div>
-            <span className="text-[10px] text-muted-foreground font-mono">
+            <span className="text-[11px] text-muted-foreground font-mono">
               {formatCurrency(monthlyTotal, 'USD')}/month
             </span>
           </div>
@@ -42,7 +42,7 @@ export function SpendProjection({
             <div className="text-lg sm:text-xl font-bold text-primary mt-1 font-mono">
               {formatCurrency(yearlyOptimized, 'USD')}
             </div>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-[11px] text-muted-foreground">
               After pruning cancel candidates
             </span>
           </div>
@@ -54,7 +54,7 @@ export function SpendProjection({
             <div className="text-lg sm:text-xl font-bold text-success mt-1 font-mono">
               {formatCurrency(yearlySavings, 'USD')}
             </div>
-            <span className="text-[10px] text-muted-foreground font-mono">
+            <span className="text-[11px] text-muted-foreground font-mono">
               +{formatCurrency(potentialMonthlySavings, 'USD')}/mo freed cashflow
             </span>
           </div>

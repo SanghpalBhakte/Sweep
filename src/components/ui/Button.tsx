@@ -20,11 +20,11 @@ const variantStyles: Record<ButtonVariant, string> = {
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  xs:   'px-2.5 py-1 text-[11px] min-h-[1.75rem] rounded-sm gap-1',
-  sm:   'px-3 py-1.5 text-xs min-h-[2rem] rounded-md gap-1.5',
-  md:   'px-4 py-2 text-sm min-h-[2.5rem] rounded-btn gap-2',
-  lg:   'px-5 py-2.5 text-sm min-h-[2.875rem] rounded-btn gap-2',
-  icon: 'p-2 min-h-[2.25rem] min-w-[2.25rem] rounded-btn',
+  xs:   'px-2.5 py-1 text-[11px] min-h-[1.75rem] max-md:min-h-[2.75rem] rounded-sm gap-1',
+  sm:   'px-3 py-1.5 text-xs min-h-[2rem] max-md:min-h-[2.75rem] rounded-md gap-1.5',
+  md:   'px-4 py-2 text-sm min-h-[2.5rem] max-md:min-h-[2.75rem] rounded-btn gap-2',
+  lg:   'px-5 py-2.5 text-sm min-h-[2.875rem] max-md:min-h-[2.75rem] rounded-btn gap-2',
+  icon: 'p-2 min-h-[2.25rem] min-w-[2.25rem] max-md:min-h-[2.75rem] max-md:min-w-[2.75rem] rounded-btn',
 };
 
 export function buttonClassName({

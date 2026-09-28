@@ -114,14 +114,14 @@ export function CandidateReviewCard({
                   ) : null}
 
                   {hasDescriptorDrift ? (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-surface border border-border text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-surface border border-border text-muted-foreground">
                       <Layers className="w-2.5 h-2.5 text-primary" />
                       Grouped {uniqueDescriptors.size} variants
                     </span>
                   ) : null}
 
                   {existingSubscription ? (
-                    <Badge variant="success" size="sm" className="gap-1 font-mono text-[10px]">
+                    <Badge variant="success" size="sm" className="gap-1 font-mono text-[11px]">
                       <TrendingUp className="w-3 h-3" />
                       Already in your list
                     </Badge>
@@ -169,7 +169,7 @@ export function CandidateReviewCard({
           <div className="pt-2 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {/* Category Selector */}
             <div>
-              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
                 Category
               </label>
               <select
@@ -191,7 +191,7 @@ export function CandidateReviewCard({
 
             {/* Billing Cycle */}
             <div>
-              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
                 Cadence
               </label>
               <select
@@ -212,7 +212,7 @@ export function CandidateReviewCard({
 
             {/* Value Rating */}
             <div>
-              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
                 Value Tier
               </label>
               <select

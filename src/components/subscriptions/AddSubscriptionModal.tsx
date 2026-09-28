@@ -147,7 +147,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors shrink-0"
+            className="max-md:min-h-[44px] max-md:min-w-[44px] max-md:-mr-2 inline-flex items-center justify-center p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors shrink-0"
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>

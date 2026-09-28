@@ -31,7 +31,7 @@ export function CurrencySwitcher({ className }: { className?: string }) {
             type="button"
             onClick={() => handleSelect(curr)}
             className={cn(
-              'px-2 py-1 rounded-md font-mono text-[11px] font-medium transition-all cursor-pointer',
+              'px-2 py-1 max-md:min-h-[44px] max-md:min-w-[44px] rounded-md font-mono text-[11px] font-medium transition-all cursor-pointer',
               isSelected
                 ? 'bg-card text-primary font-bold shadow-xs border border-border'
                 : 'text-muted-foreground hover:text-foreground hover:bg-card/50'

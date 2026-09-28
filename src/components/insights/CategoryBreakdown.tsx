@@ -60,7 +60,7 @@ export function CategoryBreakdown({
           <CardTitle>Monthly Spend by Category</CardTitle>
         </div>
         <span className="text-xs font-semibold text-foreground font-mono tabular-nums">
-          {formatCurrency(totalSpend, currency)}/mo total
+          {formatCurrency(totalSpend, currency, { showCents: false })}/mo total
         </span>
       </CardHeader>
 
@@ -70,7 +70,7 @@ export function CategoryBreakdown({
           {hoveredItem ? (
             <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-10 sweep-chart-tooltip whitespace-nowrap font-mono text-xs flex items-center gap-1.5 animate-in fade-in zoom-in-[0.98] duration-instant">
               <span className="font-sans font-medium text-foreground">{hoveredItem.category.name}:</span>
-              <span className="font-semibold text-foreground">{formatCurrency(hoveredItem.totalMonthly, currency)}/mo</span>
+              <span className="font-semibold text-foreground">{formatCurrency(hoveredItem.totalMonthly, currency, { showCents: false })}/mo</span>
               <span className="text-muted-foreground font-normal">({hoveredItem.percentage}%)</span>
             </div>
           ) : null}
@@ -92,7 +92,7 @@ export function CategoryBreakdown({
                     hoveredCategoryId && !isHovered ? 'opacity-40' : 'opacity-100'
                   )}
                   role="img"
-                  aria-label={`${item.category.name}: ${item.percentage}% (${formatCurrency(item.totalMonthly, currency)}/mo)`}
+                  aria-label={`${item.category.name}: ${item.percentage}% (${formatCurrency(item.totalMonthly, currency, { showCents: false })}/mo)`}
                 />
               );
             })}
@@ -115,24 +115,21 @@ export function CategoryBreakdown({
                   isHovered ? 'bg-surface/70' : 'hover:bg-surface/40'
                 )}
               >
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <span className={cn('w-2 h-2 rounded-full shrink-0', dotColor)} />
-                  <span className="font-medium text-foreground truncate">
-                    {item.category.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({item.count} service{item.count === 1 ? '' : 's'})
-                  </span>
+                  <div className="min-w-0">
+                    <span className="block truncate font-medium text-foreground">
+                      {item.category.name}
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      {item.count} service{item.count === 1 ? '' : 's'} · {item.percentage}%
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0 text-right">
-                  <span className="font-semibold text-foreground font-mono tabular-nums">
-                    {formatCurrency(item.totalMonthly, currency)}/mo
-                  </span>
-                  <span className="text-xs text-muted-foreground w-9 text-right font-mono tabular-nums">
-                    {item.percentage}%
-                  </span>
-                </div>
+                <span className="shrink-0 pl-3 text-right font-semibold text-foreground font-mono tabular-nums">
+                  {formatCurrency(item.totalMonthly, currency, { showCents: false })}/mo
+                </span>
               </div>
             );
           })}

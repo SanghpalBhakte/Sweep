@@ -123,7 +123,7 @@ export function AddPaymentMethodModal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors shrink-0 cursor-pointer"
+            className="max-md:min-h-[44px] max-md:min-w-[44px] max-md:-mr-2 inline-flex items-center justify-center p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors shrink-0 cursor-pointer"
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -183,7 +183,7 @@ export function AddPaymentMethodModal({
             <option value="indigo">Indigo (Navy)</option>
           </Select>
 
-          <label className="flex items-center gap-2 pt-1 text-xs text-foreground cursor-pointer select-none">
+          <label className="flex items-center gap-2 pt-1 max-md:min-h-[44px] text-xs text-foreground cursor-pointer select-none">
             <input
               type="checkbox"
               checked={isDefault}

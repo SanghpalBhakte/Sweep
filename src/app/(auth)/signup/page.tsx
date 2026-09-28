@@ -86,7 +86,7 @@ export default function SignUpPage() {
       footer={
         <div className="text-center text-xs text-muted-foreground w-full">
           Already have an account?{' '}
-          <Link href="/login" className="font-medium text-primary hover:underline">
+          <Link href="/login" className="tap min-w-[44px] justify-center font-medium text-primary hover:underline">
             Sign in
           </Link>
         </div>

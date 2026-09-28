@@ -139,7 +139,7 @@ export function AlertsBanner() {
                     </span>
                     <Link
                       href={`/subscriptions/${alert.subscriptionId}/edit`}
-                      className="text-[hsl(var(--primary))] hover:underline flex items-center gap-1 font-medium"
+                      className="max-md:py-3 max-md:-my-3 text-[hsl(var(--primary))] hover:underline flex items-center gap-1 font-medium"
                     >
                       Manage subscription <ArrowRight className="w-3 h-3" />
                     </Link>

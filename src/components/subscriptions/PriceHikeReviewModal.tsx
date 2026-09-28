@@ -18,6 +18,7 @@ import {
   Info,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { Portal } from '@/components/ui/Portal';
 
 interface PriceHikeReviewModalProps {
   subscription: Subscription | null;
@@ -110,6 +111,7 @@ export function PriceHikeReviewModal({
   };
 
   return (
+    <Portal>
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
       role="dialog"
@@ -118,7 +120,7 @@ export function PriceHikeReviewModal({
     >
       <div
         ref={modalRef}
-        className="w-full max-w-md sweep-card bg-card border-border shadow-modal rounded-2xl overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col max-h-[85vh]"
+        className="w-full max-w-md sweep-card bg-card border-border shadow-modal rounded-2xl overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col max-h-[85dvh]"
       >
         {/* Header */}
         <div className="p-3.5 sm:p-5 border-b border-border flex items-center justify-between gap-3 shrink-0">
@@ -140,7 +142,7 @@ export function PriceHikeReviewModal({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors cursor-pointer shrink-0"
+            className="max-md:min-h-[44px] max-md:min-w-[44px] max-md:-mr-2 inline-flex items-center justify-center p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -160,7 +162,7 @@ export function PriceHikeReviewModal({
               {/* Price Delta Visual Card */}
               <div className="p-4 rounded-xl bg-surface/60 border border-border flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
+                  <div className="text-[11px] uppercase font-semibold text-muted-foreground tracking-wider">
                     Previous Amount
                   </div>
                   <div className="text-sm font-semibold text-muted-foreground line-through tabular-nums">
@@ -172,13 +174,13 @@ export function PriceHikeReviewModal({
                   <Badge variant="warning" size="sm" className="font-mono text-[11px]">
                     +{percentage}%
                   </Badge>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                  <div className="text-[11px] text-muted-foreground mt-0.5">
                     (+{formatCurrency(delta, subscription.currency)}/{subscription.billing_cycle})
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <div className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
+                  <div className="text-[11px] uppercase font-semibold text-muted-foreground tracking-wider">
                     New Amount
                   </div>
                   <div className="text-base font-bold text-foreground tabular-nums">
@@ -258,5 +260,6 @@ export function PriceHikeReviewModal({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

@@ -41,9 +41,9 @@ export function UpcomingCashflowPressure({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-primary" />
-          <div>
+        <div className="flex min-w-0 items-center gap-2">
+          <Calendar className="w-4 h-4 shrink-0 text-primary" />
+          <div className="min-w-0">
             <CardTitle>Next 30-Day Cashflow Demand</CardTitle>
             <p className="text-[11px] text-muted-foreground mt-0.5">
               Scheduled recurring debits converted to {currency}
@@ -51,11 +51,11 @@ export function UpcomingCashflowPressure({
           </div>
         </div>
 
-        <div className="text-right">
+        <div className="shrink-0 whitespace-nowrap text-right">
           <div className="text-sm font-bold text-foreground font-mono">
-            {formatCurrency(total30Days, currency)}
+            {formatCurrency(total30Days, currency, { showCents: false })}
           </div>
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-[11px] text-muted-foreground">
             {items.length} charge{items.length === 1 ? '' : 's'} upcoming
           </span>
         </div>
@@ -77,7 +77,7 @@ export function UpcomingCashflowPressure({
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/subscriptions/${subscription.id}/edit`}
-                        className="text-sm font-medium text-foreground hover:text-primary transition-colors truncate"
+                        className="max-md:py-3 max-md:-my-3 text-sm font-medium text-foreground hover:text-primary transition-colors truncate"
                       >
                         {subscription.name}
                       </Link>
@@ -104,11 +104,11 @@ export function UpcomingCashflowPressure({
                       {formatCurrency(amount, subscription.currency)}
                     </div>
                     {isDifferentCurrency ? (
-                      <div className="text-[10px] text-primary font-mono">
+                      <div className="text-[11px] text-primary font-mono">
                         ≈ {formatCurrency(convertedAmount, currency)}
                       </div>
                     ) : (
-                      <div className="text-[10px] text-muted-foreground capitalize">
+                      <div className="text-[11px] text-muted-foreground capitalize">
                         {subscription.billing_cycle}
                       </div>
                     )}

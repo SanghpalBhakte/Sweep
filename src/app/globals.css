@@ -163,9 +163,9 @@
     --color-text-muted:       #5E554A;
     --color-text-faint:       #9A8F81;
 
-    --color-success:          #4B6B3D;
+    --color-success:          #34502B;
     --color-success-highlight:#E4EFE0;
-    --color-warning:          #944F1F;
+    --color-warning:          #7A3D16;
     --color-warning-highlight:#F7E9DE;
     --color-error:            #B02A14;
     --color-error-highlight:  #F9E1DC;
@@ -201,11 +201,11 @@
     --accent:                36 30% 86%;
     --accent-foreground:     18 19% 10%;
 
-    --success:               100 27% 33%;
+    --success:               100 30% 25%;
     --success-subtle:        102 24% 94%;
     --success-foreground:    44 35% 96%;
 
-    --warning:               25 65% 38%;
+    --warning:               25 70% 28%;
     --warning-subtle:        25 50% 95%;
     --warning-foreground:    44 35% 96%;
 
@@ -436,6 +436,23 @@
     opacity: 0.5;
     cursor: not-allowed;
     background-color: hsl(var(--surface-muted));
+  }
+  @media (max-width: 767px), (pointer: coarse) {
+    .sweep-input {
+      min-height: 2.75rem;
+    }
+    /* Comfortable touch height for text links and small inline buttons */
+    .tap {
+      min-height: 2.75rem;
+    }
+  }
+  .tabs-fade {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+  .tap {
+    display: inline-flex;
+    align-items: center;
   }
 
   /* ── Buttons ──────────────────────────────────────────────────── */

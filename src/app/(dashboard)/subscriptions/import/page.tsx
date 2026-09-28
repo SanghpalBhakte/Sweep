@@ -387,12 +387,12 @@ export default function StatementImportPage() {
           <Link
             href="/subscriptions"
             aria-label="Back to subscriptions"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors"
+            className="inline-flex items-center justify-center p-1.5 max-md:min-h-[44px] max-md:min-w-[44px] max-md:-ml-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
+            <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground">
               Import a bank statement
             </h1>
             <p className="text-xs text-muted-foreground">
@@ -534,7 +534,7 @@ export default function StatementImportPage() {
 
                   {/* Multi-statement Trend Analysis Badge */}
                   {hasComparisonData ? (
-                    <Badge variant="success" size="sm" className="gap-1 font-mono text-[10px] shadow-xs">
+                    <Badge variant="success" size="sm" className="gap-1 font-mono text-[11px] shadow-xs">
                       <TrendingUp className="w-3 h-3" />
                       {trendBadgeText}
                     </Badge>

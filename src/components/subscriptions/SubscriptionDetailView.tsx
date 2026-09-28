@@ -152,7 +152,7 @@ export function SubscriptionDetailView({
       <div className="flex items-center justify-between gap-3 pb-2 border-b border-border">
         <Link
           href="/subscriptions"
-          className="inline-flex items-center gap-1.5 p-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-surface transition-colors cursor-pointer"
+          className="tap -ml-1.5 gap-1.5 p-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-surface transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Subscriptions</span>
@@ -207,7 +207,7 @@ export function SubscriptionDetailView({
             </div>
 
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground truncate">
+              <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground truncate">
                 {subscription.name}
               </h1>
 

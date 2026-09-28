@@ -33,7 +33,7 @@ export function TopSubscriptions({ items, currency = 'USD' }: TopSubscriptionsPr
 
         <Link
           href="/subscriptions"
-          className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors"
+          className="max-md:py-3 max-md:-my-3 text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors"
         >
           View all <ArrowRight className="w-3 h-3" />
         </Link>
@@ -62,14 +62,14 @@ export function TopSubscriptions({ items, currency = 'USD' }: TopSubscriptionsPr
                       <div className="flex items-center gap-2 flex-wrap">
                         <Link
                           href={`/subscriptions/${subscription.id}/edit`}
-                          className="text-sm font-semibold text-foreground hover:text-primary transition-colors truncate"
+                          className="max-md:py-3 max-md:-my-3 text-sm font-semibold text-foreground hover:text-primary transition-colors truncate"
                         >
                           {subscription.name}
                         </Link>
                         <ValueRatingTag rating={subscription.value_rating} size="sm" />
                       </div>
 
-                      <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
+                      <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground mt-0.5">
                         <span>{subscription.category?.name || 'General'}</span>
                         <span>·</span>
                         <span className="font-mono">
@@ -83,15 +83,15 @@ export function TopSubscriptions({ items, currency = 'USD' }: TopSubscriptionsPr
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 whitespace-nowrap">
                     <div className="text-sm font-bold text-foreground font-mono">
-                      {formatCurrency(displayAmount, currency)}
-                      <span className="text-[10px] font-normal text-muted-foreground ml-0.5">
+                      {formatCurrency(displayAmount, currency, { showCents: false })}
+                      <span className="text-[11px] font-normal text-muted-foreground ml-0.5">
                         /mo
                       </span>
                     </div>
-                    <div className="text-[10px] text-muted-foreground font-mono">
-                      {percentageOfTotal}% of total
+                    <div className="text-[11px] text-muted-foreground font-mono">
+                      {percentageOfTotal}%
                     </div>
                   </div>
                 </div>

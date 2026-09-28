@@ -359,7 +359,7 @@ export function DashboardClient() {
                 {stats.cancelCandidateCount > 0 ? (
                   <Link
                     href="/subscriptions"
-                    className="flex items-baseline py-1.5 hover:bg-foreground/[0.04] transition-colors"
+                    className="flex items-baseline py-3 hover:bg-foreground/[0.04] transition-colors"
                   >
                     <span className="font-mono text-[13px]">Marked to cancel</span>
                     <i aria-hidden="true" className="leader" />

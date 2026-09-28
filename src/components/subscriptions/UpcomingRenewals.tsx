@@ -48,7 +48,7 @@ export function UpcomingRenewals({ subscriptions }: { subscriptions: Subscriptio
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/subscriptions/${sub.id}/edit`}
-                      className="text-sm font-medium text-foreground hover:text-primary transition-colors truncate"
+                      className="max-md:py-3 max-md:-my-3 text-sm font-medium text-foreground hover:text-primary transition-colors truncate"
                     >
                       {sub.name}
                     </Link>
@@ -70,7 +70,7 @@ export function UpcomingRenewals({ subscriptions }: { subscriptions: Subscriptio
                   <div className="text-sm font-semibold text-foreground tabular-nums">
                     {formatCurrency(sub.amount, sub.currency)}
                   </div>
-                  <div className="text-[10px] text-muted-foreground">
+                  <div className="text-[11px] text-muted-foreground">
                     {formatCycle(sub.billing_cycle, sub.custom_interval_days)}
                   </div>
                 </div>

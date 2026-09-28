@@ -32,7 +32,7 @@ interface SubscriptionCardProps {
 }
 
 const actionClass =
-  'inline-flex items-center min-h-[44px] font-mono text-xs font-semibold uppercase tracking-[0.04em] underline underline-offset-[5px] decoration-[1.5px] cursor-pointer hover:opacity-70 transition-opacity';
+  'inline-flex items-center justify-center min-h-[44px] min-w-[44px] font-mono text-xs font-semibold uppercase tracking-[0.04em] underline underline-offset-[5px] decoration-[1.5px] cursor-pointer hover:opacity-70 transition-opacity';
 
 /**
  * One line of the subscriptions ledger: due date in the margin, name and notes in the

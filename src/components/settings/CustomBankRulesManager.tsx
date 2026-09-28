@@ -558,7 +558,7 @@ export function CustomBankRulesManager() {
                     />
                     <div>
                       <div className="font-bold text-foreground">Merge (Safe)</div>
-                      <div className="text-[10px] text-muted-foreground">
+                      <div className="text-[11px] text-muted-foreground">
                         Keep existing rules and update matches
                       </div>
                     </div>
@@ -582,7 +582,7 @@ export function CustomBankRulesManager() {
                     />
                     <div>
                       <div className="font-bold text-foreground">Replace All</div>
-                      <div className="text-[10px] text-muted-foreground">
+                      <div className="text-[11px] text-muted-foreground">
                         Overwrite all current custom rules
                       </div>
                     </div>

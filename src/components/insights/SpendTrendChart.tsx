@@ -53,17 +53,17 @@ export function SpendTrendChart({ data, currency = 'USD' }: SpendTrendChartProps
 
         <div className="text-right">
           <div className="text-sm font-bold text-foreground font-mono">
-            {formatCurrency(currentMonth.totalMonthly, currency)}
+            {formatCurrency(currentMonth.totalMonthly, currency, { showCents: false })}
             <span className="text-[11px] font-normal text-muted-foreground">/mo</span>
           </div>
           {diff !== 0 ? (
             <span
               className={cn(
-                'text-[10px] font-medium font-mono',
+                'text-[11px] font-medium font-mono',
                 diff > 0 ? 'text-muted-foreground' : 'text-primary'
               )}
             >
-              {diff > 0 ? `+${formatCurrency(diff, currency)}` : `-${formatCurrency(Math.abs(diff), currency)}`} vs {firstMonth.monthLabel}
+              {diff > 0 ? `+${formatCurrency(diff, currency, { showCents: false })}` : `-${formatCurrency(Math.abs(diff), currency, { showCents: false })}`} vs {firstMonth.monthLabel}
             </span>
           ) : null}
         </div>
@@ -77,8 +77,8 @@ export function SpendTrendChart({ data, currency = 'USD' }: SpendTrendChartProps
           </span>
           <span className="font-semibold text-foreground text-xs font-mono tabular-nums">
             {hoveredPoint
-              ? `${formatCurrency(hoveredPoint.totalMonthly, currency)}/mo (${hoveredPoint.activeCount} active)`
-              : `${formatCurrency(currentMonth.totalMonthly, currency)}/mo (${currentMonth.activeCount} active)`}
+              ? `${formatCurrency(hoveredPoint.totalMonthly, currency, { showCents: false })}/mo (${hoveredPoint.activeCount} active)`
+              : `${formatCurrency(currentMonth.totalMonthly, currency, { showCents: false })}/mo (${currentMonth.activeCount} active)`}
           </span>
         </div>
 
@@ -104,7 +104,7 @@ export function SpendTrendChart({ data, currency = 'USD' }: SpendTrendChartProps
                   {/* Tooltip on bar */}
                   {isHovered ? (
                     <div className="absolute -top-8 z-10 sweep-chart-tooltip whitespace-nowrap font-mono text-[11px] font-semibold flex items-center gap-1.5 animate-in fade-in zoom-in-[0.98] duration-instant">
-                      <span>{formatCurrency(point.totalMonthly, currency)}</span>
+                      <span>{formatCurrency(point.totalMonthly, currency, { showCents: false })}</span>
                     </div>
                   ) : null}
 

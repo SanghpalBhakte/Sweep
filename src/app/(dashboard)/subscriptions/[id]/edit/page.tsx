@@ -80,7 +80,7 @@ export default function EditSubscriptionPage() {
         <div className="pt-2">
           <Link
             href="/subscriptions"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-foreground hover:bg-surface transition-colors"
+            className="tap gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-foreground hover:bg-surface transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to subscriptions
           </Link>

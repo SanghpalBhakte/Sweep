@@ -33,7 +33,7 @@ export function CancelCandidates({ subscriptions }: { subscriptions: Subscriptio
             <span className="text-xs font-semibold text-danger tabular-nums">
               Save {formatCurrency(monthlySavings, 'USD')}/mo
             </span>
-            <span className="block text-[10px] text-muted-foreground tabular-nums">
+            <span className="block text-[11px] text-muted-foreground tabular-nums">
               {formatCurrency(monthlySavings * 12, 'USD')}/yr
             </span>
           </div>
@@ -50,7 +50,7 @@ export function CancelCandidates({ subscriptions }: { subscriptions: Subscriptio
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/subscriptions/${sub.id}/edit`}
-                      className="text-sm font-medium text-foreground hover:text-primary transition-colors truncate"
+                      className="max-md:py-3 max-md:-my-3 text-sm font-medium text-foreground hover:text-primary transition-colors truncate"
                     >
                       {sub.name}
                     </Link>

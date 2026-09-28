@@ -102,7 +102,7 @@ function LoginForm() {
       footer={
         <div className="text-center text-xs text-muted-foreground w-full">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="font-medium text-primary hover:underline">
+          <Link href="/signup" className="tap font-medium text-primary hover:underline">
             Sign up
           </Link>
         </div>
@@ -138,7 +138,7 @@ function LoginForm() {
               setError(null);
             }}
             className={cn(
-              'py-1.5 font-medium rounded-md transition-all cursor-pointer',
+              'py-1.5 max-md:min-h-[44px] font-medium rounded-md transition-all cursor-pointer',
               authMode === 'password'
                 ? 'bg-card text-foreground shadow-xs font-semibold'
                 : 'text-muted-foreground hover:text-foreground'
@@ -153,7 +153,7 @@ function LoginForm() {
               setError(null);
             }}
             className={cn(
-              'py-1.5 font-medium rounded-md transition-all cursor-pointer',
+              'py-1.5 max-md:min-h-[44px] font-medium rounded-md transition-all cursor-pointer',
               authMode === 'otp'
                 ? 'bg-card text-foreground shadow-xs font-semibold'
                 : 'text-muted-foreground hover:text-foreground'
@@ -175,7 +175,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => setIsOtpSent(false)}
-              className="text-xs text-primary hover:underline pt-1 inline-block cursor-pointer"
+              className="tap text-xs text-primary hover:underline cursor-pointer"
             >
               Sign in with password instead
             </button>
@@ -218,7 +218,7 @@ function LoginForm() {
                       setAuthMode('otp');
                       setError(null);
                     }}
-                    className="text-[11px] text-muted-foreground hover:text-primary cursor-pointer transition-colors"
+                    className="tap text-[11px] text-muted-foreground hover:text-primary cursor-pointer transition-colors"
                   >
                     Forgot password? Sign in with magic link
                   </button>

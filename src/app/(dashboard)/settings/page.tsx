@@ -332,7 +332,7 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-xl mx-auto pb-16">
       {/* Header */}
       <div className="pb-2 border-b border-border">
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="font-serif text-3xl sm:text-4xl tracking-tight text-foreground">
           Settings
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -426,22 +426,22 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2.5 pt-1">
-                <label className="flex items-center gap-2.5 text-xs text-foreground cursor-pointer">
+                <label className="flex items-center gap-2.5 max-md:min-h-[44px] text-xs text-foreground cursor-pointer">
                   <input
                     type="checkbox"
                     checked={notifyRenewals}
                     onChange={(e) => setNotifyRenewals(e.target.checked)}
-                    className="w-4 h-4 rounded text-primary border-border accent-primary"
+                    className="w-5 h-5 md:w-4 md:h-4 rounded text-primary border-border accent-primary"
                   />
                   <span>Remind me before a subscription renews</span>
                 </label>
 
-                <label className="flex items-center gap-2.5 text-xs text-foreground cursor-pointer">
+                <label className="flex items-center gap-2.5 max-md:min-h-[44px] text-xs text-foreground cursor-pointer">
                   <input
                     type="checkbox"
                     checked={notifyTrials}
                     onChange={(e) => setNotifyTrials(e.target.checked)}
-                    className="w-4 h-4 rounded text-primary border-border accent-primary"
+                    className="w-5 h-5 md:w-4 md:h-4 rounded text-primary border-border accent-primary"
                   />
                   <span>Remind me before a free trial ends</span>
                 </label>
@@ -461,7 +461,7 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => toggleOffset(opt.days)}
                         className={cn(
-                          'px-2.5 py-1 rounded-md border text-xs font-medium transition-all cursor-pointer',
+                          'px-2.5 py-1 max-md:min-h-[44px] rounded-md border text-xs font-medium transition-all cursor-pointer',
                           isSelected
                             ? 'border-primary bg-primary/10 text-primary font-semibold'
                             : 'border-border bg-surface text-muted-foreground hover:text-foreground'
@@ -504,7 +504,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className="w-full py-1 text-xs font-medium text-muted-foreground hover:text-foreground flex items-center justify-between transition-colors cursor-pointer"
+                className="w-full py-1 max-md:min-h-[44px] text-xs font-medium text-muted-foreground hover:text-foreground flex items-center justify-between transition-colors cursor-pointer"
               >
                 <span>More settings (yearly discount, bank rules, sync)</span>
                 {showAdvanced ? (
@@ -916,7 +916,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between pt-1">
             <Link
               href="/privacy"
-              className="font-medium text-primary hover:underline flex items-center gap-1"
+              className="max-md:py-3 max-md:-my-3 font-medium text-primary hover:underline flex items-center gap-1"
             >
               Privacy Policy <ExternalLink className="w-3 h-3" />
             </Link>
@@ -933,7 +933,7 @@ export default function SettingsPage() {
               href="https://github.com/SanghpalBhakte/Sweep"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground hover:underline"
+              className="max-md:py-3 max-md:-my-3 text-muted-foreground hover:text-foreground hover:underline"
             >
               Star on GitHub / Feedback
             </a>

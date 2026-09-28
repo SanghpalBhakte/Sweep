@@ -195,7 +195,7 @@ export function StatementDropzone({
       {/* Sample Statement Testing */}
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[hsl(var(--muted-foreground))]">
         <span>Want to test without uploading real bank statements?</span>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <Button
             type="button"
             variant="ghost"

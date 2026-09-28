@@ -106,7 +106,7 @@ export function AnnualOptimizationReview({
                     <div className="flex items-center gap-2 flex-wrap">
                       <Link
                         href={`/subscriptions/${subscription.id}/edit`}
-                        className="text-sm font-bold text-foreground hover:text-primary transition-colors truncate"
+                        className="max-md:py-3 max-md:-my-3 text-sm font-bold text-foreground hover:text-primary transition-colors truncate"
                       >
                         {subscription.name}
                       </Link>
@@ -137,14 +137,14 @@ export function AnnualOptimizationReview({
                         href={subscription.cancel_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
+                        className="max-md:py-3 max-md:-my-3 text-xs font-medium text-primary hover:underline flex items-center gap-1"
                       >
                         Plan Portal <ExternalLink className="w-3 h-3" />
                       </a>
                     ) : (
                       <Link
                         href={`/subscriptions/${subscription.id}/edit`}
-                        className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                        className="max-md:py-3 max-md:-my-3 text-xs font-medium text-muted-foreground hover:text-foreground"
                       >
                         Edit Plan
                       </Link>

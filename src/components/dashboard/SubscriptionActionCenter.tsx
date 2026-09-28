@@ -206,9 +206,9 @@ export function SubscriptionActionCenter() {
                 <div>
                   <div className="text-xs font-bold text-foreground">
                     +<AnimatedCurrency value={potentialMonthlySavings} currency={targetCurrency} />
-                    <span className="text-[10px] font-normal text-muted-foreground">/mo</span>
+                    <span className="text-[11px] font-normal text-muted-foreground">/mo</span>
                   </div>
-                  <div className="text-[10px] text-muted-foreground">
+                  <div className="text-[11px] text-muted-foreground">
                     Identified cancel savings
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export function SubscriptionActionCenter() {
                   <h4 className="text-xs sm:text-sm font-bold text-foreground">
                     Annual Arbitrage: {arbitrageCandidates.length} Candidates Identified
                   </h4>
-                  <Badge variant="success" size="sm" className="gap-1 font-mono text-[10px]">
+                  <Badge variant="success" size="sm" className="gap-1 font-mono text-[11px]">
                     <TrendingDown className="w-3 h-3" />
                     Save ~{formatCurrency(totalArbitrageSavings, targetCurrency)}/yr
                   </Badge>
@@ -355,7 +355,7 @@ export function SubscriptionActionCenter() {
                     <div>
                       <strong className="font-semibold text-foreground">Why this appears: </strong>
                       <span>{action.whyExplanation}</span>{' '}
-                      <span className="font-mono text-[10px] text-muted-foreground/80">({action.heuristicRule})</span>
+                      <span className="font-mono text-[11px] text-muted-foreground/80">({action.heuristicRule})</span>
                     </div>
                   </div>
 
@@ -366,7 +366,7 @@ export function SubscriptionActionCenter() {
                         <Link
                           key={rel.id}
                           href={`/subscriptions/${rel.id}/edit`}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-card border border-border text-foreground hover:border-primary transition-colors"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 max-md:min-h-[44px] rounded-md text-[11px] font-medium bg-card border border-border text-foreground hover:border-primary transition-colors"
                         >
                           <span>{rel.name}</span>
                           <span className="text-muted-foreground font-mono">
