@@ -689,6 +689,12 @@
     mix-blend-mode: normal;
     opacity: 1;
   }
+  /* The SVG turbulence filter repaints on every scroll frame; skip it on phones. */
+  @media (max-width: 767px) {
+    .stamp {
+      filter: none;
+    }
+  }
 
   /* ── Signature: Paper sheet ────────────────────────────────────────
      A torn strip lying on the desk. Wrap .paper in .paper-sheet so the

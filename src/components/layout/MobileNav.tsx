@@ -23,7 +23,7 @@ export function MobileNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-foreground/25 px-1 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-foreground/25 px-1 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
       <nav className="flex items-center justify-around max-w-md mx-auto" aria-label="Mobile navigation">
         {navItems.map((item) => (
           <Link

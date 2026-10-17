@@ -27,7 +27,7 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 w-full bg-background/90 backdrop-blur-md border-b border-border/50 transition-colors">
+      <header className="sticky top-0 z-30 w-full bg-background md:bg-background/90 md:backdrop-blur-md border-b border-border/50 transition-colors">
         <div className="w-full px-4 sm:px-6 lg:px-8 h-13 sm:h-14 flex items-center justify-between gap-4">
           {/* Mobile Brand (visible only on mobile where sidebar is hidden) */}
           <div className="flex md:hidden items-center gap-2.5">
