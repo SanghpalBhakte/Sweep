@@ -3,8 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Plus, Bell, Search, Sparkles } from 'lucide-react';
-import { ThemeToggle } from '../ui/ThemeToggle';
+import { Plus, Bell, Search } from 'lucide-react';
 import { ButtonLink } from '../ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/context/NotificationContext';
@@ -21,7 +20,7 @@ export function Header() {
   const { isConfigured } = useAuth();
   const { totalAlertsCount, urgentAlertsCount, isAlertPanelOpen, toggleAlertPanel } =
     useNotifications();
-  const { stats, displayCurrency, profile } = useSubscriptions();
+  const { stats, displayCurrency } = useSubscriptions();
 
   const targetCurrency = stats.displayCurrency || displayCurrency || 'USD';
 
@@ -74,7 +73,7 @@ export function Header() {
               className="relative p-2 max-md:min-h-[44px] max-md:min-w-[44px] text-muted-foreground hover:text-foreground hover:bg-surface rounded-lg transition-colors cursor-pointer flex items-center justify-center"
               aria-label="Alerts and Reminders"
             >
-              <Bell className="w-4 h-4" aria-hidden="true" />
+              <Bell className="w-5 h-5 md:w-4 md:h-4" aria-hidden="true" />
               {totalAlertsCount > 0 ? (
                 <span
                   className={`absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[11px] font-bold shadow-xs ${
@@ -89,15 +88,13 @@ export function Header() {
               ) : null}
             </button>
 
-            {/* Mobile Theme Toggle */}
-            <div className="md:hidden">
-              <ThemeToggle variant="cycle" />
-            </div>
+            {/* Theme lives in Settings > Appearance. The extra laptop/sun icon here
+                confused people and crowded the phone header. */}
 
             {/* Mobile Quick Add Button */}
             <div className="md:hidden">
-              <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1 shadow-xs px-2.5 py-1 text-xs">
-                <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+              <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1 rounded-full pl-3 pr-4">
+                <Plus className="w-4 h-4" aria-hidden="true" />
                 <span>Add</span>
               </ButtonLink>
             </div>

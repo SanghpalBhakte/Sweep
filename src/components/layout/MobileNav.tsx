@@ -3,61 +3,64 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Home, Repeat, PieChart, Settings, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useSubscriptions } from '@/context/SubscriptionContext';
+
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  active: boolean;
+  badge?: number;
+};
 
 export function MobileNav() {
   const pathname = usePathname();
   const { stats } = useSubscriptions();
 
-  const navItems = [
-    { href: '/', label: 'Overview', active: pathname === '/' },
+  const navItems: NavItem[] = [
+    { href: '/', label: 'Home', icon: Home, active: pathname === '/' },
     {
       href: '/subscriptions',
       label: 'Subscriptions',
+      icon: Repeat,
       active: pathname.startsWith('/subscriptions') && pathname !== '/subscriptions/new',
       badge: stats.upcomingRenewalsCount > 0 ? stats.upcomingRenewalsCount : undefined,
     },
-    { href: '/insights', label: 'Insights', active: pathname === '/insights' },
-    { href: '/settings', label: 'Settings', active: pathname.startsWith('/settings') },
+    { href: '/insights', label: 'Insights', icon: PieChart, active: pathname === '/insights' },
+    { href: '/settings', label: 'Settings', icon: Settings, active: pathname.startsWith('/settings') },
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-foreground/25 px-1 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
-      <nav className="flex items-center justify-around max-w-md mx-auto" aria-label="Mobile navigation">
-        {navItems.map((item) => (
+    <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background border-t border-border pb-[env(safe-area-inset-bottom,0px)]">
+      <nav className="grid grid-cols-4 max-w-md mx-auto" aria-label="Main">
+        {navItems.map(({ href, label, icon: Icon, active, badge }) => (
           <Link
-            key={item.href}
-            href={item.href}
-            aria-current={item.active ? 'page' : undefined}
+            key={href}
+            href={href}
+            aria-current={active ? 'page' : undefined}
             className={cn(
-              'relative flex items-center justify-center min-h-[48px] px-2 font-mono text-[11px] uppercase tracking-[0.05em] transition-colors',
-              item.active
-                ? 'text-foreground font-bold'
-                : 'text-muted-foreground hover:text-foreground font-medium'
+              'group flex flex-col items-center justify-center gap-1 pt-2 pb-2.5 min-h-[56px] text-[11px] leading-none transition-colors',
+              active ? 'text-foreground font-semibold' : 'text-muted-foreground font-medium'
             )}
           >
-            <span className="relative">
-              {item.href === '/subscriptions' ? (
-                <>
-                  <span aria-hidden="true" className="min-[360px]:hidden">Subs</span>
-                  <span className="max-[359px]:sr-only">Subscriptions</span>
-                </>
-              ) : (
-                item.label
+            {/* Pill behind the icon marks the current tab (same idea as Android and iOS) */}
+            <span
+              className={cn(
+                'relative flex items-center justify-center w-14 h-7 rounded-full transition-colors',
+                active ? 'bg-foreground/10' : 'group-active:bg-foreground/5'
               )}
-              {item.badge ? (
-                <span
-                  className="absolute -top-2 -right-3 min-w-[14px] text-[11px] font-bold text-danger tabular-nums"
-                  aria-label={`${item.badge} upcoming renewals`}
-                >
-                  {item.badge}
+            >
+              <Icon className="w-5 h-5" strokeWidth={active ? 2.25 : 1.75} aria-hidden="true" />
+              {badge ? (
+                <span className="absolute top-0 right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-danger text-danger-foreground text-[10px] font-bold leading-4 text-center tabular-nums">
+                  {badge > 9 ? '9+' : badge}
                 </span>
               ) : null}
             </span>
-            {item.active ? (
-              <span aria-hidden="true" className="absolute left-2 right-2 bottom-2 h-[2px] bg-danger" />
-            ) : null}
+            <span className="truncate max-w-full px-1">{label}</span>
+            {badge ? <span className="sr-only">, {badge} renewing soon</span> : null}
           </Link>
         ))}
       </nav>

@@ -57,6 +57,7 @@ import {
   Plus,
   LogIn,
   UserPlus,
+  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -244,14 +245,14 @@ export default function SettingsPage() {
       if (isPushSubscribed) {
         const res = await disablePushNotifications();
         if (res.success) {
-          setPushActionStatus('Web push alerts disabled on this device.');
+          setPushActionStatus('Turned off. This phone will not get reminders.');
         } else {
           setPushActionStatus(res.error || 'Failed to disable push alerts.');
         }
       } else {
         const res = await enablePushNotifications();
         if (res.success) {
-          setPushActionStatus('Web push alerts enabled on this device.');
+          setPushActionStatus('Turned on. This phone will get reminders.');
         } else {
           setPushActionStatus(res.error || 'Permission not granted or push unavailable.');
         }
@@ -468,77 +469,89 @@ export default function SettingsPage() {
               </div>
 
               {/* Reminder Offset Chips */}
-              <div className="space-y-1.5 pt-2">
-                <label className="text-[11px] font-medium text-muted-foreground block">
+              <fieldset className="space-y-2 pt-2">
+                <legend className="text-[11px] font-medium text-muted-foreground mb-2">
                   When to remind me
-                </label>
-                <div className="flex items-center gap-2 flex-wrap">
+                </legend>
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                   {REMINDER_OFFSET_OPTIONS.map((opt) => {
                     const isSelected = selectedOffsets.includes(opt.days);
                     return (
                       <button
                         key={opt.days}
                         type="button"
+                        aria-pressed={isSelected}
                         onClick={() => toggleOffset(opt.days)}
                         className={cn(
-                          'px-2.5 py-1 max-md:min-h-[44px] rounded-md border text-xs font-medium transition-all cursor-pointer',
+                          'inline-flex items-center justify-center gap-1.5 px-3 py-1.5 max-md:min-h-[44px] rounded-full border text-xs font-medium transition-colors cursor-pointer',
                           isSelected
-                            ? 'border-primary bg-primary/10 text-primary font-semibold'
-                            : 'border-border bg-surface text-muted-foreground hover:text-foreground'
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-border text-foreground hover:bg-surface'
                         )}
                       >
+                        {isSelected ? <Check className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> : null}
                         {opt.label}
                       </button>
                     );
                   })}
                 </div>
+              </fieldset>
+
+              {/* Delivery channels: plain rows, not boxes inside the card */}
+              <div className="divide-y divide-border/60 border-t border-border/60 mt-2">
+                {isPushSupported ? (
+                  <div className="py-3 space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <span className="text-xs font-medium text-foreground block">Phone notifications</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {isPushSubscribed ? 'On for this device' : 'Off for this device'}
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant={isPushSubscribed ? 'outline' : 'primary'}
+                        size="sm"
+                        onClick={handleTogglePush}
+                        isLoading={isPushLoading}
+                        className="shrink-0"
+                      >
+                        {isPushSubscribed ? 'Turn off' : 'Turn on'}
+                      </Button>
+                    </div>
+                    {pushActionStatus && (
+                      <p className="text-[11px] text-muted-foreground">{pushActionStatus}</p>
+                    )}
+                  </div>
+                ) : null}
+
+                {/* Test that reminder emails actually arrive */}
+                {isConfigured && user ? (
+                  <div className="py-3 space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <span className="text-xs font-medium text-foreground block">Email reminders</span>
+                        <span className="text-[11px] text-muted-foreground truncate block">
+                          Sent to {user.email}
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleTestEmail}
+                        isLoading={isEmailTesting}
+                        className="shrink-0"
+                      >
+                        Send test
+                      </Button>
+                    </div>
+                    {emailTestStatus && (
+                      <p className="text-[11px] text-muted-foreground break-words">{emailTestStatus}</p>
+                    )}
+                  </div>
+                ) : null}
               </div>
-
-              {/* Web Push Notification Toggle */}
-              {isPushSupported ? (
-                <div className="p-3 rounded-xl bg-surface/50 border border-border space-y-2 pt-2.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-foreground">
-                      Device Push Notifications
-                    </span>
-                    <Button
-                      type="button"
-                      variant={isPushSubscribed ? 'outline' : 'primary'}
-                      size="sm"
-                      onClick={handleTogglePush}
-                      isLoading={isPushLoading}
-                      className="text-xs h-7 px-2.5"
-                    >
-                      {isPushSubscribed ? 'Disable Push' : 'Enable Push'}
-                    </Button>
-                  </div>
-                  {pushActionStatus && (
-                    <p className="text-[11px] text-primary">{pushActionStatus}</p>
-                  )}
-                </div>
-              ) : null}
-
-              {/* Test that reminder emails actually arrive */}
-              {isConfigured && user ? (
-                <div className="p-3 rounded-xl bg-surface/50 border border-border space-y-2 pt-2.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-foreground">Email reminders</span>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleTestEmail}
-                      isLoading={isEmailTesting}
-                      className="text-xs h-7 px-2.5"
-                    >
-                      Send test email
-                    </Button>
-                  </div>
-                  {emailTestStatus && (
-                    <p className="text-[11px] text-primary">{emailTestStatus}</p>
-                  )}
-                </div>
-              ) : null}
             </div>
 
             {/* Demoted Advanced Settings Collapsible */}
