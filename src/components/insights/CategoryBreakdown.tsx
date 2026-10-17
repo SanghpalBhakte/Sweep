@@ -40,12 +40,12 @@ export function CategoryBreakdown({
         <CardHeader>
           <div className="flex items-center gap-2">
             <PieChart className="w-4 h-4 text-primary" />
-            <CardTitle>Category Distribution</CardTitle>
+            <CardTitle>Spend by category</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <p className="text-xs text-muted-foreground">
-            No active subscriptions found to categorize.
+            No active subscriptions yet.
           </p>
         </CardContent>
       </Card>
@@ -57,7 +57,7 @@ export function CategoryBreakdown({
       <CardHeader>
         <div className="flex items-center gap-2">
           <PieChart className="w-4 h-4 text-primary" />
-          <CardTitle>Monthly Spend by Category</CardTitle>
+          <CardTitle>Spend by category</CardTitle>
         </div>
         <span className="text-xs font-semibold text-foreground font-mono tabular-nums">
           {formatCurrency(totalSpend, currency, { showCents: false })}/mo total

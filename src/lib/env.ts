@@ -28,7 +28,8 @@ export function getServerEnv(): ServerEnv {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || 'Sweep Reminders <onboarding@resend.dev>',
-    VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
+    // Production saved this key as "Vapidpvtkey" and Vercel cannot rename sensitive vars, so accept both.
+    VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || process.env.Vapidpvtkey,
     VAPID_SUBJECT: process.env.VAPID_SUBJECT || 'mailto:support@sweep.app',
     CRON_SECRET: process.env.CRON_SECRET,
   };
@@ -54,7 +55,7 @@ export const serviceStatus = {
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
   isResendConfigured: () => Boolean(process.env.RESEND_API_KEY),
   isWebPushConfigured: () =>
-    Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY),
+    Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && (process.env.VAPID_PRIVATE_KEY || process.env.Vapidpvtkey)),
   isCronConfigured: () => Boolean(process.env.CRON_SECRET),
 };
 

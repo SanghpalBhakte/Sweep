@@ -33,7 +33,7 @@ export function deriveAppAlerts(
 
       if (daysUntilTrial >= -2 && daysUntilTrial <= maxDaysLookahead) {
         let severity: AlertSeverity = 'warning';
-        let message = `Converts to paid subscription in ${daysUntilTrial} days.`;
+        let message = `You start paying in ${daysUntilTrial} days.`;
 
         if (daysUntilTrial <= 0) {
           severity = 'urgent';
@@ -43,10 +43,10 @@ export function deriveAppAlerts(
               : `Trial ended ${Math.abs(daysUntilTrial)}d ago. Review active status.`;
         } else if (daysUntilTrial === 1) {
           severity = 'urgent';
-          message = 'Free trial ends tomorrow! Cancel now if no longer needed.';
+          message = 'Free trial ends tomorrow. Cancel today if you don\'t want it.';
         } else if (daysUntilTrial <= 3) {
           severity = 'urgent';
-          message = `Free trial converts in ${daysUntilTrial} days (${formatDate(sub.trial_end_date)}).`;
+          message = `Free trial ends in ${daysUntilTrial} days (${formatDate(sub.trial_end_date)}).`;
         }
 
         const alertId = `trial-${sub.id}-${sub.trial_end_date}`;
@@ -57,7 +57,7 @@ export function deriveAppAlerts(
             subscriptionId: sub.id,
             subscriptionName: sub.name,
             type: 'trial_ending',
-            title: `Trial Ending: ${sub.name}`,
+            title: `${sub.name} trial ending`,
             message,
             targetDate: sub.trial_end_date,
             daysUntil: daysUntilTrial,
@@ -85,11 +85,11 @@ export function deriveAppAlerts(
         if (daysUntilRenewal < 0) {
           alertType = 'renewal_overdue';
           severity = 'warning';
-          message = `Scheduled renewal was ${Math.abs(daysUntilRenewal)}d ago. Confirm payment or cycle date.`;
+          message = `This was due ${Math.abs(daysUntilRenewal)} days ago. Check if you paid, or fix the date.`;
         } else if (daysUntilRenewal === 0) {
           alertType = 'renewal_today';
           severity = 'urgent';
-          message = `Renews TODAY for ${formatCurrency(sub.amount, sub.currency)}.`;
+          message = `Renews today for ${formatCurrency(sub.amount, sub.currency)}.`;
         } else if (daysUntilRenewal === 1) {
           severity = 'warning';
           message = `Renews tomorrow for ${formatCurrency(sub.amount, sub.currency)}.`;
@@ -106,7 +106,7 @@ export function deriveAppAlerts(
             subscriptionId: sub.id,
             subscriptionName: sub.name,
             type: alertType,
-            title: `${sub.name} Renewal`,
+            title: `${sub.name} renewal`,
             message,
             targetDate: sub.next_renewal_date,
             daysUntil: daysUntilRenewal,

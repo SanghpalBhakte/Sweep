@@ -119,12 +119,12 @@ export function AnnualOptimizationReview({
                     </div>
 
                     <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
-                      <span>Annual Commitment:</span>
+                      <span>You pay:</span>
                       <strong className="text-foreground font-mono">
                         {formatCurrency(subscription.amount, subscription.currency)}/year
                       </strong>
                       <span>·</span>
-                      <span>Effective monthly pace:</span>
+                      <span>Works out to:</span>
                       <strong className="text-foreground font-mono">
                         {formatCurrency(subscription.monthly_amount, subscription.currency)}/mo
                       </strong>
@@ -139,14 +139,14 @@ export function AnnualOptimizationReview({
                         rel="noopener noreferrer"
                         className="max-md:py-3 max-md:-my-3 text-xs font-medium text-primary hover:underline flex items-center gap-1"
                       >
-                        Plan Portal <ExternalLink className="w-3 h-3" />
+                        Manage plan <ExternalLink className="w-3 h-3" />
                       </a>
                     ) : (
                       <Link
                         href={`/subscriptions/${subscription.id}/edit`}
                         className="max-md:py-3 max-md:-my-3 text-xs font-medium text-muted-foreground hover:text-foreground"
                       >
-                        Edit Plan
+                        Edit
                       </Link>
                     )}
                   </div>
@@ -158,16 +158,16 @@ export function AnnualOptimizationReview({
                     <div className="space-y-0.5">
                       <div className="font-semibold text-success flex items-center gap-1.5">
                         <TrendingDown className="w-3.5 h-3.5" />
-                        Annual Plan Discount Secured
+                        Yearly saves you money
                       </div>
                       <p className="text-muted-foreground text-[11px]">
-                        Compared to monthly billing at{' '}
-                        {formatCurrency(monthlyAlternativePrice || 0, subscription.currency)}/mo, you
+                        Monthly would cost{' '}
+                        {formatCurrency(monthlyAlternativePrice || 0, subscription.currency)}/mo, so you
                         save{' '}
                         <strong className="text-success font-mono">
                           {formatCurrency(annualSavingsAmount, subscription.currency)}/year
                         </strong>{' '}
-                        ({savingsPercent}% discount).
+                        ({savingsPercent}% off).
                       </p>
                     </div>
                     <Button
@@ -177,7 +177,7 @@ export function AnnualOptimizationReview({
                       onClick={() => handleStartEdit(subscription.id, monthlyAlternativePrice || null)}
                       className="text-[11px] text-muted-foreground hover:text-foreground self-start sm:self-auto shrink-0"
                     >
-                      <Edit2 className="w-3 h-3 mr-1" /> Edit Monthly Rate
+                      <Edit2 className="w-3 h-3 mr-1" /> Edit monthly price
                     </Button>
                   </div>
                 ) : insightType === 'monthly_cheaper' && annualSavingsAmount !== null ? (
@@ -185,16 +185,15 @@ export function AnnualOptimizationReview({
                     <div className="space-y-0.5">
                       <div className="font-semibold text-danger flex items-center gap-1.5">
                         <AlertCircle className="w-3.5 h-3.5" />
-                        Annual Rate Exceeds Monthly Rate
+                        Yearly costs more here
                       </div>
                       <p className="text-muted-foreground text-[11px]">
-                        Billed at {formatCurrency(subscription.amount, subscription.currency)}/yr vs{' '}
-                        {formatCurrency(monthlyAlternativePrice || 0, subscription.currency)}/mo. You
-                        are paying{' '}
+                        You pay {formatCurrency(subscription.amount, subscription.currency)}/yr, monthly is{' '}
+                        {formatCurrency(monthlyAlternativePrice || 0, subscription.currency)}/mo. That&apos;s{' '}
                         <strong className="text-danger font-mono">
                           {formatCurrency(Math.abs(annualSavingsAmount), subscription.currency)}/yr
                         </strong>{' '}
-                        more on this annual plan.
+                        more than paying monthly.
                       </p>
                     </div>
                     <Button
@@ -204,7 +203,7 @@ export function AnnualOptimizationReview({
                       onClick={() => handleStartEdit(subscription.id, monthlyAlternativePrice || null)}
                       className="text-[11px] text-muted-foreground hover:text-foreground self-start sm:self-auto shrink-0"
                     >
-                      <Edit2 className="w-3 h-3 mr-1" /> Edit Monthly Rate
+                      <Edit2 className="w-3 h-3 mr-1" /> Edit monthly price
                     </Button>
                   </div>
                 ) : (
@@ -212,11 +211,10 @@ export function AnnualOptimizationReview({
                     <div className="space-y-0.5">
                       <div className="font-semibold text-foreground flex items-center gap-1.5">
                         <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
-                        Verify Annual Plan Savings
+                        Is yearly cheaper?
                       </div>
                       <p className="text-muted-foreground text-[11px]">
-                        Add the monthly plan equivalent price to calculate your exact annual contract
-                        discount.
+                        Add the monthly price to see how much yearly saves you.
                       </p>
                     </div>
                     {!isEditingThis ? (
@@ -228,7 +226,7 @@ export function AnnualOptimizationReview({
                         className="text-xs shrink-0 self-start sm:self-auto"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-primary" />
-                        Set Monthly Rate
+                        Add monthly price
                       </Button>
                     ) : null}
                   </div>
@@ -238,7 +236,7 @@ export function AnnualOptimizationReview({
                 {isEditingThis ? (
                   <div className="p-3 rounded-lg border border-primary/40 bg-card space-y-2 text-xs">
                     <label className="font-medium text-foreground block">
-                      What is the standard monthly price for {subscription.name} if billed monthly?
+                      How much is {subscription.name} if you pay monthly?
                     </label>
                     <div className="flex items-center gap-2 max-w-sm">
                       <Input

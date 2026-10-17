@@ -72,15 +72,15 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
         try {
           const subject =
             alert.daysUntil === 0
-              ? `[Sweep] ${alert.subscriptionName} Renews Today (${formatCurrency(alert.amount, alert.currency)})`
+              ? `${alert.subscriptionName} renews today (${formatCurrency(alert.amount, alert.currency)})`
               : alert.isTrial
-              ? `[Sweep] Action Needed: ${alert.subscriptionName} Trial Ends in ${alert.daysUntil} Days`
-              : `[Sweep] Upcoming Renewal: ${alert.subscriptionName} in ${alert.daysUntil} Days`;
+              ? `Your ${alert.subscriptionName} free trial ends in ${alert.daysUntil} ${alert.daysUntil === 1 ? 'day' : 'days'}`
+              : `${alert.subscriptionName} renews in ${alert.daysUntil} ${alert.daysUntil === 1 ? 'day' : 'days'}`;
 
           const html = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 540px; margin: 0 auto; padding: 24px; color: #24201E; background: #F6F1E8; border-radius: 12px; border: 1px solid #D8CFC4;">
               <div style="margin-bottom: 20px; font-size: 14px; font-weight: 700; color: #5B294A; letter-spacing: -0.01em;">
-                SWEEP · RECURRING SPEND WORKSPACE
+                SWEEP
               </div>
               <h2 style="font-size: 18px; margin: 0 0 12px 0; color: #24201E;">${alert.title}</h2>
               <p style="font-size: 14px; line-height: 1.6; color: #756D65; margin: 0 0 20px 0;">${alert.message}</p>
@@ -91,11 +91,11 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
                     <td style="font-weight: 600; text-align: right; padding-bottom: 6px;">${alert.subscriptionName}</td>
                   </tr>
                   <tr>
-                    <td style="color: #756D65; padding-bottom: 6px;">Charge Amount:</td>
+                    <td style="color: #756D65; padding-bottom: 6px;">Amount:</td>
                     <td style="font-weight: 600; text-align: right; padding-bottom: 6px; font-family: monospace;">${formatCurrency(alert.amount, alert.currency)}</td>
                   </tr>
                   <tr>
-                    <td style="color: #756D65;">Charge Date:</td>
+                    <td style="color: #756D65;">Date:</td>
                     <td style="font-weight: 600; text-align: right;">${alert.targetDate}</td>
                   </tr>
                 </table>
@@ -103,12 +103,12 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
               ${
                 alert.cancelUrl
                   ? `<div style="text-align: center; margin-bottom: 20px;">
-                      <a href="${alert.cancelUrl}" style="display: inline-block; background: #5B294A; color: #FCF9F3; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none;">Manage or Cancel Service</a>
+                      <a href="${alert.cancelUrl}" style="display: inline-block; background: #5B294A; color: #FCF9F3; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none;">Manage or cancel</a>
                      </div>`
                   : ''
               }
               <div style="font-size: 11px; color: #756D65; text-align: center; border-top: 1px solid #D8CFC4; padding-top: 16px;">
-                Sent quietly by Sweep · Your recurring life, in one clear view
+                Sent by Sweep because you turned on reminders.
               </div>
             </div>
           `;

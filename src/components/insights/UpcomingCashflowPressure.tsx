@@ -26,7 +26,7 @@ export function UpcomingCashflowPressure({
         <CardHeader>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
-            <CardTitle>Next 30-Day Payment Pressure</CardTitle>
+            <CardTitle>Next 30 days</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
@@ -44,9 +44,9 @@ export function UpcomingCashflowPressure({
         <div className="flex min-w-0 items-center gap-2">
           <Calendar className="w-4 h-4 shrink-0 text-primary" />
           <div className="min-w-0">
-            <CardTitle>Next 30-Day Cashflow Demand</CardTitle>
+            <CardTitle>Next 30 days</CardTitle>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Scheduled recurring debits converted to {currency}
+              What&apos;s due soon, shown in {currency}
             </p>
           </div>
         </div>
@@ -95,7 +95,7 @@ export function UpcomingCashflowPressure({
                     </div>
 
                     <div className="text-[11px] text-muted-foreground mt-0.5">
-                      {formatDate(renewalDate)} · {subscription.payment_method?.name || 'Default Card'}
+                      {formatDate(renewalDate)} · {subscription.payment_method?.name || 'Default card'}
                     </div>
                   </div>
 

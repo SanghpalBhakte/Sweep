@@ -24,9 +24,9 @@ export function TopSubscriptions({ items, currency = 'USD' }: TopSubscriptionsPr
         <div className="flex items-center gap-2">
           <Award className="w-4 h-4 text-primary" />
           <div>
-            <CardTitle>Top Cost Drivers</CardTitle>
+            <CardTitle>Biggest costs</CardTitle>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Subscriptions accounting for the largest share of monthly spend
+              What takes the most of your money each month
             </p>
           </div>
         </div>
