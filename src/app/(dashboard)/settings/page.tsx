@@ -217,6 +217,26 @@ export default function SettingsPage() {
     }
   };
 
+  const [isEmailTesting, setIsEmailTesting] = useState(false);
+  const [emailTestStatus, setEmailTestStatus] = useState<string | null>(null);
+  const handleTestEmail = async () => {
+    setIsEmailTesting(true);
+    setEmailTestStatus(null);
+    try {
+      const res = await fetch('/api/email/test', { method: 'POST' });
+      const body = await res.json().catch(() => ({}));
+      setEmailTestStatus(
+        res.ok
+          ? `Sent to ${body.to}. Check your inbox (and spam, the first time).`
+          : body.error || 'Could not send the test email.'
+      );
+    } catch {
+      setEmailTestStatus('Could not reach the server. Try again.');
+    } finally {
+      setIsEmailTesting(false);
+    }
+  };
+
   const handleTogglePush = async () => {
     setIsPushLoading(true);
     setPushActionStatus(null);
@@ -494,6 +514,28 @@ export default function SettingsPage() {
                   </div>
                   {pushActionStatus && (
                     <p className="text-[11px] text-primary">{pushActionStatus}</p>
+                  )}
+                </div>
+              ) : null}
+
+              {/* Test that reminder emails actually arrive */}
+              {isConfigured && user ? (
+                <div className="p-3 rounded-xl bg-surface/50 border border-border space-y-2 pt-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium text-foreground">Email reminders</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleTestEmail}
+                      isLoading={isEmailTesting}
+                      className="text-xs h-7 px-2.5"
+                    >
+                      Send test email
+                    </Button>
+                  </div>
+                  {emailTestStatus && (
+                    <p className="text-[11px] text-primary">{emailTestStatus}</p>
                   )}
                 </div>
               ) : null}
