@@ -12,6 +12,8 @@ This document details the security classification, scoping rules, and operationa
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Public** (Browser & Server) | Development, Preview, Production | Anonymous JWT token for client-side queries | **Low Risk** · Safe for client-side embedding. Strictly limited by user session RLS policies. |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Server-Only** (Secret) | Production (and Staging if needed) | Elevated database admin & background worker access | **CRITICAL SECRET** · NEVER prefix with `NEXT_PUBLIC_`. Must only be read inside server functions (`/api/*`). |
 | `NEXT_PUBLIC_APP_URL` | **Public** (Browser & Server) | Development (`http://localhost:3000`), Preview (`https://*.vercel.app`), Production (`https://sift.app`) | Root URL for email links and auth redirects | **Low Risk** · Used for constructing canonical URLs and email deep links. |
+| `GMAIL_USER` | **Server-Only** | Production | Gmail address reminder emails are sent from (used before Resend when set) | **Low Risk** |
+| `GMAIL_APP_PASSWORD` | **Server-Only** (Secret) | Production | Gmail app password for sending reminders | **HIGH SECRET** · Server-only. |
 | `RESEND_API_KEY` | **Server-Only** (Secret) | Production | API credential for sending transactional renewal alert emails | **HIGH SECRET** · Server-only. Only accessed within `/api/reminders/dispatch`. |
 | `RESEND_FROM_EMAIL` | **Server-Only** | Production, Preview | Verified email sender identity (e.g. `alerts@sift.app`) | **Low Risk** · Server-side configuration for email header formatting. |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | **Public** (Browser & Server) | Development, Preview, Production | Base64 public key for browser PushManager subscription | **Low Risk** · Public cryptographic key used by browser to register Web Push endpoints. |
@@ -86,7 +88,7 @@ flowchart TD
 4. **Centralized Schema-Validation & Route Preflight**:
    - `src/lib/env.ts` provides typed, validated getters (`getServerEnv()`, `getPublicEnv()`) and service integration checks (`serviceStatus`).
    - `next.config.mjs` executes automated build-time environment audits on startup.
-   - `/api/reminders/dispatch` returns a `503 Service Unavailable` machine-readable JSON error if `RESEND_API_KEY` is not configured, avoiding silent runtime errors.
+   - `/api/reminders/dispatch` still runs without an email provider (push still sends) and records the email error in `reminder_dispatch_logs`.
 
 ---
 

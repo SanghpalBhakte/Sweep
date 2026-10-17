@@ -7,15 +7,12 @@ import { formatCurrency } from '@/lib/utils/currency';
 import { rollForwardRenewalDate } from '@/lib/utils/dates';
 import { sendWebPushToUser } from '@/lib/services/serverPushService';
 import { getServerEnv } from '@/lib/env';
+import { sendEmail, emailProvider, escapeHtml } from '@/lib/services/emailService';
 
 // ---------------------------------------------------------------------------
 // Shared dispatch logic
 // ---------------------------------------------------------------------------
 async function runDispatch(targetUser: { id: string; email: string }, supabase: SupabaseClient<any>) {
-  const serverEnv = getServerEnv();
-
-  const resendApiKey = serverEnv.RESEND_API_KEY;
-  const resendFromEmail = serverEnv.RESEND_FROM_EMAIL;
 
   const { data: profile } = await (supabase.from('profiles') as any)
     .select('*')
@@ -101,8 +98,8 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
       let pushDispatched = false;
       let dispatchError: string | null = null;
 
-      // 1. Send Transactional Email via Resend
-      if (resendApiKey) {
+      // 1. Send the email (Gmail or Resend, see emailService)
+      if (emailProvider()) {
         try {
           const subject =
             alert.daysUntil === 0
@@ -116,13 +113,13 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
               <div style="margin-bottom: 20px; font-size: 14px; font-weight: 700; color: #5B294A; letter-spacing: -0.01em;">
                 SWEEP
               </div>
-              <h2 style="font-size: 18px; margin: 0 0 12px 0; color: #24201E;">${alert.title}</h2>
-              <p style="font-size: 14px; line-height: 1.6; color: #756D65; margin: 0 0 20px 0;">${alert.message}</p>
+              <h2 style="font-size: 18px; margin: 0 0 12px 0; color: #24201E;">${escapeHtml(alert.title)}</h2>
+              <p style="font-size: 14px; line-height: 1.6; color: #756D65; margin: 0 0 20px 0;">${escapeHtml(alert.message)}</p>
               <div style="background: #FCF9F3; padding: 16px; border-radius: 8px; border: 1px solid #D8CFC4; margin-bottom: 24px;">
                 <table style="width: 100%; font-size: 13px;">
                   <tr>
                     <td style="color: #756D65; padding-bottom: 6px;">Service:</td>
-                    <td style="font-weight: 600; text-align: right; padding-bottom: 6px;">${alert.subscriptionName}</td>
+                    <td style="font-weight: 600; text-align: right; padding-bottom: 6px;">${escapeHtml(alert.subscriptionName)}</td>
                   </tr>
                   <tr>
                     <td style="color: #756D65; padding-bottom: 6px;">Amount:</td>
@@ -137,7 +134,7 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
               ${
                 alert.cancelUrl
                   ? `<div style="text-align: center; margin-bottom: 20px;">
-                      <a href="${alert.cancelUrl}" style="display: inline-block; background: #5B294A; color: #FCF9F3; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none;">Manage or cancel</a>
+                      <a href="${escapeHtml(alert.cancelUrl)}" style="display: inline-block; background: #5B294A; color: #FCF9F3; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none;">Manage or cancel</a>
                      </div>`
                   : ''
               }
@@ -147,25 +144,11 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
             </div>
           `;
 
-          const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${resendApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: resendFromEmail,
-              to: targetUser.email,
-              subject,
-              html,
-            }),
-          });
-
-          if (res.ok) {
+          const sent = await sendEmail({ to: targetUser.email, subject, html });
+          if (sent.ok) {
             emailDispatched = true;
           } else {
-            const errBody = await res.json();
-            dispatchError = `Resend error: ${errBody.message || res.statusText}`;
+            dispatchError = sent.error;
           }
         } catch (err: any) {
           dispatchError = `Email network error: ${err.message}`;
@@ -239,16 +222,8 @@ export async function GET(request: NextRequest) {
   try {
     const serverEnv = getServerEnv();
 
-    if (!serverEnv.RESEND_API_KEY) {
-      return NextResponse.json(
-        {
-          error: 'Email dispatch service unavailable: RESEND_API_KEY is not configured.',
-          code: 'MISSING_EMAIL_CONFIGURATION',
-          service: 'resend',
-        },
-        { status: 503 }
-      );
-    }
+    // No email provider is fine: push notifications still go out, and the
+    // logs record the email error so it is easy to spot.
 
     // The cron call has no user cookies, so the normal RLS client would see zero rows
     // and nothing would ever be sent. Use the service role key here (server only).
@@ -291,18 +266,8 @@ export async function GET(request: NextRequest) {
 // ---------------------------------------------------------------------------
 export async function POST(req: NextRequest) {
   try {
-    const serverEnv = getServerEnv();
-
-    if (!serverEnv.RESEND_API_KEY) {
-      return NextResponse.json(
-        {
-          error: 'Email dispatch service unavailable: RESEND_API_KEY is not configured in server environment.',
-          code: 'MISSING_EMAIL_CONFIGURATION',
-          service: 'resend',
-        },
-        { status: 503 }
-      );
-    }
+    // No email provider is fine: push notifications still go out, and the
+    // logs record the email error so it is easy to spot.
 
     const supabase = await createClient();
     if (!supabase) {
