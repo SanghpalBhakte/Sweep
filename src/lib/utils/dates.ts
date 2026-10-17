@@ -1,4 +1,6 @@
 import {
+  addDays,
+  addMonths,
   differenceInDays,
   format,
   isAfter,
@@ -72,4 +74,38 @@ export function getCountdownBadge(dateInput: string | Date): {
 export function isUpcomingSoon(dateInput: string | Date, withinDays: number = 7): boolean {
   const days = getDaysUntil(dateInput);
   return days >= 0 && days <= withinDays;
+}
+
+
+/**
+ * If a renewal date is already in the past, move it forward by whole billing
+ * cycles until it is today or later. Steps are counted from the original date so
+ * month ends do not drift (Jan 31 -> Feb 28 -> Mar 31, not Mar 28).
+ * Returns the same string when nothing needs to change.
+ */
+export function rollForwardRenewalDate(
+  dateStr: string,
+  cycle: 'monthly' | 'quarterly' | 'yearly' | 'custom',
+  customDays?: number | null,
+  today: Date = new Date()
+): string {
+  if (!dateStr) return dateStr;
+  const original = startOfDay(parseISO(dateStr));
+  const base = startOfDay(today);
+  if (Number.isNaN(original.getTime()) || !isBefore(original, base)) return dateStr;
+
+  const stepFor = (k: number): Date => {
+    if (cycle === 'custom') return addDays(original, k * Math.max(1, customDays || 30));
+    const months = cycle === 'yearly' ? 12 : cycle === 'quarterly' ? 3 : 1;
+    return addMonths(original, k * months);
+  };
+
+  let k = 1;
+  let next = stepFor(k);
+  // Hard cap so bad data can never loop forever (100 years of monthly cycles).
+  while (isBefore(next, base) && k < 1200) {
+    k += 1;
+    next = stepFor(k);
+  }
+  return format(next, 'yyyy-MM-dd');
 }

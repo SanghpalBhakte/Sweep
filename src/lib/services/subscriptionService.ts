@@ -16,6 +16,7 @@ import {
 import { createClient } from '../supabase/client';
 import { calculateDashboardStats } from '../utils/analytics';
 import { normalizeMonthlyAmount, getDefaultCurrency } from '../utils/currency';
+import { rollForwardRenewalDate } from '../utils/dates';
 import { resolveCategoryDefaultColor } from '../utils/backup';
 
 const STORAGE_KEYS = {
@@ -128,6 +129,21 @@ class SubscriptionService {
         [],
         LEGACY_STORAGE_KEYS.SUBSCRIPTIONS
       );
+    }
+
+    // Renewal dates that already passed move to the next cycle, so totals, the
+    // "this week" list and reminders keep working. The daily cron saves the new
+    // dates to the database; here we fix them for display and the local cache.
+    let rolledAny = false;
+    items = items.map((s) => {
+      if (s.status !== 'active' || s.is_trial || !s.next_renewal_date) return s;
+      const next = rollForwardRenewalDate(s.next_renewal_date, s.billing_cycle, s.custom_interval_days);
+      if (next === s.next_renewal_date) return s;
+      rolledAny = true;
+      return { ...s, next_renewal_date: next };
+    });
+    if (rolledAny && !filters) {
+      this.setLocalData(STORAGE_KEYS.SUBSCRIPTIONS, items);
     }
 
     // Apply in-memory search

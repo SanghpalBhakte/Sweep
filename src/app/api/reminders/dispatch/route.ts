@@ -4,6 +4,7 @@ import { createClient as createAdminClient, type SupabaseClient } from '@supabas
 import { subscriptionService } from '@/lib/services/subscriptionService';
 import { deriveAppAlerts } from '@/lib/utils/reminders';
 import { formatCurrency } from '@/lib/utils/currency';
+import { rollForwardRenewalDate } from '@/lib/utils/dates';
 import { sendWebPushToUser } from '@/lib/services/serverPushService';
 import { getServerEnv } from '@/lib/env';
 
@@ -28,11 +29,44 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
 
   const subscriptions = subscriptionsData || [];
 
-  const alerts = deriveAppAlerts(subscriptions, {
-    enabled: profile?.notifications_enabled !== false,
-    notifyRenewals: profile?.notify_renewals !== false,
-    notifyTrials: profile?.notify_trials !== false,
-    offsets: profile?.default_reminder_days || [7, 3, 1],
+  // Move past renewal dates to the next cycle and save them, otherwise a
+  // subscription drops out of reminders forever once its date passes.
+  for (const sub of subscriptions) {
+    if (sub.is_trial || !sub.next_renewal_date) continue;
+    const next = rollForwardRenewalDate(sub.next_renewal_date, sub.billing_cycle, sub.custom_interval_days);
+    if (next !== sub.next_renewal_date) {
+      sub.next_renewal_date = next;
+      await (supabase.from('subscriptions') as any)
+        .update({ next_renewal_date: next })
+        .eq('id', sub.id)
+        .eq('user_id', targetUser.id);
+    }
+  }
+
+  const profileOffsets: number[] = profile?.default_reminder_days || [7, 3, 1];
+
+  // User turned reminders off completely: send nothing.
+  const allAlerts =
+    profile?.notifications_enabled === false
+      ? []
+      : deriveAppAlerts(subscriptions, {
+          enabled: true,
+          notifyRenewals: profile?.notify_renewals !== false,
+          notifyTrials: profile?.notify_trials !== false,
+          offsets: profileOffsets,
+        });
+
+  // deriveAppAlerts returns everything in the next 7 days (for the in-app bell).
+  // Emails only go out on the days the user picked, plus the day itself.
+  const offsetsById = new Map<string, number[]>(
+    subscriptions.map((s: { id: string; reminder_offsets?: number[] | null }) => [
+      s.id,
+      s.reminder_offsets && s.reminder_offsets.length ? s.reminder_offsets : profileOffsets,
+    ])
+  );
+  const alerts = allAlerts.filter((a) => {
+    if (a.daysUntil === 0) return true;
+    return (offsetsById.get(a.subscriptionId) || profileOffsets).includes(a.daysUntil);
   });
 
   const results = {
