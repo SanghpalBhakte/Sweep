@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Button, ButtonLink } from '../ui/Button';
 import { SweepLogo } from '../brand/SweepLogo';
 import { useSubscriptions } from '@/context/SubscriptionContext';
+import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 import { ArrowRight, Sparkles, UploadCloud } from 'lucide-react';
 
 interface WelcomeScreenProps {
@@ -12,6 +14,7 @@ interface WelcomeScreenProps {
 
 export function WelcomeScreen({ onRestoreClick }: WelcomeScreenProps) {
   const { populateStarterTemplates } = useSubscriptions();
+  const { user, isConfigured } = useAuth();
   const [isLoadingSample, setIsLoadingSample] = useState(false);
 
   const handleTrySample = async () => {
@@ -92,6 +95,18 @@ export function WelcomeScreen({ onRestoreClick }: WelcomeScreenProps) {
             Restore a backup
           </ButtonLink>
         )}
+        {/* On phones the sidebar (and its Sign In link) is hidden, so give returning users a way in */}
+        {isConfigured && !user ? (
+          <p className="pt-2 text-center text-sm text-muted-foreground">
+            Already have an account?{' '}
+            <Link
+              href="/login"
+              className="inline-flex items-center min-h-[44px] font-semibold text-foreground underline underline-offset-4"
+            >
+              Sign in
+            </Link>
+          </p>
+        ) : null}
       </div>
     </div>
   );

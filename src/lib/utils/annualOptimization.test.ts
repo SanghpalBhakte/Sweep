@@ -296,8 +296,8 @@ describe('getAnnualArbitrageCandidates', () => {
   });
 
   it('applies per-category benchmark overrides when configured and falls back to global benchmark otherwise', () => {
-    const devCategory = { id: 'cat-dev', name: 'Software & Dev', slug: 'dev', color: '#10b981', icon: 'code', created_at: '' };
-    const mediaCategory = { id: 'cat-media', name: 'Media & Streaming', slug: 'media', color: '#6366f1', icon: 'tv', created_at: '' };
+    const devCategory = { user_id: null, id: 'cat-dev', name: 'Software & Dev', slug: 'dev', color: '#10b981', icon: 'code', created_at: '' };
+    const mediaCategory = { user_id: null, id: 'cat-media', name: 'Media & Streaming', slug: 'media', color: '#6366f1', icon: 'tv', created_at: '' };
 
     const devSub: Subscription = {
       ...baseMonthlySub,

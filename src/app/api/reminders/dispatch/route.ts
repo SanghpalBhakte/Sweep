@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient, type SupabaseClient } from '@supabase/supabase-js';
 import { subscriptionService } from '@/lib/services/subscriptionService';
 import { deriveAppAlerts } from '@/lib/utils/reminders';
 import { formatCurrency } from '@/lib/utils/currency';
@@ -9,13 +10,8 @@ import { getServerEnv } from '@/lib/env';
 // ---------------------------------------------------------------------------
 // Shared dispatch logic
 // ---------------------------------------------------------------------------
-async function runDispatch(targetUser: { id: string; email: string }) {
+async function runDispatch(targetUser: { id: string; email: string }, supabase: SupabaseClient<any>) {
   const serverEnv = getServerEnv();
-  const supabase = await createClient();
-
-  if (!supabase) {
-    return NextResponse.json({ error: 'Supabase client unavailable' }, { status: 500 });
-  }
 
   const resendApiKey = serverEnv.RESEND_API_KEY;
   const resendFromEmail = serverEnv.RESEND_FROM_EMAIL;
@@ -220,10 +216,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-    if (!supabase) {
-      return NextResponse.json({ error: 'Supabase client unavailable' }, { status: 500 });
+    // The cron call has no user cookies, so the normal RLS client would see zero rows
+    // and nothing would ever be sent. Use the service role key here (server only).
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl || !serverEnv.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json(
+        { error: 'SUPABASE_SERVICE_ROLE_KEY is not set, cron cannot read users.' },
+        { status: 500 }
+      );
     }
+    const supabase = createAdminClient(supabaseUrl, serverEnv.SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
     // In cron mode, iterate over ALL users with active profiles
     const { data: profiles } = await (supabase.from('profiles') as any)
@@ -236,7 +240,7 @@ export async function GET(request: NextRequest) {
 
     const allResults = [];
     for (const profile of profiles) {
-      const res = await runDispatch({ id: profile.id, email: profile.email });
+      const res = await runDispatch({ id: profile.id, email: profile.email }, supabase);
       const body = await res.json();
       allResults.push(body);
     }
@@ -279,7 +283,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized request or session' }, { status: 401 });
     }
 
-    return runDispatch({ id: user.id, email: user.email });
+    return runDispatch({ id: user.id, email: user.email }, supabase as unknown as SupabaseClient<any>);
   } catch (err: any) {
     console.error('Reminder dispatch error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

@@ -17,6 +17,25 @@ export const SUPPORTED_CURRENCIES = [
 ];
 
 /**
+ * Best guess at the user's own currency for brand new profiles.
+ * Most Sweep users are in India, so INR for an Indian timezone or locale, USD otherwise.
+ * Only meaningful in the browser; returns USD on the server.
+ */
+export function getDefaultCurrency(): string {
+  if (typeof window === 'undefined') return 'USD';
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    const langs = navigator.languages?.length ? navigator.languages : [navigator.language];
+    if (tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta' || langs.some((l) => /-IN$/i.test(l || ''))) {
+      return 'INR';
+    }
+  } catch {
+    // fall through
+  }
+  return 'USD';
+}
+
+/**
  * Format a number into clean, human currency display
  */
 export function formatCurrency(

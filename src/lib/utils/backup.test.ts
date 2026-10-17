@@ -33,7 +33,7 @@ describe('Backup & Export Manifest Engine', () => {
   };
 
   const mockCategories: Category[] = [
-    {
+    { user_id: null,
       id: 'cat-dev',
       name: 'Software & Dev',
       slug: 'dev',
@@ -179,15 +179,15 @@ describe('Backup & Export Manifest Engine', () => {
 
   describe('remapCategoryBenchmarkOverrides (Portability & Slug Fallback)', () => {
     const sourceBackupCategories: Category[] = [
-      { id: 'src-uuid-1', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
-      { id: 'src-uuid-2', name: 'Media & Streaming', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
-      { id: 'src-uuid-3', name: 'Productivity', slug: 'productivity', color: '#f59e0b', icon: 'briefcase', created_at: '' },
+      { user_id: null, id: 'src-uuid-1', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
+      { user_id: null, id: 'src-uuid-2', name: 'Media & Streaming', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
+      { user_id: null, id: 'src-uuid-3', name: 'Productivity', slug: 'productivity', color: '#f59e0b', icon: 'briefcase', created_at: '' },
     ];
 
     it('matches by exact category UUID when restoring on the same instance', () => {
       const activeCategories: Category[] = [
-        { id: 'src-uuid-1', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
-        { id: 'src-uuid-2', name: 'Media & Streaming', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
+        { user_id: null, id: 'src-uuid-1', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
+        { user_id: null, id: 'src-uuid-2', name: 'Media & Streaming', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
       ];
 
       const backupBenchmarks = {
@@ -209,8 +209,8 @@ describe('Backup & Export Manifest Engine', () => {
 
     it('falls back to matching by slug when restoring on a fresh instance with different category UUIDs', () => {
       const destFreshCategories: Category[] = [
-        { id: 'dest-new-uuid-1', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
-        { id: 'dest-new-uuid-2', name: 'Media & Streaming', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
+        { user_id: null, id: 'dest-new-uuid-1', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
+        { user_id: null, id: 'dest-new-uuid-2', name: 'Media & Streaming', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
       ];
 
       const backupBenchmarks = {
@@ -232,9 +232,9 @@ describe('Backup & Export Manifest Engine', () => {
 
     it('safely skips ambiguous slug collisions without guessing when duplicate destination slugs exist', () => {
       const destCategoriesWithDuplicateSlugs: Category[] = [
-        { id: 'dup-1', name: 'Dev 1', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
-        { id: 'dup-2', name: 'Dev 2', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
-        { id: 'unique-1', name: 'Media', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
+        { user_id: null, id: 'dup-1', name: 'Dev 1', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
+        { user_id: null, id: 'dup-2', name: 'Dev 2', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
+        { user_id: null, id: 'unique-1', name: 'Media', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
       ];
 
       const backupBenchmarks = {
@@ -262,7 +262,7 @@ describe('Backup & Export Manifest Engine', () => {
 
     it('safely skips categories that are missing in the destination workspace', () => {
       const destCategories: Category[] = [
-        { id: 'dest-1', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
+        { user_id: null, id: 'dest-1', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
       ];
 
       const backupBenchmarks = {
@@ -284,7 +284,7 @@ describe('Backup & Export Manifest Engine', () => {
 
     it('matches renamed categories using historical slug_aliases when UUID and current slug differ', () => {
       const destCategoriesWithAliases: Category[] = [
-        {
+        { user_id: null,
           id: 'dest-renamed-1',
           name: 'Developer Tools & Cloud',
           slug: 'dev-tools-cloud', // renamed from 'software-dev'
@@ -316,7 +316,7 @@ describe('Backup & Export Manifest Engine', () => {
 
     it('safely skips without guessing if historical slug aliases collide across multiple categories', () => {
       const destCategoriesWithConflictingAliases: Category[] = [
-        {
+        { user_id: null,
           id: 'cat-a',
           name: 'Cloud Services',
           slug: 'cloud-services',
@@ -325,7 +325,7 @@ describe('Backup & Export Manifest Engine', () => {
           icon: 'server',
           created_at: '',
         },
-        {
+        { user_id: null,
           id: 'cat-b',
           name: 'Developer Tools',
           slug: 'developer-tools',
@@ -357,9 +357,9 @@ describe('Backup & Export Manifest Engine', () => {
 
   describe('Advisory Category Similarity Suggestions', () => {
     const workspaceCategories: Category[] = [
-      { id: 'cat-media', name: 'Media & Streaming', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
-      { id: 'cat-dev', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
-      { id: 'cat-ops', name: 'Infrastructure', slug: 'infra', color: '#f59e0b', icon: 'server', created_at: '' },
+      { user_id: null, id: 'cat-media', name: 'Media & Streaming', slug: 'media-streaming', color: '#6366f1', icon: 'tv', created_at: '' },
+      { user_id: null, id: 'cat-dev', name: 'Software & Dev', slug: 'software-dev', color: '#10b981', icon: 'code', created_at: '' },
+      { user_id: null, id: 'cat-ops', name: 'Infrastructure', slug: 'infra', color: '#f59e0b', icon: 'server', created_at: '' },
     ];
 
     it('suggests closest match for similar category names like Streaming Services -> Media & Streaming', () => {

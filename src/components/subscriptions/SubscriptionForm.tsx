@@ -16,6 +16,7 @@ import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { SUPPORTED_CURRENCIES } from '@/lib/utils/currency';
+import { useSubscriptions } from '@/context/SubscriptionContext';
 import {
   Trash2,
   ArrowLeft,
@@ -90,6 +91,13 @@ export function SubscriptionForm({
   const [name, setName] = useState(initialData?.name || '');
   const [amount, setAmount] = useState<string>(initialData ? String(initialData.amount) : '');
   const [currency, setCurrency] = useState(initialData?.currency || 'USD');
+  // New subscriptions start in the user's own currency, not always USD.
+  const { displayCurrency } = useSubscriptions();
+  const currencyTouchedRef = useRef(false);
+  useEffect(() => {
+    if (initialData || currencyTouchedRef.current || !displayCurrency) return;
+    setCurrency(displayCurrency);
+  }, [initialData, displayCurrency]);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     initialData?.billing_cycle || 'monthly'
   );
@@ -223,6 +231,10 @@ export function SubscriptionForm({
 
     if (service.defaultAmount !== undefined && (!amount || amount === '0')) {
       setAmount(String(service.defaultAmount));
+      // Preset prices are in the service's own currency (USD unless stated),
+      // so switch the currency too, otherwise "20" would land as Rs 20.
+      currencyTouchedRef.current = true;
+      setCurrency(service.currency || 'USD');
     }
     if (service.billingCycle) {
       setBillingCycle(service.billingCycle);
@@ -633,7 +645,10 @@ export function SubscriptionForm({
             <Select
               label="Currency"
               value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
+              onChange={(e) => {
+                currencyTouchedRef.current = true;
+                setCurrency(e.target.value);
+              }}
             >
               {SUPPORTED_CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>

@@ -8,9 +8,9 @@ import { generateSubscriptionHealthActions } from './subscriptionHealth';
 import { Subscription, Category } from '../types';
 
 const mockCategories: Category[] = [
-  { id: 'cat-1', name: 'Entertainment', slug: 'entertainment', color: '#ff0000', icon: 'tv', created_at: '' },
-  { id: 'cat-2', name: 'Productivity', slug: 'productivity', color: '#00ff00', icon: 'zap', created_at: '' },
-  { id: 'cat-3', name: 'Cloud & Hosting', slug: 'cloud', color: '#0000ff', icon: 'cloud', created_at: '' },
+  { user_id: null, id: 'cat-1', name: 'Entertainment', slug: 'entertainment', color: '#ff0000', icon: 'tv', created_at: '' },
+  { user_id: null, id: 'cat-2', name: 'Productivity', slug: 'productivity', color: '#00ff00', icon: 'zap', created_at: '' },
+  { user_id: null, id: 'cat-3', name: 'Cloud & Hosting', slug: 'cloud', color: '#0000ff', icon: 'cloud', created_at: '' },
 ];
 
 function createMockSub(overrides: Partial<Subscription>): Subscription {

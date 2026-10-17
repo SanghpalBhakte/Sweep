@@ -15,7 +15,7 @@ import {
 } from './subscriptionPayloadBuilder';
 import { createClient } from '../supabase/client';
 import { calculateDashboardStats } from '../utils/analytics';
-import { normalizeMonthlyAmount } from '../utils/currency';
+import { normalizeMonthlyAmount, getDefaultCurrency } from '../utils/currency';
 import { resolveCategoryDefaultColor } from '../utils/backup';
 
 const STORAGE_KEYS = {
@@ -707,7 +707,7 @@ class SubscriptionService {
             id: user.id,
             email: user.email || '',
             full_name: (user.user_metadata?.full_name as string) || '',
-            currency_preference: 'USD',
+            currency_preference: getDefaultCurrency(),
             theme_preference: 'paper-ledger',
             default_reminder_days: [3, 1],
             created_at: user.created_at || new Date().toISOString(),
@@ -718,7 +718,10 @@ class SubscriptionService {
         // Fallback
       }
     }
-    return this.getLocalData(STORAGE_KEYS.PROFILE, defaultProfile);
+    return this.getLocalData(STORAGE_KEYS.PROFILE, {
+      ...defaultProfile,
+      currency_preference: getDefaultCurrency(),
+    });
   }
 
   async updateProfile(updates: Partial<Profile>): Promise<Profile> {

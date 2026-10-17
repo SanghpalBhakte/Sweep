@@ -27,12 +27,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <div className="h-screen w-full flex flex-row bg-background text-foreground overflow-hidden">
+    <div className="h-dvh w-full flex flex-row bg-background text-foreground overflow-hidden">
       {/* 1. Pinned Desktop Sidebar (scrolls independently only if viewport is too short) */}
       <DesktopSidebar />
 
       {/* 2. Primary Single Vertical Scroll Region for the Application Workspace */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto overflow-x-hidden bg-background">
+      <div className="flex-1 flex flex-col min-w-0 h-dvh overflow-y-auto overflow-x-hidden bg-background">
         <Header />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-12 min-w-0">
           {children}
