@@ -20,6 +20,20 @@ export async function sendEmail(msg: { to: string; subject: string; html: string
   const provider = emailProvider();
 
   if (provider === 'gmail') {
+    const viaGmail = await sendViaGmail(msg);
+    // If Gmail is set up wrong (bad app password etc), still try Resend when it
+    // exists, so reminders keep reaching at least the Resend account owner.
+    if (viaGmail.ok || !process.env.RESEND_API_KEY) return viaGmail;
+    const viaResend = await sendViaResend(msg);
+    return viaResend.ok ? viaResend : { ok: false, error: `${viaGmail.error} | ${viaResend.error}` };
+  }
+
+  if (provider === 'resend') return sendViaResend(msg);
+
+  return { ok: false, error: 'No email provider set up (GMAIL_USER + GMAIL_APP_PASSWORD, or RESEND_API_KEY).' };
+}
+
+async function sendViaGmail(msg: { to: string; subject: string; html: string }): Promise<EmailResult> {
     try {
       gmailTransport ??= nodemailer.createTransport({
         host: 'smtp.gmail.com',
@@ -41,9 +55,9 @@ export async function sendEmail(msg: { to: string; subject: string; html: string
     } catch (err) {
       return { ok: false, error: `Gmail error: ${err instanceof Error ? err.message : String(err)}` };
     }
-  }
+}
 
-  if (provider === 'resend') {
+async function sendViaResend(msg: { to: string; subject: string; html: string }): Promise<EmailResult> {
     try {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -64,9 +78,6 @@ export async function sendEmail(msg: { to: string; subject: string; html: string
     } catch (err) {
       return { ok: false, error: `Email network error: ${err instanceof Error ? err.message : String(err)}` };
     }
-  }
-
-  return { ok: false, error: 'No email provider set up (GMAIL_USER + GMAIL_APP_PASSWORD, or RESEND_API_KEY).' };
 }
 
 /** Subscription names are typed by users, so escape them before putting them in HTML. */
