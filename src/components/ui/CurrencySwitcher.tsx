@@ -21,7 +21,7 @@ export function CurrencySwitcher({ className }: { className?: string }) {
         className
       )}
       role="group"
-      aria-label="Currency Selector"
+      aria-label="Currency selector"
     >
       {POPULAR_CURRENCIES.map((curr) => {
         const isSelected = displayCurrency.toUpperCase() === curr;

@@ -51,7 +51,7 @@ export function AccountGroupSelector({
           </div>
           {completedCount > 0 ? (
             <Badge variant="success" size="sm">
-              {completedCount} of {groups.length} Accounts Imported
+              {completedCount} of {groups.length} Accounts imported
             </Badge>
           ) : null}
         </div>
@@ -91,7 +91,7 @@ export function AccountGroupSelector({
               </div>
               <div>
                 <div className="text-sm font-bold text-foreground">
-                  All Accounts Combined
+                  All accounts combined
                 </div>
                 <div className="text-xs text-muted-foreground">
                   Scan all {groups.length} sub-accounts together ({totalRows} total transactions)
@@ -214,7 +214,7 @@ export function AccountGroupSelector({
             onClick={onFinishSession}
             className="gap-1.5 shadow-xs font-semibold"
           >
-            Finish & View Subscriptions <ArrowRight className="w-4 h-4" />
+            Finish & view subscriptions <ArrowRight className="w-4 h-4" />
           </Button>
         ) : (
           <Button

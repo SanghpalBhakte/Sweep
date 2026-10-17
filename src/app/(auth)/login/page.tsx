@@ -159,7 +159,7 @@ function LoginForm() {
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            Magic Link
+            Magic link
           </button>
         </div>
 

@@ -135,7 +135,7 @@ export function MFAEnroll({ onEnrolled, onCancel }: MFAEnrollProps) {
           <QrCode className="w-6 h-6" />
         </div>
         <CardTitle className="font-serif text-xl font-bold tracking-tight text-foreground">
-          Set Up Two-Factor Authentication
+          Set up Two-factor authentication
         </CardTitle>
         <p className="text-xs text-muted-foreground leading-relaxed">
           Scan the QR code with Google Authenticator, Authy, or 1Password to protect your recurring ledger.
@@ -232,7 +232,7 @@ export function MFAEnroll({ onEnrolled, onCancel }: MFAEnrollProps) {
               onClick={onCancel}
               className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
             >
-              Cancel Setup
+              Cancel setup
             </button>
           </div>
         ) : null}

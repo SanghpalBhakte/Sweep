@@ -75,7 +75,7 @@ export function ColumnMapper({
       <div className="space-y-1">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-lg font-bold text-[hsl(var(--foreground))]">
-            Confirm Statement Column Mapping
+            Confirm statement column mapping
           </h2>
           <Badge variant="outline" size="sm" className="font-mono flex items-center gap-1">
             <Coins className="w-3 h-3" /> Account Currency: {batchCurrency}
@@ -100,7 +100,7 @@ export function ColumnMapper({
             onClick={handleResetToAuto}
             className="text-[11px] font-medium text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] flex items-center gap-1 hover:underline shrink-0 cursor-pointer"
           >
-            <RefreshCw className="w-3 h-3" /> Reset to Default
+            <RefreshCw className="w-3 h-3" /> Reset to default
           </button>
         </div>
       ) : customBankLabel && customBankLabel !== 'Custom Statement Format' ? (
@@ -124,7 +124,7 @@ export function ColumnMapper({
         <CardHeader>
           <div className="flex items-center gap-2">
             <Table className="w-4 h-4 text-[hsl(var(--primary))]" />
-            <CardTitle>Column Definitions</CardTitle>
+            <CardTitle>Column definitions</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -280,7 +280,7 @@ export function ColumnMapper({
         </Button>
 
         <Button type="button" variant="primary" size="md" onClick={handleContinue} className="gap-1.5">
-          Scan for Subscriptions <ArrowRight className="w-4 h-4" />
+          Scan for subscriptions <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
     </div>

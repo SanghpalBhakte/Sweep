@@ -151,7 +151,7 @@ export default function SecuritySettingsPage() {
             </Link>
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground mt-1">
-            Password & Security
+            Password & security
           </h1>
         </div>
 
@@ -203,7 +203,7 @@ export default function SecuritySettingsPage() {
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-primary" />
-            <CardTitle>Change Password</CardTitle>
+            <CardTitle>Change password</CardTitle>
           </div>
           <CardDescription>
             Update your password to keep your Sweep account secure.
@@ -213,7 +213,7 @@ export default function SecuritySettingsPage() {
         <CardContent className="pt-0">
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Current Password"
+              label="Current password"
               type="password"
               placeholder="••••••••"
               value={currentPassword}
@@ -223,7 +223,7 @@ export default function SecuritySettingsPage() {
             />
 
             <Input
-              label="New Password"
+              label="New password"
               type="password"
               placeholder="At least 6 characters"
               value={newPassword}
@@ -234,7 +234,7 @@ export default function SecuritySettingsPage() {
             />
 
             <Input
-              label="Confirm New Password"
+              label="Confirm new password"
               type="password"
               placeholder="••••••••"
               value={confirmPassword}
@@ -252,7 +252,7 @@ export default function SecuritySettingsPage() {
                 className="text-xs font-semibold shadow-xs"
               >
                 <KeyRound className="w-3.5 h-3.5 mr-1.5" />
-                Update Password
+                Update password
               </Button>
             </div>
           </form>

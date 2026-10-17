@@ -118,7 +118,7 @@ export function AddCategoryModal({
             </div>
             <div>
               <h2 id="add-cat-title" className="text-sm font-semibold text-foreground">
-                Add Category
+                Add category
               </h2>
               <p className="text-[11px] text-muted-foreground mt-0.5">
                 Organize your recurring subscriptions into custom groups
@@ -154,7 +154,7 @@ export function AddCategoryModal({
           />
 
           <Select
-            label="Color Theme"
+            label="Color theme"
             value={color}
             onChange={(e) => setColor(e.target.value)}
           >
@@ -177,7 +177,7 @@ export function AddCategoryModal({
               className="gap-1.5 shadow-xs font-semibold"
             >
               <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-              Save Category
+              Save category
             </Button>
           </div>
         </form>

@@ -438,7 +438,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs font-semibold text-foreground block">
-                    Renewal & Trial Alerts
+                    Renewal & trial alerts
                   </span>
                   <span className="text-[11px] text-muted-foreground">
                     Get a reminder before you are charged.
@@ -574,7 +574,7 @@ export default function SettingsPage() {
                   {/* Default Annual Benchmark */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-medium text-foreground">
-                      Annual Plan Savings Benchmark
+                      Annual plan savings benchmark
                     </label>
                     <Select
                       value={String(annualBenchmark)}
@@ -599,7 +599,7 @@ export default function SettingsPage() {
                     )}
                   >
                     <span className="font-medium text-foreground block">
-                      Category Benchmark Overrides
+                      Category benchmark overrides
                     </span>
                     <div className="space-y-2 max-h-40 overflow-y-auto">
                       {categories.map((c) => (
@@ -630,7 +630,7 @@ export default function SettingsPage() {
 
                   {/* Exchange Rates Sync */}
                   <div className="flex items-center justify-between p-2.5 rounded-lg bg-surface/40 border border-border">
-                    <span className="text-muted-foreground">Manual Exchange Rates Sync</span>
+                    <span className="text-muted-foreground">Manual exchange rates sync</span>
                     <Button
                       type="button"
                       variant="outline"
@@ -659,7 +659,7 @@ export default function SettingsPage() {
                 isLoading={isSaving}
                 className="text-xs font-semibold shadow-xs"
               >
-                Save General Settings
+                Save general settings
               </Button>
             </div>
           </form>
@@ -673,7 +673,7 @@ export default function SettingsPage() {
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <CreditCard className="w-4 h-4 text-primary" />
-            <CardTitle>Payment Methods & Wallet</CardTitle>
+            <CardTitle>Payment methods & Wallet</CardTitle>
           </div>
           <Button
             type="button"
@@ -683,7 +683,7 @@ export default function SettingsPage() {
             className="text-xs gap-1.5 shadow-xs font-semibold"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Add Payment Method</span>
+            <span>Add payment method</span>
           </Button>
         </CardHeader>
         <CardContent className="space-y-3 pt-0 text-xs">
@@ -704,7 +704,7 @@ export default function SettingsPage() {
                 className="text-xs gap-1.5 shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
-                Add Your First Payment Method
+                Add your first payment method
               </Button>
             </div>
           ) : (
@@ -747,15 +747,15 @@ export default function SettingsPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-primary" />
-              <CardTitle>Account & Security</CardTitle>
+              <CardTitle>Account & security</CardTitle>
             </div>
             <Badge variant="success" size="sm">
-              Signed In
+              Signed in
             </Badge>
           </CardHeader>
           <CardContent className="space-y-4 pt-0 text-xs">
             <div className="flex items-center justify-between border-b border-border/50 pb-2">
-              <span className="text-muted-foreground">Authenticated Account</span>
+              <span className="text-muted-foreground">Authenticated account</span>
               <span className="font-mono font-medium text-foreground">{user.email}</span>
             </div>
 
@@ -783,7 +783,7 @@ export default function SettingsPage() {
 
               <div className="pt-1 flex items-center justify-end gap-2">
                 <ButtonLink href="/settings/security" variant="outline" size="sm" className="text-xs h-8">
-                  Change Password
+                  Change password
                 </ButtonLink>
 
                 <ButtonLink href="/settings/mfa" variant={totpFactor ? 'outline' : 'primary'} size="sm" className="text-xs h-8 gap-1.5 shadow-xs">
@@ -804,7 +804,7 @@ export default function SettingsPage() {
                 className="text-xs text-danger hover:bg-danger-subtle gap-1.5"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                Sign Out
+                Sign out
               </Button>
             </div>
           </CardContent>
@@ -824,7 +824,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-3 pt-0">
           <div className="flex items-center justify-between text-xs">
             <div>
-              <span className="font-semibold text-foreground block">Theme Mode</span>
+              <span className="font-semibold text-foreground block">Theme mode</span>
               <span className="text-muted-foreground text-[11px]">
                 Light, dark, or match your device.
               </span>
@@ -841,7 +841,7 @@ export default function SettingsPage() {
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Database className="w-4 h-4 text-primary" />
-            <CardTitle>Data & Portability</CardTitle>
+            <CardTitle>Data & portability</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-0 text-xs">
@@ -854,7 +854,7 @@ export default function SettingsPage() {
             <div>
               <span className="font-semibold text-foreground block flex items-center gap-1.5">
                 <RefreshCw className="w-4 h-4 text-primary" />
-                Restore From Backup
+                Restore from backup
               </span>
               <p className="text-[11px] text-foreground/70 mt-0.5">
                 Restore or merge a <code className="font-mono bg-surface px-1 py-0.2 rounded">sweep-backup-*.json</code> file.
@@ -869,14 +869,14 @@ export default function SettingsPage() {
               className="text-xs font-semibold shadow-xs shrink-0 gap-1.5"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              Restore Backup
+              Restore backup
             </Button>
           </div>
 
           {/* Export Action Buttons */}
           <div className="space-y-1.5 pt-1">
             <span className="text-[11px] font-medium text-muted-foreground block">
-              Export Records
+              Export records
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <Button
@@ -909,16 +909,16 @@ export default function SettingsPage() {
                 className="gap-1.5 text-xs justify-center"
               >
                 <Archive className="w-3.5 h-3.5 text-primary" />
-                Backup Bundle
+                Backup bundle
               </Button>
             </div>
           </div>
 
           {/* Statement Import Link */}
           <div className="pt-2 flex items-center justify-between border-t border-border/60">
-            <span className="text-muted-foreground">Bank Statement Import</span>
+            <span className="text-muted-foreground">Bank statement import</span>
             <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="text-xs gap-1">
-              Open Importer <ExternalLink className="w-3 h-3" />
+              Open importer <ExternalLink className="w-3 h-3" />
             </ButtonLink>
           </div>
 
@@ -927,7 +927,7 @@ export default function SettingsPage() {
             <div>
               <span className="font-semibold text-danger block flex items-center gap-1.5">
                 <Trash2 className="w-3.5 h-3.5 text-danger" />
-                Delete All Data
+                Delete all data
               </span>
               <span className="text-[11px] text-muted-foreground">
                 Deletes all your subscriptions, categories, and settings. This cannot be undone.
@@ -941,7 +941,7 @@ export default function SettingsPage() {
               onClick={() => setIsDeleteAllModalOpen(true)}
               className="text-xs text-danger hover:bg-danger-subtle shrink-0"
             >
-              Delete All Data
+              Delete all data
             </Button>
           </div>
         </CardContent>
@@ -973,7 +973,7 @@ export default function SettingsPage() {
               href="/privacy"
               className="max-md:py-3 max-md:-my-3 font-medium text-primary hover:underline flex items-center gap-1"
             >
-              Privacy Policy <ExternalLink className="w-3 h-3" />
+              Privacy policy <ExternalLink className="w-3 h-3" />
             </Link>
             <span className="text-[11px] text-muted-foreground">Build 2026.08</span>
           </div>
@@ -1040,7 +1040,7 @@ export default function SettingsPage() {
                 isLoading={isDeletingAll}
                 className="text-xs bg-danger hover:bg-danger/90 border-transparent text-danger-foreground font-semibold"
               >
-                Erase Everything
+                Erase everything
               </Button>
             </div>
           </div>

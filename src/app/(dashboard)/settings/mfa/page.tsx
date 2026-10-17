@@ -236,12 +236,12 @@ export default function MFASettingsPage() {
             </Link>
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground mt-1">
-            Two-Factor Authentication
+            Two-factor authentication
           </h1>
         </div>
 
         <ButtonLink href="/settings/security" variant="outline" size="sm" className="text-xs">
-          Password Security
+          Password security
         </ButtonLink>
       </div>
 
@@ -346,7 +346,7 @@ export default function MFASettingsPage() {
             <div className="p-4 rounded-xl bg-surface/50 border border-border space-y-4 animate-in fade-in duration-200">
               <div className="text-center space-y-1">
                 <span className="font-semibold text-foreground text-sm block">
-                  Scan QR Code
+                  Scan QR code
                 </span>
                 <p className="text-[11px] text-muted-foreground">
                   Open your authenticator app (Google Authenticator, Authy) and scan this QR code:
@@ -374,7 +374,7 @@ export default function MFASettingsPage() {
                     type="button"
                     onClick={handleCopySecret}
                     className="text-muted-foreground hover:text-foreground cursor-pointer"
-                    title="Copy Secret"
+                    title="Copy secret"
                   >
                     {copied ? (
                       <Check className="w-3 h-3 text-success" />
@@ -437,7 +437,7 @@ export default function MFASettingsPage() {
                     className="text-xs font-semibold shadow-xs"
                   >
                     <Lock className="w-3.5 h-3.5 mr-1" />
-                    Confirm & Activate
+                    Confirm & activate
                   </Button>
                 </div>
               </form>
@@ -463,7 +463,7 @@ export default function MFASettingsPage() {
                 className="text-xs gap-1.5 shadow-xs shrink-0"
               >
                 <QrCode className="w-3.5 h-3.5" />
-                <span>Set Up Authenticator</span>
+                <span>Set up authenticator</span>
               </Button>
             </div>
           )}

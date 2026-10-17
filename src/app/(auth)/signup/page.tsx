@@ -124,7 +124,7 @@ export default function SignUpPage() {
               to activate your account.
             </p>
             <ButtonLink href="/login" variant="outline" size="sm" className="text-xs">
-              Back to Sign In
+              Back to sign in
             </ButtonLink>
           </div>
         ) : (
@@ -171,7 +171,7 @@ export default function SignUpPage() {
               className="w-full shadow-xs text-xs font-semibold"
               isLoading={isSubmitting}
             >
-              Create Account
+              Create account
             </Button>
           </form>
         )}

@@ -468,6 +468,7 @@
     font-size: 0.875rem;
     letter-spacing: 0;
     text-transform: none;
+    white-space: nowrap;
     border-radius: var(--radius-btn);
     padding: 0.55rem 1rem;
     min-height: 2.5rem;

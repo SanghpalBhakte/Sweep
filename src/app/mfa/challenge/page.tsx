@@ -189,7 +189,7 @@ function MFAChallengeForm() {
 
   return (
     <AuthShell
-      title="Two-Factor Authentication"
+      title="Two-factor authentication"
       description="Enter the 6-digit verification code from your authenticator app to continue."
       icon={<ShieldCheck className="w-6 h-6" />}
       footer={
@@ -234,7 +234,7 @@ function MFAChallengeForm() {
               {hasNoFactor ? (
                 <div className="pt-2">
                   <ButtonLink href="/settings/mfa" variant="outline" size="xs">
-                    Set up MFA in Settings
+                    Set up MFA in settings
                   </ButtonLink>
                 </div>
               ) : (
@@ -263,7 +263,7 @@ function MFAChallengeForm() {
                 htmlFor="totp-code"
                 className="block text-xs font-medium text-foreground text-center"
               >
-                Security Code
+                Security code
               </label>
               <Input
                 id="totp-code"
@@ -290,7 +290,7 @@ function MFAChallengeForm() {
               className="w-full text-xs font-semibold shadow-xs"
             >
               <KeyRound className="w-3.5 h-3.5 mr-1.5" />
-              Verify & Enter
+              Verify & enter
             </Button>
           </form>
         )}

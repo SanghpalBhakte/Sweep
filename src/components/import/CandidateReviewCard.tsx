@@ -37,20 +37,20 @@ export function CandidateReviewCard({
     if (candidate.confidence === 'high') {
       return (
         <Badge variant="primary" size="sm" className="gap-1">
-          <Sparkles className="w-2.5 h-2.5" /> High Confidence
+          <Sparkles className="w-2.5 h-2.5" /> High confidence
         </Badge>
       );
     }
     if (candidate.confidence === 'medium') {
       return (
         <Badge variant="warning" size="sm">
-          Medium Confidence
+          Medium confidence
         </Badge>
       );
     }
     return (
       <Badge variant="outline" size="sm" className="gap-1 text-warning">
-        <AlertCircle className="w-2.5 h-2.5" /> Verify Recurrence
+        <AlertCircle className="w-2.5 h-2.5" /> Verify recurrence
       </Badge>
     );
   };
@@ -180,7 +180,7 @@ export function CandidateReviewCard({
                 aria-label="Category"
                 className="sweep-input w-full h-8 px-2 py-1 text-xs"
               >
-                <option value="">General & Other</option>
+                <option value="">General & other</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -213,7 +213,7 @@ export function CandidateReviewCard({
             {/* Value Rating */}
             <div>
               <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                Value Tier
+                Value tier
               </label>
               <select
                 value={candidate.valueRating}
@@ -222,13 +222,13 @@ export function CandidateReviewCard({
                     valueRating: e.target.value as ValueRating,
                   })
                 }
-                aria-label="Value Tier"
+                aria-label="Value tier"
                 className="sweep-input w-full h-8 px-2 py-1 text-xs"
               >
                 <option value="essential">Essential</option>
                 <option value="useful">Useful</option>
-                <option value="rarely_used">Rarely Used</option>
-                <option value="cancel_candidate">Cancel Candidate</option>
+                <option value="rarely_used">Rarely used</option>
+                <option value="cancel_candidate">Cancel candidate</option>
               </select>
             </div>
           </div>

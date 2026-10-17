@@ -33,7 +33,7 @@ export default function PrivacyPolicyPage() {
           </ButtonLink>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <h1 className="font-serif text-2xl sm:text-3xl tracking-tight text-foreground">
-              Privacy & Data Policy
+              Privacy & data policy
             </h1>
             <Badge variant="success" size="sm" className="font-mono text-[11px]">
               Stays on your device
@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
         </div>
 
         <ButtonLink href="/settings" variant="outline" size="sm" className="text-xs gap-1.5 self-start sm:self-center">
-          <Download className="w-3.5 h-3.5" /> Export My Data in Settings
+          <Download className="w-3.5 h-3.5" /> Export my data in settings
         </ButtonLink>
       </div>
 
@@ -56,7 +56,7 @@ export default function PrivacyPolicyPage() {
             <EyeOff className="w-4 h-4" />
           </div>
           <div className="space-y-1">
-            <div className="text-xs font-bold text-foreground">Zero Surveillance</div>
+            <div className="text-xs font-bold text-foreground">Zero surveillance</div>
             <div className="text-[11px] text-muted-foreground leading-relaxed">
               No browser tracking, no app login surveillance, and no background screen time monitors.
             </div>
@@ -68,7 +68,7 @@ export default function PrivacyPolicyPage() {
             <Lock className="w-4 h-4" />
           </div>
           <div className="space-y-1">
-            <div className="text-xs font-bold text-foreground">Client-Side Processing</div>
+            <div className="text-xs font-bold text-foreground">Client-side processing</div>
             <div className="text-[11px] text-muted-foreground leading-relaxed">
               Statement imports (CSV/PDF) are parsed directly in your browser. Raw files are never uploaded to parsing APIs.
             </div>
@@ -80,7 +80,7 @@ export default function PrivacyPolicyPage() {
             <Database className="w-4 h-4" />
           </div>
           <div className="space-y-1">
-            <div className="text-xs font-bold text-foreground">Complete Ownership</div>
+            <div className="text-xs font-bold text-foreground">Complete ownership</div>
             <div className="text-[11px] text-muted-foreground leading-relaxed">
               Export your entire workspace in open JSON and CSV formats at any time, or delete records in 1 click.
             </div>
@@ -93,7 +93,7 @@ export default function PrivacyPolicyPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-primary" />
-            <CardTitle>Data Collection Matrix</CardTitle>
+            <CardTitle>Data collection matrix</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-1">
@@ -136,7 +136,7 @@ export default function PrivacyPolicyPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            <CardTitle>How Sweep Recommendations Work</CardTitle>
+            <CardTitle>How Sweep recommendations work</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-3.5 text-xs text-muted-foreground leading-relaxed pt-1">
@@ -149,7 +149,7 @@ export default function PrivacyPolicyPage() {
             <div className="p-3 rounded-xl border border-border bg-surface/40 flex items-start gap-3">
               <HelpCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <div className="text-xs font-semibold text-foreground">Underutilization & Value Ratings</div>
+                <div className="text-xs font-semibold text-foreground">Underutilization & value ratings</div>
                 <div className="text-[11px] leading-relaxed">
                   Utilization suggestions come directly from your assigned value tags (<code className="px-1 py-0.5 rounded bg-surface font-mono text-[11px]">rarely_used</code> or <code className="px-1 py-0.5 rounded bg-surface font-mono text-[11px]">cancel_candidate</code>).
                   Because Sweep does not monitor your browser or device activity, value signals reflect your own periodic reviews.
@@ -160,7 +160,7 @@ export default function PrivacyPolicyPage() {
             <div className="p-3 rounded-xl border border-border bg-surface/40 flex items-start gap-3">
               <TrendingUp className="w-4 h-4 text-warning shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <div className="text-xs font-semibold text-foreground">Price-Hike Detection</div>
+                <div className="text-xs font-semibold text-foreground">Price hike detection</div>
                 <div className="text-[11px] leading-relaxed">
                   Sweep can detect price changes only when it has enough historical evidence to compare against. For subscriptions with a single entry, Sweep must wait for a later imported statement or a manually edited amount before it can infer a trend. Sweep does not use bank OAuth scraping or store bank login credentials.
                 </div>
@@ -170,7 +170,7 @@ export default function PrivacyPolicyPage() {
             <div className="p-3 rounded-xl border border-border bg-surface/40 flex items-start gap-3">
               <Layers className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <div className="text-xs font-semibold text-foreground">Plan Alternatives & Downgrade Suggestions</div>
+                <div className="text-xs font-semibold text-foreground">Plan alternatives & downgrade suggestions</div>
                 <div className="text-[11px] leading-relaxed">
                   Sweep does not access merchant admin panels or store provider credentials. As a result, plan and feature quota comparisons are based on user-entered audit ratings, visible pricing tiers, and merchant cancellation links rather than live provider-side intelligence.
                 </div>
@@ -180,7 +180,7 @@ export default function PrivacyPolicyPage() {
             <div className="p-3 rounded-xl border border-border bg-surface/40 flex items-start gap-3">
               <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <div className="text-xs font-semibold text-foreground">Cancellation Assistance & Merchant Responsibility</div>
+                <div className="text-xs font-semibold text-foreground">Cancellation assistance & merchant responsibility</div>
                 <div className="text-[11px] leading-relaxed">
                   Sweep also does not store merchant login credentials. Where a subscription must be canceled through a merchant’s website, Sweep can help the user track, review, and prepare the cancellation, but the user must complete the final action directly with the merchant.
                 </div>
@@ -190,7 +190,7 @@ export default function PrivacyPolicyPage() {
             <div className="p-3 rounded-xl border border-border bg-surface/40 flex items-start gap-3">
               <Clock className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <div className="text-xs font-semibold text-foreground">Upcoming Renewals & Trials</div>
+                <div className="text-xs font-semibold text-foreground">Upcoming renewals & trials</div>
                 <div className="text-[11px] leading-relaxed">
                   Scheduled notifications calculate exact countdowns against your entered renewal dates and reminder offsets (e.g. 7, 3, or 1 days prior).
                 </div>
@@ -205,7 +205,7 @@ export default function PrivacyPolicyPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Database className="w-4 h-4 text-primary" />
-            <CardTitle>Storage, Export & Deletion</CardTitle>
+            <CardTitle>Storage, export & deletion</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-xs text-muted-foreground leading-relaxed pt-1">
@@ -226,7 +226,7 @@ export default function PrivacyPolicyPage() {
 
           <div className="pt-2 flex items-center gap-2">
             <ButtonLink href="/settings" variant="outline" size="sm" className="text-xs gap-1">
-              Go to Settings & Backup <ArrowLeft className="w-3 h-3 rotate-180" />
+              Go to settings & backup <ArrowLeft className="w-3 h-3 rotate-180" />
             </ButtonLink>
           </div>
         </CardContent>

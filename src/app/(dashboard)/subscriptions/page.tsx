@@ -14,7 +14,7 @@ export default function SubscriptionsPage() {
     useSubscriptions();
 
   return (
-    <AppErrorBoundary fallback={<SubscriptionScreenErrorFallback title="Unable to render Subscriptions Ledger" />}>
+    <AppErrorBoundary fallback={<SubscriptionScreenErrorFallback title="Unable to render subscriptions ledger" />}>
       <div className="space-y-6 max-w-3xl mx-auto">
         {/* Header (phones use the Add button in the top bar) */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">

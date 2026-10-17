@@ -134,7 +134,7 @@ export function MFAChallenge({ onSuccess, onCancel }: MFAChallengeProps) {
           <ShieldCheck className="w-6 h-6" />
         </div>
         <CardTitle className="font-serif text-xl font-bold tracking-tight text-foreground">
-          Two-Factor Authentication
+          Two-factor authentication
         </CardTitle>
         <p className="text-xs text-muted-foreground leading-relaxed">
           Enter the 6-digit security code from your Google Authenticator or TOTP app.
@@ -163,7 +163,7 @@ export function MFAChallenge({ onSuccess, onCancel }: MFAChallengeProps) {
         <form onSubmit={handleVerify} className="space-y-4">
           <div className="space-y-1.5">
             <label className="block text-xs font-medium text-foreground text-center">
-              Security Code
+              Security code
             </label>
             <div className="relative">
               <input
@@ -191,7 +191,7 @@ export function MFAChallenge({ onSuccess, onCancel }: MFAChallengeProps) {
             className="w-full text-xs font-semibold shadow-xs"
           >
             <KeyRound className="w-3.5 h-3.5 mr-1.5" />
-            Verify & Sign In
+            Verify & sign in
           </Button>
         </form>
 
@@ -209,7 +209,7 @@ export function MFAChallenge({ onSuccess, onCancel }: MFAChallengeProps) {
               href="/login"
               className="text-muted-foreground hover:text-foreground flex items-center gap-1"
             >
-              <ArrowLeft className="w-3 h-3" /> Back to Sign In
+              <ArrowLeft className="w-3 h-3" /> Back to sign in
             </Link>
           )}
 

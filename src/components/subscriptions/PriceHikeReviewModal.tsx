@@ -163,7 +163,7 @@ export function PriceHikeReviewModal({
               <div className="p-4 rounded-xl bg-surface/60 border border-border flex items-center justify-between gap-4">
                 <div>
                   <div className="text-[11px] uppercase font-semibold text-muted-foreground tracking-wider">
-                    Previous Amount
+                    Previous amount
                   </div>
                   <div className="text-sm font-semibold text-muted-foreground line-through tabular-nums">
                     {formatCurrency(prevAmount, subscription.currency)}
@@ -181,7 +181,7 @@ export function PriceHikeReviewModal({
 
                 <div className="text-right">
                   <div className="text-[11px] uppercase font-semibold text-muted-foreground tracking-wider">
-                    New Amount
+                    New amount
                   </div>
                   <div className="text-base font-bold text-foreground tabular-nums">
                     {formatCurrency(currentAmount, subscription.currency)}
@@ -212,7 +212,7 @@ export function PriceHikeReviewModal({
                 >
                   <div className="space-y-0.5">
                     <div className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
-                      Accept & Keep at New Price
+                      Accept & keep at new price
                     </div>
                     <div className="text-[11px] text-muted-foreground">
                       Dismisses price hike alerts and continues tracking.
@@ -229,7 +229,7 @@ export function PriceHikeReviewModal({
                 >
                   <div className="space-y-0.5">
                     <div className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
-                      Set Reminders Before Next Charge
+                      Set reminders before next charge
                     </div>
                     <div className="text-[11px] text-muted-foreground">
                       Remind me 7, 3, and 1 days before {formatDate(subscription.next_renewal_date)}.

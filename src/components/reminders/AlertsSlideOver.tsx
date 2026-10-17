@@ -44,7 +44,7 @@ export function AlertsSlideOver() {
   if (!isAlertPanelOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true" aria-label="Upcoming Alerts and Reminders">
+    <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true" aria-label="Upcoming alerts and reminders">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200 transition-opacity"
@@ -211,7 +211,7 @@ export function AlertsSlideOver() {
               onClick={closeAlertPanel}
               className="max-md:py-3.5 max-md:-my-3.5 text-[11px] font-medium text-[hsl(var(--primary))] hover:underline flex items-center gap-1"
             >
-              <Settings className="w-3 h-3" /> Reminder Settings
+              <Settings className="w-3 h-3" /> Reminder settings
             </Link>
           </div>
         </div>

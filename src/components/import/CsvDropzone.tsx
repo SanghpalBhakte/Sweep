@@ -173,7 +173,7 @@ export function StatementDropzone({
             isLoading={isProcessingPdf}
             className="pointer-events-none text-xs"
           >
-            Choose Statement File
+            Choose statement file
           </Button>
         </div>
       </div>
@@ -203,7 +203,7 @@ export function StatementDropzone({
             onClick={handleDownloadSample}
             className="text-xs gap-1"
           >
-            <Download className="w-3.5 h-3.5" /> Download Sample CSV
+            <Download className="w-3.5 h-3.5" /> Download sample CSV
           </Button>
 
           <Button

@@ -680,7 +680,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
           <div className="flex items-center gap-2">
             <RefreshCw className="w-4 h-4 text-[hsl(var(--primary))]" />
             <h2 className="text-base font-bold text-[hsl(var(--foreground))]">
-              Restore Sweep Account Backup
+              Restore Sweep account backup
             </h2>
           </div>
           <button
@@ -706,7 +706,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                 <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-success" />
                 <div className="space-y-1">
                   <h3 className="font-bold text-sm text-foreground">
-                    Workspace Restore Complete
+                    Workspace restore complete
                   </h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Successfully {restoreResult.mode === 'replace' ? 'replaced' : 'imported and merged'}{' '}
@@ -724,13 +724,13 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                   </div>
                 </div>
                 <div className="p-2.5 rounded-lg border border-border bg-surface/50 text-center">
-                  <div className="text-[11px] text-muted-foreground">Global Benchmark</div>
+                  <div className="text-[11px] text-muted-foreground">Global benchmark</div>
                   <div className="text-sm font-bold text-foreground font-mono">
                     {restoreResult.globalBenchmark}%
                   </div>
                 </div>
                 <div className="p-2.5 rounded-lg border border-border bg-surface/50 text-center col-span-2 sm:col-span-1">
-                  <div className="text-[11px] text-muted-foreground">Category Overrides</div>
+                  <div className="text-[11px] text-muted-foreground">Category overrides</div>
                   <div className="text-sm font-bold text-foreground font-mono">
                     {restoreResult.activeOverridesCount} Active
                   </div>
@@ -741,7 +741,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
               {restoreResult.items.length > 0 ? (
                 <div className="p-2.5 rounded-xl border border-border bg-surface/30 space-y-1.5">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block">
-                    Category Mapping Breakdown
+                    Category mapping breakdown
                   </span>
                   <div className="flex flex-wrap gap-1.5 text-[11px]">
                     {restoreResult.matchedByUuid > 0 ? (
@@ -756,17 +756,17 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                     ) : null}
                     {restoreResult.manuallyRemapped > 0 ? (
                       <Badge variant="primary" size="sm" className="font-mono text-[11px]">
-                        {restoreResult.manuallyRemapped} Manually Remapped
+                        {restoreResult.manuallyRemapped} Manually remapped
                       </Badge>
                     ) : null}
                     {restoreResult.skippedCollisionCount > 0 ? (
                       <Badge variant="warning" size="sm" className="font-mono text-[11px]">
-                        {restoreResult.skippedCollisionCount} Collisions Skipped
+                        {restoreResult.skippedCollisionCount} Collisions skipped
                       </Badge>
                     ) : null}
                     {restoreResult.skippedUnmatchedCount > 0 ? (
                       <Badge variant="outline" size="sm" className="font-mono text-[11px] text-muted-foreground">
-                        {restoreResult.skippedUnmatchedCount} Unmatched Skipped
+                        {restoreResult.skippedUnmatchedCount} Unmatched skipped
                       </Badge>
                     ) : null}
                   </div>
@@ -885,14 +885,14 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                   </div>
                   <div className="space-y-1">
                     <div className="text-xs font-semibold text-[hsl(var(--foreground))]">
-                      Select Sweep JSON Backup File
+                      Select Sweep JSON backup file
                     </div>
                     <div className="text-[11px] text-[hsl(var(--muted-foreground))]">
                       Choose a previously exported <code className="font-mono text-[11px]">sweep-backup-*.json</code> file
                     </div>
                   </div>
                   <Button type="button" variant="outline" size="sm" className="pointer-events-none text-xs">
-                    Browse Files
+                    Browse files
                   </Button>
                 </div>
               ) : (
@@ -903,7 +903,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-[hsl(var(--success))]" />
                         <span className="font-bold text-[hsl(var(--foreground))]">
-                          Valid Backup Archive Verified
+                          Valid backup archive verified
                         </span>
                       </div>
                       <Badge variant="primary" size="sm">
@@ -1076,7 +1076,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                           Suggested: {suggestion.category.name} ({Math.round(suggestion.similarity * 100)}% match)
                                         </option>
                                       ) : null}
-                                      <optgroup label="Available Workspace Categories">
+                                      <optgroup label="Available workspace categories">
                                         {categories.map((c) => (
                                           <option key={c.id} value={c.id}>
                                             {c.name}
@@ -1203,7 +1203,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                               size="sm"
                                               className="text-[11px]"
                                             >
-                                              Will Create
+                                              Will create
                                             </Badge>
                                           )}
                                         </div>
@@ -1212,7 +1212,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
                                         <div>
                                           <label className="text-[11px] font-medium text-muted-foreground block mb-0.5">
-                                            Category Name
+                                            Category name
                                           </label>
                                           <input
                                             type="text"
@@ -1290,7 +1290,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                   >
                                     <FolderPlus className="w-3.5 h-3.5" />
                                     <span>
-                                      Create {creatableBatchItems.length} Valid Categor{creatableBatchItems.length === 1 ? 'y' : 'ies'} & Map
+                                      Create {creatableBatchItems.length} Valid categor{creatableBatchItems.length === 1 ? 'y' : 'ies'} & Map
                                     </span>
                                   </Button>
                                 </div>
@@ -1361,7 +1361,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                           Suggested: {suggestion.category.name} ({Math.round(suggestion.similarity * 100)}% match)
                                         </option>
                                       ) : null}
-                                      <optgroup label="Available Workspace Categories">
+                                      <optgroup label="Available workspace categories">
                                         {categories.map((c) => (
                                           <option key={c.id} value={c.id}>
                                             {c.name}
@@ -1377,7 +1377,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                       <div className="flex items-center justify-between">
                                         <span className="font-semibold text-foreground text-[11px] flex items-center gap-1.5">
                                           <Plus className="w-3.5 h-3.5 text-primary" />
-                                          Create Category in Workspace
+                                          Create category in workspace
                                         </span>
                                         <button
                                           type="button"
@@ -1401,7 +1401,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                         <div>
                                           <label className="text-[11px] font-medium text-muted-foreground block mb-0.5">
-                                            Category Name
+                                            Category name
                                           </label>
                                           <input
                                             type="text"
@@ -1413,7 +1413,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                         </div>
                                         <div>
                                           <label className="text-[11px] font-medium text-muted-foreground block mb-0.5">
-                                            Category Slug
+                                            Category slug
                                           </label>
                                           <input
                                             type="text"
@@ -1438,7 +1438,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                                           className="h-6 text-[11px] px-2.5 gap-1 shrink-0"
                                         >
                                           <Plus className="w-3 h-3" />
-                                          Create & Map
+                                          Create & map
                                         </Button>
                                       </div>
                                     </div>
@@ -1466,7 +1466,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                   {/* Restore Strategy Selection */}
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-[hsl(var(--foreground))] block">
-                      Restore Strategy
+                      Restore strategy
                     </label>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -1481,7 +1481,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                       >
                         <div className="flex items-center gap-1.5 font-semibold text-xs text-[hsl(var(--foreground))]">
                           <Layers className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
-                          Merge & Append
+                          Merge & append
                         </div>
                         <div className="text-[11px] text-[hsl(var(--muted-foreground))] mt-1">
                           Adds imported items alongside your current {subscriptions.length} existing
@@ -1500,7 +1500,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
                       >
                         <div className="flex items-center gap-1.5 font-semibold text-xs text-[hsl(var(--danger))]">
                           <Trash2 className="w-3.5 h-3.5 text-[hsl(var(--danger))]" />
-                          Replace Workspace
+                          Replace workspace
                         </div>
                         <div className="text-[11px] text-[hsl(var(--muted-foreground))] mt-1">
                           Clears your current {subscriptions.length} records and restores fresh.
@@ -1530,7 +1530,7 @@ export function RestoreModal({ isOpen, onClose, onSuccess }: RestoreModalProps) 
               {restoreResult.skippedCollisionCount + restoreResult.skippedUnmatchedCount > 0 ? (
                 <a href="#category-benchmarks" onClick={handleNavigateToCategoryBenchmarks}>
                   <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs">
-                    <span>Review Skipped Mappings</span>
+                    <span>Review skipped mappings</span>
                     <ExternalLink className="w-3 h-3" />
                   </Button>
                 </a>

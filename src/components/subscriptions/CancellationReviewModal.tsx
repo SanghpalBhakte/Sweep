@@ -301,7 +301,7 @@ export function CancellationReviewModal({
               onClick={onClose}
               className="text-xs"
             >
-              Keep Active
+              Keep active
             </Button>
 
             <div className="flex items-center gap-2">
@@ -313,7 +313,7 @@ export function CancellationReviewModal({
                   className="inline-flex"
                 >
                   <Button variant="outline" size="sm" className="text-xs gap-1 text-danger hover:border-danger">
-                    Direct Cancel <ExternalLink className="w-3 h-3" />
+                    Direct cancel <ExternalLink className="w-3 h-3" />
                   </Button>
                 </a>
               ) : null}
@@ -326,7 +326,7 @@ export function CancellationReviewModal({
                 onClick={handleConfirmCancelInSweep}
                 className="text-xs gap-1 bg-danger hover:bg-danger/90 text-danger-foreground border-danger shadow-xs"
               >
-                <Scissors className="w-3.5 h-3.5" /> Mark Canceled in Sweep
+                <Scissors className="w-3.5 h-3.5" /> Mark canceled in Sweep
               </Button>
             </div>
           </div>

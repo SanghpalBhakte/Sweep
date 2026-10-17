@@ -9,7 +9,7 @@ export default function DashboardLoading() {
         <div className="sm:col-span-7 sweep-card p-5 sm:p-6 flex flex-col justify-between min-h-[160px]">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider font-sans">
-              Recurring Spend
+              Recurring spend
             </span>
             <div className="flex items-center gap-0.5 p-0.5 bg-surface border border-border/80 rounded-lg text-xs">
               <span className="px-2 py-0.5 rounded-md font-medium text-[11px] text-foreground bg-card shadow-xs">
@@ -38,7 +38,7 @@ export default function DashboardLoading() {
         <div className="sm:col-span-5 sweep-card p-5 flex flex-col justify-between min-h-[160px] bg-card/60">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider font-sans">
-              Next Renewal
+              Next renewal
             </span>
             <div className="w-14 h-5 skeleton rounded-full" />
           </div>
@@ -76,7 +76,7 @@ export default function DashboardLoading() {
       {/* 3. Subscription Rows Skeletons */}
       <div className="space-y-2.5 pt-1">
         <div className="flex items-center justify-between px-0.5">
-          <span className="text-sm font-serif font-bold text-foreground">Active Ledger</span>
+          <span className="text-sm font-serif font-bold text-foreground">Active ledger</span>
           <span className="text-[11px] text-muted-foreground">Full ledger →</span>
         </div>
 

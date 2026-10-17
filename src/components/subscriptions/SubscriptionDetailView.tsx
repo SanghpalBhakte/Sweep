@@ -242,7 +242,7 @@ export function SubscriptionDetailView({
         <div className="p-4 rounded-xl bg-surface/50 border border-border flex items-center justify-between gap-4 flex-wrap">
           <div>
             <span className="text-[11px] font-medium text-muted-foreground block">
-              Cost & Frequency
+              Cost & frequency
             </span>
             <div className="text-2xl font-bold text-foreground tabular-nums">
               {formatCurrency(subscription.amount, subscription.currency)}
@@ -259,7 +259,7 @@ export function SubscriptionDetailView({
 
           <div className="text-right">
             <span className="text-[11px] font-medium text-muted-foreground block">
-              Next Billing Date
+              Next billing date
             </span>
             <div className="text-sm font-semibold text-foreground">
               {formatDate(subscription.next_renewal_date)}
@@ -282,13 +282,13 @@ export function SubscriptionDetailView({
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Subscription Details
+            Subscription details
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 pt-0 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-1 border-b border-border/50">
             <div>
-              <span className="text-muted-foreground block">Payment Method</span>
+              <span className="text-muted-foreground block">Payment method</span>
               <span className="font-medium text-foreground">
                 {subscription.payment_method
                   ? `${subscription.payment_method.name} ${
@@ -301,7 +301,7 @@ export function SubscriptionDetailView({
             </div>
 
             <div>
-              <span className="text-muted-foreground block">Start Date</span>
+              <span className="text-muted-foreground block">Start date</span>
               <span className="font-medium text-foreground">
                 {formatDate(subscription.start_date)}
               </span>
@@ -318,7 +318,7 @@ export function SubscriptionDetailView({
           {subscription.cancel_url ? (
             <div className="py-1 flex items-center justify-between gap-2">
               <div>
-                <span className="text-muted-foreground block">Account Billing Page</span>
+                <span className="text-muted-foreground block">Account billing page</span>
                 <span className="font-medium text-foreground truncate block max-w-xs sm:max-w-sm">
                   {subscription.cancel_url}
                 </span>
@@ -343,7 +343,7 @@ export function SubscriptionDetailView({
           <CardHeader className="pb-2 flex items-center justify-between">
             <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-primary" />
-              <span>Private Notes</span>
+              <span>Private notes</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -400,7 +400,7 @@ export function SubscriptionDetailView({
       {/* 5. Non-Destructive vs. Destructive Action Footer */}
       <div className="p-4 rounded-xl border border-border bg-card space-y-3">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-          Subscription Actions
+          Subscription actions
         </span>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -415,12 +415,12 @@ export function SubscriptionDetailView({
             {subscription.status === 'active' ? (
               <>
                 <Pause className="w-3.5 h-3.5 text-muted-foreground" />
-                <span>Mark as Paused</span>
+                <span>Mark as paused</span>
               </>
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 text-primary" />
-                <span>Resume Subscription</span>
+                <span>Resume subscription</span>
               </>
             )}
           </Button>
@@ -434,7 +434,7 @@ export function SubscriptionDetailView({
             className="w-full sm:w-auto text-xs text-danger hover:bg-danger-subtle gap-1.5"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>Delete Subscription</span>
+            <span>Delete subscription</span>
           </Button>
         </div>
       </div>
@@ -445,7 +445,7 @@ export function SubscriptionDetailView({
           <div className="sweep-card max-w-sm w-full p-5 space-y-4 shadow-xl border-danger/30">
             <div className="flex items-center gap-2.5 text-danger font-semibold text-sm">
               <AlertTriangle className="w-4 h-4 shrink-0" />
-              <span>Delete Subscription</span>
+              <span>Delete subscription</span>
             </div>
 
             <p className="text-xs text-muted-foreground leading-relaxed">

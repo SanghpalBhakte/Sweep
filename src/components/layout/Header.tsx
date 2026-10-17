@@ -55,7 +55,7 @@ export function Header() {
             <Link
               href="/settings"
               className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface/40 hover:bg-surface border border-border/50 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-              title="Currency preferences in Settings"
+              title="Currency preferences in settings"
             >
               <span className="font-mono font-semibold text-foreground">{targetCurrency}</span>
               <span className="text-[11px]">Ledger</span>
@@ -71,7 +71,7 @@ export function Header() {
                   : 'Upcoming reminders & alerts'
               }
               className="relative p-2 max-md:min-h-[44px] max-md:min-w-[44px] text-muted-foreground hover:text-foreground hover:bg-surface rounded-lg transition-colors cursor-pointer flex items-center justify-center"
-              aria-label="Alerts and Reminders"
+              aria-label="Alerts and reminders"
             >
               <Bell className="w-5 h-5 md:w-4 md:h-4" aria-hidden="true" />
               {totalAlertsCount > 0 ? (

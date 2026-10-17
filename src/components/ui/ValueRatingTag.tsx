@@ -23,14 +23,14 @@ export function ValueRatingTag({ rating, size = 'sm' }: { rating: ValueRating; s
       return (
         <Badge variant="warning" size={size}>
           <HelpCircle className="w-3 h-3" />
-          Rarely Used
+          Rarely used
         </Badge>
       );
     case 'cancel_candidate':
       return (
         <Badge variant="danger" size={size}>
           <Scissors className="w-3 h-3" />
-          Cancel Candidate
+          Cancel candidate
         </Badge>
       );
     default:

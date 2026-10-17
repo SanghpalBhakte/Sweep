@@ -15,7 +15,7 @@ export default function NewSubscriptionPage() {
   };
 
   return (
-    <AppErrorBoundary fallback={<SubscriptionScreenErrorFallback title="Unable to open New Subscription" />}>
+    <AppErrorBoundary fallback={<SubscriptionScreenErrorFallback title="Unable to open new subscription" />}>
       <div className="py-2">
         <SubscriptionForm
           categories={categories}

@@ -98,7 +98,7 @@ export default function EditSubscriptionPage() {
   };
 
   return (
-    <AppErrorBoundary fallback={<SubscriptionScreenErrorFallback title="Unable to render Subscription Detail" />}>
+    <AppErrorBoundary fallback={<SubscriptionScreenErrorFallback title="Unable to render subscription detail" />}>
       <SubscriptionDetailView
         subscription={subscription}
         categories={categories}

@@ -111,7 +111,7 @@ export function AddPaymentMethodModal({
             </div>
             <div>
               <h2 id="add-pm-title" className="text-sm font-semibold text-foreground">
-                Add Payment Method
+                Add payment method
               </h2>
               <p className="text-[11px] text-muted-foreground mt-0.5">
                 Assign subscriptions to cards, accounts, or digital wallets
@@ -152,8 +152,8 @@ export function AddPaymentMethodModal({
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
-              <option value="credit_card">Credit Card</option>
-              <option value="debit_card">Debit Card</option>
+              <option value="credit_card">Credit card</option>
+              <option value="debit_card">Debit card</option>
               <option value="bank_account">Bank Account / Transfer</option>
               <option value="paypal">PayPal</option>
               <option value="apple_pay">Apple Pay</option>
@@ -205,7 +205,7 @@ export function AddPaymentMethodModal({
               className="gap-1.5 shadow-xs font-semibold"
             >
               <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-              Save Payment Method
+              Save payment method
             </Button>
           </div>
         </form>

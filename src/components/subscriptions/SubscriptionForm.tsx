@@ -544,7 +544,7 @@ export function SubscriptionForm({
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground">
-            Subscription Details
+            Subscription details
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
@@ -787,7 +787,7 @@ export function SubscriptionForm({
         {showMoreOptions ? (
           <div className="p-4 space-y-4 border-t border-border/60 animate-in fade-in duration-150">
             <Input
-              label="Short Description"
+              label="Short description"
               placeholder="e.g., Team license, personal account"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -796,7 +796,7 @@ export function SubscriptionForm({
             {/* Annual Plan Arbitrage */}
             {billingCycle === 'yearly' ? (
               <Input
-                label="Monthly Alternative Price"
+                label="Monthly alternative price"
                 type="number"
                 step="0.01"
                 min="0"
@@ -809,7 +809,7 @@ export function SubscriptionForm({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
-                label="Start Date"
+                label="Start date"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
@@ -856,7 +856,7 @@ export function SubscriptionForm({
             {/* Value Tier & Cancellation Link */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Select
-                label="Value Tier"
+                label="Value tier"
                 value={valueRating}
                 onChange={(e) => setValueRating(e.target.value as ValueRating)}
               >
@@ -867,7 +867,7 @@ export function SubscriptionForm({
               </Select>
 
               <Input
-                label="Direct Cancellation Link"
+                label="Direct cancellation link"
                 type="url"
                 placeholder="https://service.com/account/billing"
                 value={cancelUrl}
@@ -905,7 +905,7 @@ export function SubscriptionForm({
             {/* Private Notes Field */}
             <div className="space-y-1">
               <label className="text-xs font-medium text-foreground block">
-                Private Notes
+                Private notes
               </label>
               <textarea
                 rows={2}
@@ -942,7 +942,7 @@ export function SubscriptionForm({
             disabled={isSubmitting || isDeleting}
             className="w-full sm:w-auto text-xs cursor-pointer"
           >
-            Save & Add Another
+            Save & add another
           </Button>
         ) : null}
 

@@ -135,7 +135,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
             </div>
             <div>
               <h2 id="quick-add-sub-title" className="text-sm font-semibold text-foreground">
-                Add Subscription
+                Add subscription
               </h2>
               <p className="text-[11px] text-muted-foreground mt-0.5">
                 Add the basics now. You can edit the rest later.
@@ -216,7 +216,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
 
             <div className="grid grid-cols-2 gap-3">
               <Select
-                label="Payment Method"
+                label="Payment method"
                 value={paymentMethodId}
                 onChange={(e) => setPaymentMethodId(e.target.value)}
               >
@@ -229,7 +229,7 @@ export function AddSubscriptionModal({ isOpen, onClose }: AddSubscriptionModalPr
               </Select>
 
               <Input
-                label="Next Renewal Date"
+                label="Next renewal date"
                 type="date"
                 value={isTrial ? trialEndDate : nextRenewalDate}
                 onChange={(e) => {

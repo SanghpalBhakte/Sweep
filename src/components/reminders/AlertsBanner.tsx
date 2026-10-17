@@ -73,7 +73,7 @@ export function AlertsBanner() {
               isLoading={isEnablingPush}
               className="text-xs h-7 px-2.5 shadow-xs"
             >
-              Enable Push
+              Enable push
             </Button>
             <button
               type="button"

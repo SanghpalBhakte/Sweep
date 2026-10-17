@@ -654,7 +654,7 @@ export default function StatementImportPage() {
                   onClick={() => handleSelectAll(true)}
                   className="text-[11px] text-primary hover:underline font-medium cursor-pointer"
                 >
-                  Select All
+                  Select all
                 </button>
                 <span className="text-border">·</span>
                 <button
@@ -662,7 +662,7 @@ export default function StatementImportPage() {
                   onClick={() => handleSelectAll(false)}
                   className="text-[11px] text-muted-foreground hover:underline font-medium cursor-pointer"
                 >
-                  Deselect All
+                  Deselect all
                 </button>
               </div>
             </div>
@@ -738,7 +738,7 @@ export default function StatementImportPage() {
               onClick={handleExecuteImport}
               className="gap-1.5 shadow-xs font-semibold"
             >
-              <Plus className="w-4 h-4" /> Import {selectedCount} Selected Subscription{selectedCount === 1 ? '' : 's'}
+              <Plus className="w-4 h-4" /> Import {selectedCount} Selected subscription{selectedCount === 1 ? '' : 's'}
             </Button>
           </div>
         </div>
@@ -809,7 +809,7 @@ export default function StatementImportPage() {
                   onClick={() => setStep('account_select')}
                   className="text-xs"
                 >
-                  View All Batches
+                  View all batches
                 </Button>
               </div>
             </div>
@@ -817,11 +817,11 @@ export default function StatementImportPage() {
 
           <div className="flex items-center justify-center gap-3 pt-2">
             <ButtonLink href="/subscriptions" variant="primary" size="md">
-              View Subscriptions
+              View subscriptions
             </ButtonLink>
 
             <ButtonLink href="/" variant="outline" size="md">
-              Go to Dashboard
+              Go to dashboard
             </ButtonLink>
           </div>
         </Card>

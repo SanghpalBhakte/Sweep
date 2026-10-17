@@ -76,7 +76,7 @@ export function DesktopSidebar() {
         >
           <span className="flex items-center gap-2 font-medium">
             <Plus className="w-3.5 h-3.5 transition-transform group-hover:rotate-90" aria-hidden="true" />
-            <span>Add Subscription</span>
+            <span>Add subscription</span>
           </span>
           <kbd className="text-[11px] bg-primary-foreground/20 border border-primary-foreground/20 rounded px-1.5 py-0.2 font-mono font-normal">
             N
@@ -192,7 +192,7 @@ export function DesktopSidebar() {
                 href="/login"
                 className="text-[11px] text-primary font-medium hover:underline px-1.5"
               >
-                Sign In
+                Sign in
               </Link>
             ) : null}
           </div>

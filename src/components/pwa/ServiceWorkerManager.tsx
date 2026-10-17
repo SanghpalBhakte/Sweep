@@ -97,7 +97,7 @@ export function ServiceWorkerManager() {
             <Sparkles className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <h4 className="text-xs font-bold text-foreground">Update Available</h4>
+            <h4 className="text-xs font-bold text-foreground">Update available</h4>
             <p className="text-[11px] text-muted-foreground truncate">
               A newer version of Sweep is ready to load.
             </p>
@@ -114,7 +114,7 @@ export function ServiceWorkerManager() {
             className="text-xs font-semibold px-2.5 py-1 h-7 shadow-xs gap-1"
           >
             <RefreshCw className="w-3 h-3" />
-            <span>Update Now</span>
+            <span>Update now</span>
           </Button>
 
           <button
