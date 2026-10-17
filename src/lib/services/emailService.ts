@@ -4,7 +4,7 @@
 // Gmail: set GMAIL_USER (your full gmail address) and GMAIL_APP_PASSWORD
 // (a 16 character app password from myaccount.google.com/apppasswords).
 // Gmail wins when both are set.
-import nodemailer from 'nodemailer';
+import nodemailer, { type Transporter } from 'nodemailer';
 
 export type EmailResult = { ok: true; provider: 'gmail' | 'resend' } | { ok: false; error: string };
 
@@ -14,7 +14,7 @@ export function emailProvider(): 'gmail' | 'resend' | null {
   return null;
 }
 
-let gmailTransport: nodemailer.Transporter | null = null;
+let gmailTransport: Transporter | null = null;
 
 export async function sendEmail(msg: { to: string; subject: string; html: string }): Promise<EmailResult> {
   const provider = emailProvider();
