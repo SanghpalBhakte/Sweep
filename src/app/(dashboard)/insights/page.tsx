@@ -190,7 +190,7 @@ export default function InsightsPage() {
       {/* 1. Summary: one statement, not four boxes */}
       <section
         aria-label="Spending summary"
-        className="ledger-margin rounded-xl bg-card border border-border/60 shadow-xs grid grid-cols-2 lg:grid-cols-4 overflow-hidden"
+        className="rounded-xl bg-card border border-border/60 shadow-xs grid grid-cols-2 lg:grid-cols-4 overflow-hidden"
       >
         {[
           { label: 'Per month', value: stats.monthlyTotal, note: `${stats.activeCount} active` },

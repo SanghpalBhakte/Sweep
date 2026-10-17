@@ -71,7 +71,7 @@ export function SpendTrendChart({ data, currency = 'USD' }: SpendTrendChartProps
 
       <CardContent className="pt-2 space-y-3">
         {/* Hover info pill */}
-        <div className="h-7 flex items-center justify-between text-xs px-2.5 rounded-md bg-surface/40 border border-border/40 transition-all">
+        <div className="h-7 flex items-center justify-between text-xs transition-all">
           <span className="text-xs text-muted-foreground">
             {hoveredPoint ? hoveredPoint.monthLabel : 'This month'}
           </span>

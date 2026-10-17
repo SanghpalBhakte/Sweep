@@ -810,20 +810,6 @@
     pointer-events: none;
   }
 
-  /* Kept for pages that still use the old class name */
-  .ledger-margin {
-    position: relative;
-  }
-  .ledger-margin::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.85rem;
-    bottom: 0.85rem;
-    width: 3px;
-    border-radius: 3px;
-    background: hsl(var(--danger) / 0.5);
-  }
 }
 
 /* ================================================================

@@ -8,7 +8,9 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     display: 'standalone',
     orientation: 'portrait',
-    background_color: '#F6F1E8',
+    // Android paints its button bar with this colour in the installed app, so a light
+    // value showed a cream strip under the dark bottom nav.
+    background_color: '#191516',
     theme_color: '#5B294A',
     icons: [
       {
