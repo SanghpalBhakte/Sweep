@@ -22,6 +22,18 @@ const CADENCES: Cadence[] = [
   { cycle: 'yearly', days: 365, tolerance: 25 },
 ];
 
+// Regular payments that are not subscriptions: loans, rent, investments, bills,
+// cash, fuel and money sent to people. Only checked for merchants we don't know.
+const NOT_A_SUBSCRIPTION =
+  /\b(emi|loan|rent|rental|sip|mutual ?fund|nach|ach ?dr?|insurance|lic|policy|credit ?card|cc ?(bill|payment)|card ?payment|atm|cash|neft|imps|rtgs|salary|fd|rd|ppf|nps|tax|gst|challan|school|college|tuition|fees?|electricity|bescom|msedcl|tneb|water ?bill|gas ?bill|petrol|diesel|fuel|hpcl|iocl|bpcl|indian ?oil|bharat ?petroleum|self ?transfer|own ?account)\b/i;
+// UPI to a person: phone-number VPAs, Google Pay personal handles, P2P/P2A tags
+const PERSON_TRANSFER = /\b\d{10}@|@ok(axis|sbi|hdfcbank|icici)\b|\bP2[AP]\b/i;
+// An unknown merchant only counts when its narration looks like a paid plan or an
+// online service. Without this, a milkman, maid or tiffin paid the same amount
+// every month would show up as a "subscription".
+const SUBSCRIPTION_SIGNAL =
+  /subscri|membership|member ?fee|premium|renewal|recurring|auto ?pay|auto ?debit|autopay|mandate|standing ?instruction|\bsi\b|\bplan\b|\bpro\b|\bplus\b|\.com\b|\.io\b|\.ai\b|\.app\b|www\.|\bsaas\b|\bcloud\b|\bhosting\b|\bdomain\b|\bvpn\b|app ?store|play ?store|itunes|paddle|stripe|fastspring|gumroad|patreon|lemon ?squeezy|\bott\b|\bstream/i;
+
 /** Median, so one skipped month (60 days) doesn't break a monthly pattern */
 function median(nums: number[]): number {
   const s = [...nums].sort((a, b) => a - b);
@@ -99,6 +111,14 @@ export function detectRecurringCandidates(
     // Food delivery, shopping and rides: only a near-identical amount repeating
     // on a steady cycle (e.g. a meal plan) counts. Two similar orders don't.
     const isEverydayBrand = brand?.subscription === false;
+    const raw = `${sorted[0].rawDescription || ''} ${sorted[0].cleanMerchant}`;
+    // Unknown merchant that looks like an EMI, rent, bill or a transfer to a person: skip it
+    if (!brand && (NOT_A_SUBSCRIPTION.test(raw) || PERSON_TRANSFER.test(raw))) return;
+    // Food delivery, shopping, rides, travel: everyday spending, never a subscription.
+    // Their paid plans (Swiggy One, Zomato Gold, Amazon Prime) are separate brands.
+    if (isEverydayBrand) return;
+    // Unknown merchant with nothing that says "plan" or "online service": daily spending
+    if (!brand && !SUBSCRIPTION_SIGNAL.test(raw)) return;
 
     const evaluate = (txs: NormalizedTransaction[], label: string, suffix?: string) => {
       const amounts = txs.map((t) => t.amount);
@@ -127,10 +147,17 @@ export function detectRecurringCandidates(
         }
       } else if (isEverydayBrand && (txs.length < 3 || !match?.regular || Math.max(...amounts) / Math.min(...amounts) > 1.03)) {
         return false;
+      } else if (match && stable && !brand) {
+        // Unknown merchant: needs 3+ same-price charges on a steady monthly or longer
+        // cycle, and is shown unticked so only real subscriptions are pre-selected
+        if (txs.length < 3 || !match.regular || match.cadence.days < 28) return false;
+        cycle = match.cadence.cycle;
+        days = match.cadence.days;
+        confidence = 'low';
       } else if (match && stable) {
         cycle = match.cadence.cycle;
         days = match.cadence.days;
-        confidence = match.regular && (txs.length >= 3 || isSubBrand) ? 'high' : 'medium';
+        confidence = isEverydayBrand ? 'low' : match.regular && (txs.length >= 3 || isSubBrand) ? 'high' : 'medium';
       } else if (isSubBrand && stable) {
         confidence = 'medium';
       } else if (isSubBrand) {
