@@ -18,6 +18,21 @@ describe('Auth Redirection & Security Validation', () => {
       expect(getSafeNext('/\\evil.com')).toBe('/');
     });
 
+    it('rejects tricks browsers turn into //evil.com', () => {
+      // Browsers drop tabs and newlines inside URLs: "/\t/evil.com" becomes "//evil.com"
+      expect(getSafeNext('/\t/evil.com')).toBe('/');
+      expect(getSafeNext('/\n/evil.com')).toBe('/');
+      expect(getSafeNext('/\r\n/evil.com')).toBe('/');
+      expect(getSafeNext('/\\/evil.com')).toBe('/');
+      expect(getSafeNext(' //evil.com')).toBe('/');
+      // Encoded slashes stay a path on our site, which is safe
+      expect(getSafeNext('/%2F/evil.com')).toBe('/%2F/evil.com');
+      // Whatever comes back must stay on our origin when the browser resolves it
+      for (const n of ['/\t/evil.com', '/\n/evil.com', '/%09/evil.com', '/./evil', '/a/../../evil']) {
+        expect(new URL(getSafeNext(n), 'https://sift-sand.vercel.app').host).toBe('sift-sand.vercel.app');
+      }
+    });
+
     it('rejects javascript: and data: pseudo-protocols', () => {
       expect(getSafeNext('javascript:alert(1)')).toBe('/');
       expect(getSafeNext('data:text/html,evil')).toBe('/');

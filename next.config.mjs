@@ -44,18 +44,23 @@ const securityHeaders = [
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
   },
-  // CSP — allow Supabase, Resend, Vercel Analytics, and Exchange Rates APIs; block everything else
+  // CSP. Scripts only from this site (Vercel Analytics is served from our own
+  // domain). No *.vercel.app: anyone can host a script there. No unsafe-eval:
+  // nothing in the app needs it (pdf.js runs with isEvalSupported: false).
+  // 'unsafe-inline' stays for the small theme script that prevents a flash.
   {
     key: 'Content-Security-Policy',
     value: [
       `default-src 'self'`,
-      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://vercel.com https://*.vercel.app`,
-      `style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com`,
-      `font-src 'self' https://api.fontshare.com https://fonts.gstatic.com`,
-      `img-src 'self' data: blob: https://*.supabase.co https://vercel.com https://*.vercel.app`,
-      `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://vitals.vercel-insights.com https://open.er-api.com https://api.frankfurter.dev https://vercel.com https://*.vercel.app https://vercel.live`,
-      `manifest-src 'self' https://vercel.com https://*.vercel.app`,
-      `frame-src 'self' https://vercel.live https://vercel.com`,
+      `script-src 'self' 'unsafe-inline' https://vercel.live`,
+      `style-src 'self' 'unsafe-inline'`,
+      `font-src 'self' data:`,
+      `img-src 'self' data: blob: https://*.supabase.co https://vercel.com`,
+      `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vitals.vercel-insights.com https://open.er-api.com https://api.frankfurter.dev https://vercel.live wss://ws-us3.pusher.com`,
+      `worker-src 'self' blob:`,
+      `manifest-src 'self'`,
+      `frame-src https://vercel.live`,
+      `object-src 'none'`,
       `frame-ancestors 'none'`,
       `base-uri 'self'`,
       `form-action 'self'`,

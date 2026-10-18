@@ -4,6 +4,26 @@ import { sendEmail, emailProvider } from '@/lib/services/emailService';
 
 // Sends one test email to the signed-in user's own address, so they can check
 // that reminder emails reach their inbox. Never takes a recipient from the request.
+
+// Gmail allows about 500 emails a day for the whole app. Without a limit, one
+// account pressing the button in a loop could use that up and block every
+// real reminder. 3 tests per 10 minutes per user is plenty for checking setup.
+const WINDOW_MS = 10 * 60 * 1000;
+const MAX_PER_WINDOW = 3;
+const recentTests = new Map<string, number[]>();
+
+function allowTest(userId: string): boolean {
+  const now = Date.now();
+  const times = (recentTests.get(userId) || []).filter((t) => now - t < WINDOW_MS);
+  if (times.length >= MAX_PER_WINDOW) {
+    recentTests.set(userId, times);
+    return false;
+  }
+  times.push(now);
+  recentTests.set(userId, times);
+  return true;
+}
+
 export async function POST() {
   const supabase = await createClient();
   if (!supabase) {
@@ -15,6 +35,13 @@ export async function POST() {
   } = await supabase.auth.getUser();
   if (!user?.email) {
     return NextResponse.json({ error: 'Sign in to send a test email.' }, { status: 401 });
+  }
+
+  if (!allowTest(user.id)) {
+    return NextResponse.json(
+      { error: 'You just sent a few test emails. Wait 10 minutes and try again.' },
+      { status: 429 }
+    );
   }
 
   if (!emailProvider()) {
