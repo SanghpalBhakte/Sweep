@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Plus, Bell, Search } from 'lucide-react';
+import { Plus, Bell, Search, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 import { ButtonLink } from '../ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/context/NotificationContext';
@@ -21,6 +22,9 @@ export function Header() {
   const { totalAlertsCount, urgentAlertsCount, isAlertPanelOpen, toggleAlertPanel } =
     useNotifications();
   const { stats, displayCurrency } = useSubscriptions();
+
+  const { resolvedTheme, toggleTheme } = useTheme();
+  const isDark = resolvedTheme === 'night-shelf';
 
   const targetCurrency = stats.displayCurrency || displayCurrency || 'USD';
 
@@ -60,6 +64,21 @@ export function Header() {
               <span className="font-mono font-semibold text-foreground">{targetCurrency}</span>
               <span className="text-[11px]">Ledger</span>
             </Link>
+
+            {/* One tap to switch light / dark */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="relative p-2 max-md:min-h-[44px] max-md:min-w-[44px] text-muted-foreground hover:text-foreground hover:bg-surface rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+            >
+              {isDark ? (
+                <Sun className="w-5 h-5 md:w-4 md:h-4" aria-hidden="true" />
+              ) : (
+                <Moon className="w-5 h-5 md:w-4 md:h-4" aria-hidden="true" />
+              )}
+            </button>
 
             {/* Reminders Bell with Active Alert Count */}
             <button

@@ -57,6 +57,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         root.classList.remove('dark');
         root.setAttribute('data-theme', 'paper-ledger');
       }
+
+      // Phone status bar follows the theme the user picked, not only the system setting
+      const barColor = effectiveTheme === 'night-shelf' ? '#0F0B0A' : '#D9D2C4';
+      document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+        m.removeAttribute('media');
+        m.setAttribute('content', barColor);
+      });
     };
 
     applyTheme();
