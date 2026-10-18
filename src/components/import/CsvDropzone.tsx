@@ -19,22 +19,41 @@ interface StatementDropzoneProps {
   isProcessingPdf?: boolean;
 }
 
-const SAMPLE_CSV_CONTENT = `Date,Description,Amount,Type
-2026-06-01,SPOTIFY USA 800-555-0199,10.99,Debit
-2026-06-05,WHOLE FOODS MARKET,84.20,Debit
-2026-06-12,NETFLIX.COM LOS GATOS CA,15.49,Debit
-2026-06-15,GITHUB INC SAN FRANCISCO,20.00,Debit
-2026-06-20,UBER TRIP HELP.UBER,24.50,Debit
-2026-06-28,CHATGPT SUBSCRIPTION OPENAI,20.00,Debit
-2026-07-01,SPOTIFY USA 800-555-0199,10.99,Debit
-2026-07-08,TRADER JOE'S #142,56.30,Debit
-2026-07-12,NETFLIX.COM LOS GATOS CA,15.49,Debit
-2026-07-15,GITHUB INC SAN FRANCISCO,20.00,Debit
-2026-07-28,CHATGPT SUBSCRIPTION OPENAI,20.00,Debit
-2026-08-01,SPOTIFY USA 800-555-0199,10.99,Debit
-2026-08-12,NETFLIX.COM LOS GATOS CA,15.49,Debit
-2026-08-15,GITHUB INC SAN FRANCISCO,20.00,Debit
-2026-08-28,CHATGPT SUBSCRIPTION OPENAI,20.00,Debit`;
+// Looks like a real HDFC savings account export: account details on top,
+// day-first dates, Withdrawal and Deposit columns, UPI and e-mandate narrations.
+const SAMPLE_CSV_CONTENT = `Account Name : SAMPLE STUDENT
+Account No : 50100XXXXXX123
+Statement From : 01/07/2026 To : 30/09/2026
+
+Date,Narration,Chq./Ref.No.,Value Dt,Withdrawal Amt.,Deposit Amt.,Closing Balance
+01/07/26,NEFT CR-SBIN0001234-PARENTS-POCKET MONEY,N123456,01/07/26,,"8,000.00","12,450.00"
+03/07/26,UPI-SPOTIFY INDIA-spotify.bdsi@icici-ICIC0DC0099-418412345678-Spotify,418412345678,03/07/26,139.00,,"12,311.00"
+05/07/26,UPI-SWIGGY-swiggy.stores@axb-UTIB0000100-418612345111-Order,418612345111,05/07/26,412.00,,"11,899.00"
+08/07/26,ME DC SI 4XXXXX1234 NETFLIX,0000418812,08/07/26,199.00,,"11,700.00"
+12/07/26,UPI-ZOMATO-zomato-order@ptybl-YESB0PTMUPI-419212345222-Pay,419212345222,12/07/26,286.50,,"11,413.50"
+15/07/26,UPI-AIRTEL PREPAID-airtelpredirect@airtel-AIRP0000001-419512345333-Recharge,419512345333,15/07/26,349.00,,"11,064.50"
+18/07/26,UPI-GOOGLE PLAY-playstore@axisbank-UTIB0000553-419812345444-YouTube,419812345444,18/07/26,129.00,,"10,935.50"
+22/07/26,UPI-RAPIDO-rapido.bike@ybl-YESB0YBLUPI-420212345555-Ride,420212345555,22/07/26,64.00,,"10,871.50"
+03/08/26,UPI-SPOTIFY INDIA-spotify.bdsi@icici-ICIC0DC0099-421512345666-Spotify,421512345666,03/08/26,139.00,,"10,732.50"
+06/08/26,UPI-SWIGGY-swiggy.stores@axb-UTIB0000100-421812345777-Order,421812345777,06/08/26,689.00,,"10,043.50"
+08/08/26,ME DC SI 4XXXXX1234 NETFLIX,0000422012,08/08/26,199.00,,"9,844.50"
+14/08/26,UPI-AIRTEL PREPAID-airtelpredirect@airtel-AIRP0000001-422612345888-Recharge,422612345888,14/08/26,349.00,,"9,495.50"
+18/08/26,UPI-GOOGLE PLAY-playstore@axisbank-UTIB0000553-423012345999-YouTube,423012345999,18/08/26,129.00,,"9,366.50"
+25/08/26,UPI-AMAZON-amazon@apl-UTIB0000100-423712340000-Order,423712340000,25/08/26,"1,249.00",,"8,117.50"
+01/09/26,NEFT CR-SBIN0001234-PARENTS-POCKET MONEY,N123457,01/09/26,,"8,000.00","16,117.50"
+03/09/26,UPI-SPOTIFY INDIA-spotify.bdsi@icici-ICIC0DC0099-424612341111-Spotify,424612341111,03/09/26,139.00,,"15,978.50"
+08/09/26,ME DC SI 4XXXXX1234 NETFLIX,0000425112,08/09/26,199.00,,"15,779.50"
+13/09/26,UPI-AIRTEL PREPAID-airtelpredirect@airtel-AIRP0000001-425612342222-Recharge,425612342222,13/09/26,349.00,,"15,430.50"
+18/09/26,UPI-GOOGLE PLAY-playstore@axisbank-UTIB0000553-426112343333-YouTube,426112343333,18/09/26,129.00,,"15,301.50"
+20/09/26,UPI-SWIGGY-swiggy.stores@axb-UTIB0000100-426312344444-Order,426312344444,20/09/26,355.00,,"14,946.50"`;
+
+const EXCEL_EXTENSIONS = ['.xls', '.xlsx', '.xlsm', '.ods'];
+
+/** Excel files go through the same reader as CSV. Loaded only when needed. */
+async function excelToCsv(file: File): Promise<string> {
+  const { excelBufferToCsv } = await import('@/lib/utils/excelStatement');
+  return excelBufferToCsv(new Uint8Array(await file.arrayBuffer()));
+}
 
 export function StatementDropzone({
   onCsvLoaded,
@@ -51,6 +70,21 @@ export function StatementDropzone({
 
     if (lowerName.endsWith('.pdf')) {
       onPdfLoaded(file);
+      return;
+    }
+
+    if (EXCEL_EXTENSIONS.some((ext) => lowerName.endsWith(ext))) {
+      excelToCsv(file)
+        .then((csv) => {
+          if (!csv.trim()) {
+            setError('This Excel file has no rows in it.');
+            return;
+          }
+          onCsvLoaded(csv, file.name);
+        })
+        .catch(() => {
+          setError("Couldn't open this Excel file. Try saving it again, or download the CSV version from your bank.");
+        });
       return;
     }
 
@@ -71,7 +105,7 @@ export function StatementDropzone({
       return;
     }
 
-    setError('Please upload a valid .csv, .txt, or text-based .pdf statement file.');
+    setError('Upload a CSV, Excel (.xls or .xlsx) or PDF statement.');
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -130,7 +164,7 @@ export function StatementDropzone({
         <input
           ref={fileInputRef}
           type="file"
-          accept=".csv,.txt,.pdf"
+          accept=".csv,.txt,.pdf,.xls,.xlsx,.xlsm,.ods"
           className="hidden"
           onChange={(e) => {
             if (e.target.files && e.target.files.length > 0) {
@@ -150,16 +184,19 @@ export function StatementDropzone({
 
           <div className="space-y-1.5">
             <h3 className="text-base font-semibold text-[hsl(var(--foreground))]">
-              {isProcessingPdf ? 'Extracting Statement PDF...' : 'Upload Statement CSV or PDF'}
+              {isProcessingPdf ? 'Reading your PDF...' : 'Upload a bank or card statement'}
             </h3>
             <p className="text-xs text-[hsl(var(--muted-foreground))] leading-relaxed">
-              Drag and drop your bank or card statement here, or click to browse.
+              Download it from net banking and drop it here, or tap to choose the file.
             </p>
           </div>
 
           <div className="flex items-center justify-center gap-2">
             <Badge variant="outline" size="sm" className="gap-1 text-[11px]">
-              <FileSpreadsheet className="w-3 h-3 text-[hsl(var(--primary))]" /> CSV / TXT
+              <FileSpreadsheet className="w-3 h-3 text-[hsl(var(--primary))]" /> CSV
+            </Badge>
+            <Badge variant="outline" size="sm" className="gap-1 text-[11px]">
+              <FileSpreadsheet className="w-3 h-3 text-[hsl(var(--primary))]" /> Excel
             </Badge>
             <Badge variant="outline" size="sm" className="gap-1 text-[11px]">
               <FileType className="w-3 h-3 text-[hsl(var(--primary))]" /> Digital PDF
@@ -186,8 +223,8 @@ export function StatementDropzone({
             Your file stays on your device
           </div>
           <p className="text-[11px] leading-relaxed">
-            Sweep reads your CSV or PDF right here in your browser. Nothing is uploaded. Other
-            charges are ignored, and only the subscriptions you pick get added.
+            Sweep reads the file right here on your phone or laptop. Nothing is uploaded. Money
+            coming in is ignored, and only the subscriptions you pick get added.
           </p>
         </div>
       </div>

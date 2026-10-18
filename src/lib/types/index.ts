@@ -290,9 +290,13 @@ export interface RecurringCandidate {
 export interface CsvColumnMapping {
   dateColumn: string;
   descriptionColumn: string;
+  /** Money-out column. For statements with Withdrawal/Deposit columns this is the withdrawal one. */
   amountColumn: string;
   debitColumn?: string;
+  /** Money-in column, when the statement splits debits and credits into two columns. */
   creditColumn?: string;
+  /** Column holding Dr/Cr or Debit/Credit per row, when there is a single amount column. */
+  typeColumn?: string;
 }
 
 // -----------------------------------------------------------------------------

@@ -5,274 +5,196 @@ import {
   RecurringCandidate,
   ValueRating,
 } from '../types';
-import { addDays, addMonths, addYears, differenceInDays, isBefore, parseISO, format } from 'date-fns';
-import { clusterTransactionsBySimilarity } from './merchantMatcher';
+import { differenceInDays, parseISO } from 'date-fns';
+import { clusterTransactionsBySimilarity, findBrand } from './merchantMatcher';
+import { rollForwardRenewalDate } from './dates';
 
-const KNOWN_SUBSCRIPTION_BRANDS = [
-  'spotify',
-  'netflix',
-  'github',
-  'notion',
-  'linear',
-  'figma',
-  'openai',
-  'chatgpt',
-  'claude',
-  'cursor',
-  'vercel',
-  'supabase',
-  'aws',
-  'amazon',
-  'youtube',
-  'google',
-  'apple',
-  'icloud',
-  'disney',
-  'hulu',
-  'max (hbo)',
-  'adobe',
-  'slack',
-  'zoom',
-  'loom',
-  'dropbox',
-  'nytimes',
-  'medium',
-  'substack',
-  'strava',
-  'planet fitness',
-  'equinox',
-  'whoop',
-  'oura',
-  'audible',
-  'playstation',
-  'xbox',
-  '1password',
-  'bitwarden',
-  'proton',
+interface Cadence {
+  cycle: BillingCycle;
+  days: number;
+  tolerance: number;
+}
+
+const CADENCES: Cadence[] = [
+  { cycle: 'custom', days: 7, tolerance: 2 },
+  { cycle: 'monthly', days: 30, tolerance: 5 },
+  { cycle: 'quarterly', days: 91, tolerance: 12 },
+  { cycle: 'yearly', days: 365, tolerance: 25 },
 ];
 
+/** Median, so one skipped month (60 days) doesn't break a monthly pattern */
+function median(nums: number[]): number {
+  const s = [...nums].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+function matchCadence(intervals: number[]): { cadence: Cadence; regular: boolean } | null {
+  if (intervals.length === 0) return null;
+  const med = median(intervals);
+  const cadence = CADENCES.find((c) => Math.abs(med - c.days) <= c.tolerance);
+  if (!cadence) return null;
+  // Regular when each gap is one cycle, or a whole number of cycles (a missed month)
+  const regular = intervals.every((gap) => {
+    const k = Math.max(1, Math.round(gap / cadence.days));
+    return k <= 3 && Math.abs(gap - k * cadence.days) <= cadence.tolerance * k;
+  });
+  return { cadence, regular };
+}
+
+/** Amounts the same within 15%, or one price change (e.g. 129 -> 149) */
+function amountsConsistent(amounts: number[]): boolean {
+  const min = Math.min(...amounts);
+  const max = Math.max(...amounts);
+  if (min <= 0) return false;
+  if (max / min <= 1.15) return true;
+  // A single step up or down that then stays put is a price change
+  let changes = 0;
+  for (let i = 1; i < amounts.length; i++) {
+    if (Math.abs(amounts[i] - amounts[i - 1]) / amounts[i - 1] > 0.05) changes++;
+  }
+  return changes <= 1 && max / min <= 1.6;
+}
+
+/** Split a merchant's charges into price groups, e.g. two Google Play subscriptions */
+function splitByAmount(txs: NormalizedTransaction[]): NormalizedTransaction[][] {
+  const sorted = [...txs].sort((a, b) => a.amount - b.amount);
+  const groups: NormalizedTransaction[][] = [];
+  for (const tx of sorted) {
+    const g = groups[groups.length - 1];
+    if (g && tx.amount / g[0].amount <= 1.1) g.push(tx);
+    else groups.push([tx]);
+  }
+  return groups.map((g) => g.sort((a, b) => a.date.localeCompare(b.date)));
+}
+
 /**
- * Detects recurring subscription candidates using fuzzy descriptor clustering and interval analysis
+ * Finds recurring payments in a list of money-out transactions.
+ * Everyday spending (food orders, rides, shopping) has changing amounts and
+ * uneven gaps, so it is dropped instead of being suggested as a subscription.
  */
 export function detectRecurringCandidates(
   transactions: NormalizedTransaction[],
   categories: Category[] = [],
-  currency: string = 'USD'
+  currency: string = 'INR'
 ): RecurringCandidate[] {
   if (transactions.length === 0) return [];
 
-  // Group transactions using intelligent fuzzy descriptor clustering
-  const merchantGroups = clusterTransactionsBySimilarity(transactions);
-
+  const groups = clusterTransactionsBySimilarity(transactions);
   const candidates: RecurringCandidate[] = [];
 
-  merchantGroups.forEach((group, merchantKey) => {
-    // Sort transactions chronologically
-    const sortedGroup = [...group].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
+  groups.forEach((group, merchantKey) => {
+    const sorted = [...group].sort((a, b) => a.date.localeCompare(b.date));
+    const brand = findBrand(sorted[0].rawDescription || sorted[0].cleanMerchant);
+    const isSubBrand = brand?.subscription === true;
+    // Food delivery, shopping and rides: only a near-identical amount repeating
+    // on a steady cycle (e.g. a meal plan) counts. Two similar orders don't.
+    const isEverydayBrand = brand?.subscription === false;
 
-    const isRecognizedBrand = KNOWN_SUBSCRIPTION_BRANDS.some((brand) =>
-      merchantKey.includes(brand)
-    );
-
-    // If only 1 transaction and not a recognized recurring brand, ignore one-off charge
-    if (sortedGroup.length < 2 && !isRecognizedBrand) {
-      return;
-    }
-
-    const firstTx = sortedGroup[0];
-    const lastTx = sortedGroup[sortedGroup.length - 1];
-    const amounts = sortedGroup.map((t) => t.amount);
-    const avgAmount = Math.round((amounts.reduce((a, b) => a + b, 0) / amounts.length) * 100) / 100;
-    const latestAmount = lastTx.amount;
-
-    // Determine Cadence & Intervals
-    let billingCycle: BillingCycle = 'monthly';
-    let frequencyDays = 30;
-    let confidence: 'high' | 'medium' | 'low' = 'low';
-
-    if (sortedGroup.length >= 2) {
+    const evaluate = (txs: NormalizedTransaction[], label: string, suffix?: string) => {
+      const amounts = txs.map((t) => t.amount);
       const intervals: number[] = [];
-      for (let i = 1; i < sortedGroup.length; i++) {
-        const diff = differenceInDays(
-          parseISO(sortedGroup[i].date),
-          parseISO(sortedGroup[i - 1].date)
-        );
-        intervals.push(diff);
+      for (let i = 1; i < txs.length; i++) {
+        intervals.push(differenceInDays(parseISO(txs[i].date), parseISO(txs[i - 1].date)));
       }
+      // Same-day duplicates (a retried payment) shouldn't count as a cycle
+      const gaps = intervals.filter((g) => g > 1);
+      const match = matchCadence(gaps);
+      const stable = amountsConsistent(amounts);
 
-      const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      let confidence: 'high' | 'medium' | 'low';
+      let cycle: BillingCycle = 'monthly';
+      let days = 30;
 
-      if (avgInterval >= 25 && avgInterval <= 35) {
-        billingCycle = 'monthly';
-        frequencyDays = 30;
-        confidence = intervals.every((inv) => Math.abs(inv - 30) <= 5) ? 'high' : 'medium';
-      } else if (avgInterval >= 80 && avgInterval <= 100) {
-        billingCycle = 'quarterly';
-        frequencyDays = 90;
+      if (txs.length === 1) {
+        if (!isSubBrand) return false;
         confidence = 'medium';
-      } else if (avgInterval >= 340 && avgInterval <= 380) {
-        billingCycle = 'yearly';
-        frequencyDays = 365;
-        confidence = 'high';
-      } else if (avgInterval >= 6 && avgInterval <= 8) {
-        // Weekly
-        billingCycle = 'custom';
-        frequencyDays = 7;
+      } else if (isEverydayBrand && (txs.length < 3 || !match?.regular || Math.max(...amounts) / Math.min(...amounts) > 1.03)) {
+        return false;
+      } else if (match && stable) {
+        cycle = match.cadence.cycle;
+        days = match.cadence.days;
+        confidence = match.regular && (txs.length >= 3 || isSubBrand) ? 'high' : 'medium';
+      } else if (isSubBrand && stable) {
         confidence = 'medium';
-      } else {
-        billingCycle = 'monthly';
-        frequencyDays = 30;
+      } else if (isSubBrand) {
         confidence = 'low';
-      }
-
-      // Check amount consistency
-      const maxAmountDiff = Math.max(...amounts) - Math.min(...amounts);
-      if (maxAmountDiff === 0 && confidence !== 'low') {
-        confidence = 'high';
-      }
-    } else {
-      // Single transaction of known brand
-      billingCycle = 'monthly';
-      frequencyDays = 30;
-      confidence = 'medium';
-    }
-
-    // Estimate Next Renewal Date
-    const estimatedNextRenewal = calculateEstimatedNextRenewal(lastTx.date, billingCycle, frequencyDays);
-
-    // Suggest Category
-    const suggestedCategory = suggestCategoryForMerchant(sortedGroup[0].cleanMerchant, categories);
-
-    // Initial Value Rating Guess
-    let valueRating: ValueRating = 'useful';
-    if (['github', '1password', 'bitwarden', 'proton', 'aws'].some((b) => merchantKey.includes(b))) {
-      valueRating = 'essential';
-    }
-
-    candidates.push({
-      id: `candidate-${merchantKey.replace(/[^a-z0-9]/g, '-')}-${Date.now()}`,
-      merchantName: sortedGroup[0].cleanMerchant,
-      amount: latestAmount || avgAmount,
-      currency,
-      billingCycle,
-      frequencyDays,
-      confidence,
-      transactionCount: sortedGroup.length,
-      firstDate: firstTx.date,
-      lastDate: lastTx.date,
-      estimatedNextRenewal,
-      matchedTransactions: sortedGroup,
-      suggestedCategoryId: suggestedCategory?.id || null,
-      valueRating,
-      selected: confidence === 'high' || confidence === 'medium',
-    });
-  });
-
-  // Sort candidates by confidence (high -> medium -> low), then by amount descending
-  return candidates.sort((a, b) => {
-    const confWeight = { high: 3, medium: 2, low: 1 };
-    if (confWeight[b.confidence] !== confWeight[a.confidence]) {
-      return confWeight[b.confidence] - confWeight[a.confidence];
-    }
-    return b.amount - a.amount;
-  });
-}
-
-/**
- * Calculates estimated next renewal date projected forward into the future
- */
-function calculateEstimatedNextRenewal(
-  lastDateStr: string,
-  billingCycle: BillingCycle,
-  customDays = 30
-): string {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let nextDate = parseISO(lastDateStr);
-
-    // Roll forward until it lands in the future
-    while (isBefore(nextDate, today)) {
-      if (billingCycle === 'monthly') {
-        nextDate = addMonths(nextDate, 1);
-      } else if (billingCycle === 'quarterly') {
-        nextDate = addMonths(nextDate, 3);
-      } else if (billingCycle === 'yearly') {
-        nextDate = addYears(nextDate, 1);
       } else {
-        nextDate = addDays(nextDate, customDays || 30);
+        return false; // irregular, changing amounts: everyday spending
       }
-    }
 
-    return format(nextDate, 'yyyy-MM-dd');
-  } catch {
-    return format(addMonths(new Date(), 1), 'yyyy-MM-dd');
-  }
+      const first = txs[0];
+      const last = txs[txs.length - 1];
+      const latestAmount = last.amount;
+      const name = suffix ? `${label} (${suffix})` : label;
+
+      let valueRating: ValueRating = 'useful';
+      if (/github|1password|bitwarden|proton|aws|airtel|jio|^vi$|act fibernet|google one|icloud/i.test(label)) {
+        valueRating = 'essential';
+      }
+
+      candidates.push({
+        id: `candidate-${merchantKey.replace(/[^a-z0-9]/g, '-')}-${suffix || 'all'}-${first.date}`,
+        merchantName: name,
+        amount: latestAmount,
+        currency,
+        billingCycle: cycle,
+        frequencyDays: days,
+        confidence,
+        transactionCount: txs.length,
+        firstDate: first.date,
+        lastDate: last.date,
+        estimatedNextRenewal: rollForwardRenewalDate(last.date, cycle, days),
+        matchedTransactions: txs,
+        suggestedCategoryId: suggestCategoryForMerchant(label, categories)?.id || null,
+        valueRating,
+        selected: confidence !== 'low',
+      });
+      return true;
+    };
+
+    const label = sorted[0].cleanMerchant;
+    if (evaluate(sorted, label)) return;
+
+    // The whole group didn't look recurring. Try each price group on its own
+    // (two plans from the same store, or a ₹199 plan among random orders).
+    // A price group pulled out of a mixed list needs 3+ charges, so two orders
+    // that happen to cost about the same are not mistaken for a plan.
+    const priceGroups = splitByAmount(sorted).filter((g) => g.length >= (isSubBrand ? 1 : 3));
+    if (priceGroups.length === 0 || priceGroups.length === sorted.length) return;
+    const multiple = priceGroups.length > 1;
+    for (const g of priceGroups) {
+      const priceLabel = multiple ? `${currency === 'INR' ? '₹' : ''}${Math.round(g[g.length - 1].amount)}` : undefined;
+      evaluate(g, label, priceLabel);
+    }
+  });
+
+  const weight = { high: 3, medium: 2, low: 1 };
+  return candidates.sort((a, b) =>
+    weight[b.confidence] !== weight[a.confidence] ? weight[b.confidence] - weight[a.confidence] : b.amount - a.amount
+  );
 }
 
 /**
  * Matches category based on merchant name
  */
-export function suggestCategoryForMerchant(
-  merchantName: string,
-  categories: Category[]
-): Category | null {
+export function suggestCategoryForMerchant(merchantName: string, categories: Category[]): Category | null {
   const lower = merchantName.toLowerCase();
 
-  const slugMap: Record<string, string> = {
-    // Software & Dev
-    github: 'software-dev',
-    vercel: 'software-dev',
-    cursor: 'software-dev',
-    linear: 'software-dev',
-    openai: 'software-dev',
-    claude: 'software-dev',
-    chatgpt: 'software-dev',
-    figma: 'software-dev',
-    // Infrastructure & Cloud
-    aws: 'infra-cloud',
-    supabase: 'infra-cloud',
-    google: 'infra-cloud',
-    cloudflare: 'infra-cloud',
-    digitalocean: 'infra-cloud',
-    // Productivity & Notes
-    notion: 'productivity',
-    slack: 'productivity',
-    zoom: 'productivity',
-    loom: 'productivity',
-    dropbox: 'productivity',
-    // Media & Reading
-    spotify: 'media-reading',
-    netflix: 'media-reading',
-    youtube: 'media-reading',
-    disney: 'media-reading',
-    hulu: 'media-reading',
-    nytimes: 'media-reading',
-    medium: 'media-reading',
-    substack: 'media-reading',
-    audible: 'media-reading',
-    // Health & Routine
-    gym: 'health-routine',
-    fitness: 'health-routine',
-    strava: 'health-routine',
-    whoop: 'health-routine',
-    oura: 'health-routine',
-    // Utilities & Sync
-    '1password': 'utilities-sync',
-    bitwarden: 'utilities-sync',
-    proton: 'utilities-sync',
-    icloud: 'utilities-sync',
-  };
+  const slugMap: [RegExp, string][] = [
+    [/github|vercel|cursor|chatgpt|claude|figma|canva|adobe|notion|linear/, 'software-dev'],
+    [/aws|supabase|digitalocean|hostinger|godaddy|google one|icloud|dropbox/, 'infra-cloud'],
+    [/slack|zoom|microsoft 365|grammarly|1password|bitwarden|proton|nordvpn/, 'productivity'],
+    [/netflix|spotify|youtube|jiohotstar|amazon prime|zee5|sonyliv|jiosaavn|gaana|audible|kindle|apple|medium|substack|disney|max|tata play|google play|xbox|playstation/, 'media-reading'],
+    [/cult\.fit|gym|fitness|duolingo/, 'health-routine'],
+    [/airtel|jio|^vi$|act fibernet|times prime|swiggy one|zomato gold|linkedin/, 'utilities-sync'],
+  ];
 
-  for (const [key, slug] of Object.entries(slugMap)) {
-    if (lower.includes(key)) {
-      const matched = categories.find((c) => c.slug === slug);
+  for (const [re, slug] of slugMap) {
+    if (re.test(lower)) {
+      const matched = categories.find((c) => c.slug === slug || c.slug_aliases?.includes(slug));
       if (matched) return matched;
     }
   }
-
   return null;
 }

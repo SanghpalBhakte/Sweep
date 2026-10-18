@@ -22,6 +22,7 @@ import {
 } from '@/lib/utils/multiAccountDetector';
 import { parsePdfStatement } from '@/lib/utils/pdfParser';
 import { detectRecurringCandidates } from '@/lib/utils/recurringDetector';
+import { rollForwardRenewalDate } from '@/lib/utils/dates';
 import dynamic from 'next/dynamic';
 import { StatementDropzone } from '@/components/import/CsvDropzone';
 import { AddPaymentMethodModal } from '@/components/subscriptions/AddPaymentMethodModal';
@@ -312,11 +313,15 @@ export default function StatementImportPage() {
     setIsImporting(true);
     try {
       for (const item of selected) {
+        // Next charge after the last one seen, in the plan's own cycle (yearly stays yearly),
+        // using the cycle the user may have changed on the review screen.
         const nextDate = item.lastDate
-          ? new Date(new Date(item.lastDate).getTime() + 30 * 24 * 60 * 60 * 1000)
-              .toISOString()
-              .split('T')[0]
-          : new Date().toISOString().split('T')[0];
+          ? rollForwardRenewalDate(
+              item.lastDate,
+              item.billingCycle,
+              item.billingCycle === 'custom' ? item.frequencyDays : undefined
+            )
+          : item.estimatedNextRenewal;
 
         await addSubscription({
           name: item.merchantName,

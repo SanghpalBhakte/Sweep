@@ -1,52 +1,97 @@
 import { CsvColumnMapping, NormalizedTransaction } from '../types';
 import { normalizeMerchantDescriptor } from './merchantMatcher';
+import { detectDateOrder, headerWords, parseMoney, parseStatementDate } from './statementParsing';
+
+const DATE_WORDS = ['date', 'dt', 'posted', 'posting', 'booking'];
+const MONEY_WORDS = ['amount', 'amt', 'debit', 'credit', 'withdrawal', 'withdrawals', 'deposit', 'deposits', 'dr', 'cr', 'inr', 'charge', 'spent'];
+const DESC_WORDS = ['narration', 'description', 'particulars', 'details', 'remarks', 'merchant', 'payee', 'memo', 'name', 'transaction'];
 
 /**
- * Robust, client-side CSV parser supporting quoted cells, commas, tabs, and semicolons.
+ * Reads CSV text into header + row objects. Indian bank exports usually start
+ * with a block of account details, so the real header row is found by looking
+ * for a row that names a date column and a money column.
  */
 export function parseRawCsv(csvText: string): { headers: string[]; rows: Record<string, string>[] } {
-  // Strip BOM if present
-  const cleanText = csvText.replace(/^\uFEFF/, '').trim();
+  const cleanText = csvText.replace(/^﻿/, '').trim();
   if (!cleanText) return { headers: [], rows: [] };
 
-  // Detect delimiter (comma, semicolon, tab)
-  const firstLine = cleanText.split(/\r\n|\n/)[0];
-  const commaCount = (firstLine.match(/,/g) || []).length;
-  const semiCount = (firstLine.match(/;/g) || []).length;
-  const tabCount = (firstLine.match(/\t/g) || []).length;
-
-  let delimiter = ',';
-  if (semiCount > commaCount && semiCount > tabCount) delimiter = ';';
-  if (tabCount > commaCount && tabCount > semiCount) delimiter = '\t';
-
+  const delimiter = detectDelimiter(cleanText);
   const lines = parseCsvLines(cleanText, delimiter);
   if (lines.length === 0) return { headers: [], rows: [] };
 
-  const rawHeaders = lines[0].map((h) => h.trim());
-  // Ensure non-empty headers
-  const headers = rawHeaders.map((h, i) => (h ? h : `Column_${i + 1}`));
+  return rowsFromTable(lines);
+}
+
+/** Same as parseRawCsv but for a table that is already split into cells (Excel files). */
+export function rowsFromTable(lines: string[][]): { headers: string[]; rows: Record<string, string>[] } {
+  const table = lines
+    .map((cells) => cells.map((c) => (c === null || c === undefined ? '' : String(c))))
+    .filter((cells) => cells.some((c) => c.trim().length > 0));
+  if (table.length === 0) return { headers: [], rows: [] };
+
+  const headerIndex = findHeaderRow(table);
+  const rawHeaders = table[headerIndex].map((h) => h.replace(/\s+/g, ' ').trim());
+
+  // Unique, non-empty header names
+  const seen: Record<string, number> = {};
+  const headers = rawHeaders.map((h, i) => {
+    const base = h || `Column ${i + 1}`;
+    seen[base] = (seen[base] || 0) + 1;
+    return seen[base] > 1 ? `${base} (${seen[base]})` : base;
+  });
 
   const rows: Record<string, string>[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const rowValues = lines[i];
-    // Skip empty lines
-    if (rowValues.length === 0 || (rowValues.length === 1 && !rowValues[0].trim())) {
-      continue;
-    }
-
-    const rowObj: Record<string, string> = {};
+  for (let i = headerIndex + 1; i < table.length; i++) {
+    const values = table[i];
+    // Banks repeat the header row on every page of an export
+    if (values.map((v) => v.trim()).join('|') === rawHeaders.join('|')) continue;
+    const row: Record<string, string> = {};
     headers.forEach((header, index) => {
-      rowObj[header] = (rowValues[index] || '').trim();
+      row[header] = (values[index] || '').trim();
     });
-    rows.push(rowObj);
+    rows.push(row);
   }
 
   return { headers, rows };
 }
 
+function detectDelimiter(text: string): string {
+  // Look at several lines, since the first one is often "Account Name : ..."
+  const sample = text.split(/\r\n|\n/).slice(0, 40);
+  const score = (d: string) =>
+    sample.reduce((best, line) => Math.max(best, line.split(d).length - 1), 0);
+  const candidates: [string, number][] = [
+    [',', score(',')],
+    [';', score(';')],
+    ['\t', score('\t')],
+    ['|', score('|')],
+  ];
+  candidates.sort((a, b) => b[1] - a[1]);
+  return candidates[0][1] > 0 ? candidates[0][0] : ',';
+}
+
+function isHeaderLike(cells: string[]): boolean {
+  const words = cells.map((c) => headerWords(c));
+  const hasDate = words.some((w) => w.some((x) => DATE_WORDS.includes(x)));
+  const hasMoney = words.some((w) => w.some((x) => MONEY_WORDS.includes(x)));
+  const filled = cells.filter((c) => c.trim()).length;
+  return hasDate && hasMoney && filled >= 3;
+}
+
+function findHeaderRow(table: string[][]): number {
+  const limit = Math.min(table.length, 60);
+  for (let i = 0; i < limit; i++) {
+    if (isHeaderLike(table[i])) return i;
+  }
+  // No obvious header: use the first row that has at least 3 filled cells
+  for (let i = 0; i < limit; i++) {
+    if (table[i].filter((c) => c.trim()).length >= 3) return i;
+  }
+  return 0;
+}
+
 /**
- * Character-by-character parser handling quoted cells and escape sequences
+ * Character-by-character parser handling quoted cells and escaped quotes
  */
 function parseCsvLines(text: string, delimiter: string): string[][] {
   const result: string[][] = [];
@@ -61,7 +106,7 @@ function parseCsvLines(text: string, delimiter: string): string[][] {
     if (char === '"') {
       if (inQuotes && nextChar === '"') {
         currentCell += '"';
-        i++; // skip escaped quote
+        i++;
       } else {
         inQuotes = !inQuotes;
       }
@@ -69,13 +114,9 @@ function parseCsvLines(text: string, delimiter: string): string[][] {
       currentLine.push(currentCell);
       currentCell = '';
     } else if ((char === '\r' || char === '\n') && !inQuotes) {
-      if (char === '\r' && nextChar === '\n') {
-        i++; // skip \n in CRLF
-      }
+      if (char === '\r' && nextChar === '\n') i++;
       currentLine.push(currentCell);
-      if (currentLine.length > 0 && currentLine.some((c) => c.trim().length > 0)) {
-        result.push(currentLine);
-      }
+      if (currentLine.some((c) => c.trim().length > 0)) result.push(currentLine);
       currentLine = [];
       currentCell = '';
     } else {
@@ -85,189 +126,157 @@ function parseCsvLines(text: string, delimiter: string): string[][] {
 
   if (currentCell.length > 0 || currentLine.length > 0) {
     currentLine.push(currentCell);
-    result.push(currentLine);
+    if (currentLine.some((c) => c.trim().length > 0)) result.push(currentLine);
   }
 
   return result;
 }
 
 /**
- * Auto-detects matching columns based on common bank statement header keywords
+ * Picks the date, description and money columns by matching whole words in the
+ * headers (so "Description" no longer matches "cr", and "Value Dt" is never
+ * taken as an amount). Works for HDFC, SBI, ICICI, Axis, Kotak and card exports.
  */
 export function autoDetectColumnMapping(headers: string[]): CsvColumnMapping {
-  const normalized = headers.map((h) => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
-
-  const findHeader = (keywords: string[]): string => {
-    for (let i = 0; i < headers.length; i++) {
-      const hNorm = normalized[i];
-      const hOrig = headers[i].toLowerCase();
-      if (keywords.some((kw) => hNorm.includes(kw) || hOrig.includes(kw))) {
-        return headers[i];
+  const info = headers.map((h) => ({ h, w: headerWords(h) }));
+  const has = (w: string[], ...keys: string[]) => keys.some((k) => w.includes(k));
+  const pick = (score: (w: string[], h: string) => number): string => {
+    let best = '';
+    let bestScore = 0;
+    for (const { h, w } of info) {
+      const s = score(w, h);
+      if (s > bestScore) {
+        best = h;
+        bestScore = s;
       }
     }
-    return '';
+    return best;
   };
 
-  const dateColumn = findHeader([
-    'date',
-    'transactiondate',
-    'posteddate',
-    'bookingdate',
-    'transdate',
-    'effective',
-    'time',
-  ]) || headers[0] || '';
+  const isBalance = (w: string[]) => has(w, 'balance', 'bal');
+  const isTypeCol = (w: string[], h: string) =>
+    /^(dr\s*\/\s*cr|cr\s*\/\s*dr|debit\s*\/\s*credit|type|txn type|transaction type|dr cr|cr dr)$/i.test(h.trim());
 
-  const descriptionColumn = findHeader([
-    'description',
-    'merchant',
-    'payee',
-    'narrative',
-    'details',
-    'memo',
-    'name',
-    'particulars',
-    'transactiondetails',
-  ]) || (headers.length > 1 ? headers[1] : headers[0] || '');
+  const dateColumn =
+    pick((w) => {
+      if (!has(w, 'date', 'dt')) return 0;
+      if (has(w, 'value')) return 1; // value date only as a last resort
+      if (has(w, 'txn', 'transaction', 'tran', 'trans', 'posting', 'posted', 'booking')) return 4;
+      return 3;
+    }) || headers[0] || '';
 
-  const amountColumn = findHeader([
-    'amount',
-    'debit',
-    'spent',
-    'charge',
-    'value',
-    'total',
-    'transamount',
-  ]) || (headers.length > 2 ? headers[2] : headers[headers.length - 1] || '');
+  const descriptionColumn =
+    pick((w) => {
+      if (isBalance(w)) return 0;
+      if (has(w, 'narration', 'particulars', 'description')) return 5;
+      if (has(w, 'details', 'remarks', 'merchant', 'payee')) return 4;
+      if (has(w, 'memo', 'name')) return 2;
+      if (has(w, 'transaction') && !has(w, 'date', 'dt', 'amount', 'amt', 'id', 'no', 'type')) return 2;
+      return 0;
+    }) || headers.find((h) => h !== dateColumn) || '';
 
-  const debitColumn = findHeader(['debit', 'withdrawal', 'dr', 'moneyout']);
-  const creditColumn = findHeader(['credit', 'deposit', 'cr', 'moneyin']);
+  const typeColumn = info.find(({ h, w }) => isTypeCol(w, h))?.h;
+
+  const debitColumn = pick((w, h) => {
+    if (isBalance(w) || isTypeCol(w, h)) return 0;
+    if (has(w, 'withdrawal', 'withdrawals', 'debit', 'debits', 'paid')) return 3;
+    if (has(w, 'dr') && !has(w, 'cr')) return 2;
+    if (has(w, 'out') && has(w, 'money')) return 3;
+    return 0;
+  });
+
+  const creditColumn = pick((w, h) => {
+    if (isBalance(w) || isTypeCol(w, h)) return 0;
+    if (has(w, 'deposit', 'deposits', 'credit', 'credits', 'received')) return 3;
+    if (has(w, 'cr') && !has(w, 'dr')) return 2;
+    if (has(w, 'in') && has(w, 'money')) return 3;
+    return 0;
+  });
+
+  const plainAmount = pick((w, h) => {
+    if (isBalance(w) || isTypeCol(w, h) || has(w, 'date', 'dt')) return 0;
+    if (has(w, 'withdrawal', 'deposit', 'debit', 'credit')) return 0;
+    if (has(w, 'amount', 'amt')) return 3;
+    if (has(w, 'inr', 'charge', 'spent', 'value') && !has(w, 'date')) return 1;
+    return 0;
+  });
+
+  const split = Boolean(debitColumn && creditColumn && debitColumn !== creditColumn);
+  const amountColumn = split ? debitColumn : plainAmount || debitColumn || '';
 
   return {
     dateColumn,
     descriptionColumn,
     amountColumn,
-    debitColumn: debitColumn || undefined,
-    creditColumn: creditColumn || undefined,
+    debitColumn: split ? debitColumn : undefined,
+    creditColumn: split ? creditColumn : undefined,
+    typeColumn: !split ? typeColumn : undefined,
   };
 }
 
 /**
- * Normalizes raw transaction rows into unified format
+ * Turns rows into money-out transactions only. Credits (salary, refunds,
+ * cashback) are dropped, so they can never show up as subscriptions.
  */
 export function normalizeTransactions(
   rows: Record<string, string>[],
   mapping: CsvColumnMapping
 ): NormalizedTransaction[] {
-  const normalizedList: NormalizedTransaction[] = [];
+  const amountCol = mapping.amountColumn || mapping.debitColumn || '';
+  if (!amountCol || !mapping.dateColumn) return [];
 
-  rows.forEach((row, index) => {
-    const rawDate = row[mapping.dateColumn] || '';
-    const rawDescription = row[mapping.descriptionColumn] || '';
+  const splitMode = Boolean(mapping.creditColumn && mapping.creditColumn !== amountCol);
+  const order = detectDateOrder(rows.map((r) => r[mapping.dateColumn] || ''));
 
-    let amount = 0;
-
-    if (mapping.debitColumn && row[mapping.debitColumn]) {
-      amount = parseAmountNumber(row[mapping.debitColumn]);
-    } else if (mapping.amountColumn && row[mapping.amountColumn]) {
-      amount = parseAmountNumber(row[mapping.amountColumn]);
+  // Single signed column: whichever sign most rows have is money out.
+  // Bank exports show debits as negative; card exports show charges as positive.
+  let negativeIsDebit = true;
+  if (!splitMode) {
+    let neg = 0;
+    let pos = 0;
+    for (const r of rows) {
+      const m = parseMoney(r[amountCol] || '');
+      if (!m || m.value === 0 || m.direction) continue;
+      if (m.negative) neg++;
+      else pos++;
     }
+    negativeIsDebit = neg >= pos;
+  }
 
-    // Skip credits or $0 transfers
-    if (amount <= 0 || isNaN(amount)) return;
+  const out: NormalizedTransaction[] = [];
+  rows.forEach((row, index) => {
+    const date = parseStatementDate(row[mapping.dateColumn] || '', order);
+    if (!date) return; // totals, footers, opening balance rows
 
-    const parsedDate = parseDateString(rawDate);
-    if (!parsedDate) return;
+    const money = parseMoney(row[amountCol] || '');
+    if (!money || money.value <= 0) return;
 
+    let isDebit: boolean;
+    if (splitMode) {
+      isDebit = money.direction !== 'credit';
+    } else {
+      const typeCell = mapping.typeColumn ? (row[mapping.typeColumn] || '').trim().toLowerCase() : '';
+      if (/^(cr|c|credit|cr\.)$/.test(typeCell)) isDebit = false;
+      else if (/^(dr|d|debit|dr\.)$/.test(typeCell)) isDebit = true;
+      else if (money.direction) isDebit = money.direction === 'debit';
+      else isDebit = money.negative === negativeIsDebit;
+    }
+    if (!isDebit) return;
+
+    const rawDescription = (row[mapping.descriptionColumn] || '').trim();
     const cleanMerchant = cleanMerchantDescription(rawDescription);
     if (!cleanMerchant) return;
 
-    normalizedList.push({
-      id: `tx-${index}-${Date.now()}`,
-      date: parsedDate,
+    out.push({
+      id: `tx-${index}-${date}`,
+      date,
       rawDescription,
       cleanMerchant,
-      amount: Math.round(amount * 100) / 100,
+      amount: Math.round(money.value * 100) / 100,
     });
   });
 
-  return normalizedList.sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-}
-
-/**
- * Parses numeric amount strings (handles $14.99, -14.99, 14,99 EUR, (14.99))
- */
-function parseAmountNumber(amountStr: string): number {
-  if (!amountStr) return 0;
-
-  let str = amountStr.trim();
-  const isParentheses = str.startsWith('(') && str.endsWith(')');
-  str = str.replace(/[()]/g, '');
-
-  // Remove currency symbols & letters
-  str = str.replace(/[^0-9.,\-+]/g, '');
-
-  // Handle European comma decimal (e.g., 14,99 or 1.250,50)
-  if (str.includes(',') && !str.includes('.')) {
-    str = str.replace(',', '.');
-  } else if (str.includes(',') && str.includes('.')) {
-    if (str.lastIndexOf(',') > str.lastIndexOf('.')) {
-      str = str.replace(/\./g, '').replace(',', '.');
-    } else {
-      str = str.replace(/,/g, '');
-    }
-  }
-
-  const num = parseFloat(str);
-  if (isNaN(num)) return 0;
-
-  // We consider debit expense amounts as positive numbers
-  return Math.abs(num);
-}
-
-/**
- * Standardize dates into YYYY-MM-DD
- */
-function parseDateString(dateStr: string): string | null {
-  if (!dateStr) return null;
-  const clean = dateStr.trim();
-
-  // If already ISO YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
-    return clean.slice(0, 10);
-  }
-
-  // Handle MM/DD/YYYY or DD/MM/YYYY
-  const slashParts = clean.split(/[/.-]/);
-  if (slashParts.length >= 3) {
-    let [p1, p2, p3] = slashParts;
-    if (p3.length === 2) p3 = `20${p3}`;
-
-    const n1 = parseInt(p1, 10);
-    const n2 = parseInt(p2, 10);
-    const n3 = parseInt(p3, 10);
-
-    if (n3 > 1900 && n1 <= 12 && n2 <= 31) {
-      // MM/DD/YYYY
-      const m = String(n1).padStart(2, '0');
-      const d = String(n2).padStart(2, '0');
-      return `${n3}-${m}-${d}`;
-    } else if (n3 > 1900 && n1 <= 31 && n2 <= 12) {
-      // DD/MM/YYYY
-      const d = String(n1).padStart(2, '0');
-      const m = String(n2).padStart(2, '0');
-      return `${n3}-${m}-${d}`;
-    }
-  }
-
-  const parsed = new Date(clean);
-  if (!isNaN(parsed.getTime())) {
-    return parsed.toISOString().slice(0, 10);
-  }
-
-  return null;
+  return out.sort((a, b) => a.date.localeCompare(b.date));
 }
 
 /**

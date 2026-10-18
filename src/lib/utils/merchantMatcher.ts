@@ -1,7 +1,6 @@
-// =============================================================================
-// Sift - Merchant Descriptor Normalization & Fuzzy Token Matching Engine
-// Path: src/lib/utils/merchantMatcher.ts
-// =============================================================================
+// Turns raw statement narrations into a clean merchant name, and groups
+// transactions from the same merchant. Knows Indian formats (UPI, NACH,
+// e-mandate / standing instructions, POS, IMPS) and card descriptors.
 
 import { NormalizedTransaction } from '../types';
 
@@ -10,134 +9,181 @@ export interface NormalizedDescriptorResult {
   normalized: string;
   canonical: string;
   tokens: string[];
+  /** True when the merchant is a known subscription service */
+  isSubscriptionBrand?: boolean;
 }
 
-// Known brand canonical mappings
-const CANONICAL_BRAND_DICTIONARY: Record<string, string> = {
-  spotify: 'Spotify',
-  netflix: 'Netflix',
-  github: 'GitHub',
-  notion: 'Notion',
-  linear: 'Linear',
-  figma: 'Figma',
-  openai: 'OpenAI (ChatGPT)',
-  chatgpt: 'ChatGPT Plus',
-  anthropic: 'Claude Pro',
-  claude: 'Claude Pro',
-  cursor: 'Cursor AI',
-  vercel: 'Vercel',
-  supabase: 'Supabase',
-  aws: 'AWS Cloud',
-  amazon: 'Amazon Prime',
-  amzn: 'Amazon',
-  youtube: 'YouTube Premium',
-  google: 'Google One',
-  apple: 'Apple Services',
-  icloud: 'iCloud+',
-  disney: 'Disney+',
-  hulu: 'Hulu',
-  hbo: 'Max (HBO)',
-  adobe: 'Adobe Creative Cloud',
-  slack: 'Slack',
-  zoom: 'Zoom',
-  loom: 'Loom',
-  dropbox: 'Dropbox',
-  nytimes: 'NYTimes',
-  medium: 'Medium',
-  substack: 'Substack',
-  strava: 'Strava',
-  gym: 'Gym Membership',
-  planetfitness: 'Planet Fitness',
-  equinox: 'Equinox',
-  whoop: 'Whoop',
-  oura: 'Oura Ring',
-  audible: 'Audible',
-  playstation: 'PlayStation Plus',
-  xbox: 'Xbox Game Pass',
-  nintendo: 'Nintendo Switch Online',
-  '1password': '1Password',
-  bitwarden: 'Bitwarden',
-  proton: 'Proton Mail',
-  uber: 'Uber',
-  lyft: 'Lyft',
-  doordash: 'DoorDash',
-};
+interface Brand {
+  pattern: RegExp; // tested against the squashed lowercase narration (letters+digits only)
+  name: string;
+  subscription: boolean;
+}
 
-// Common payment processor noise prefixes and tokens
-const PROCESSOR_NOISE_PATTERNS = [
-  /^(POS\s+)?(DEBIT|PURCHASE|WITHDRAWAL)\s+/i,
-  /^CARD\s+PURCHASE\s+/i,
-  /^RECURRING\s+(PAYMENT|DEBIT|CHARGE)?\s+/i,
-  /^ACH\s+(DEBIT|PAYMENT|WITHDRAWAL)?\s+/i,
-  /^DIRECT\s+DEBIT\s+/i,
-  /^CHECKCARD\s+\d*\s*/i,
-  /^PAYPAL\s*[*_\-]\s*/i,
-  /^SQ\s*[*_\-]\s*/i,
-  /^TST\s*[*_\-]\s*/i,
-  /^UPI\s*[/_\-]\s*/i,
-  /^APPLE\.COM\/BILL\s*/i,
-  /^GOOGLE\s*[*_\-]\s*/i,
-  /^AMZN\s+(MKTP|DIGITAL|RETAIL)\s*(US|UK|CA|DE)?\s*[*_\-]?\s*/i,
+// Order matters: specific names before generic ones (JioHotstar before Jio,
+// Amazon Prime before Amazon, Google One before Google).
+const BRANDS: Brand[] = [
+  { pattern: /jiohotstar|disneyhotstar|hotstar/, name: 'JioHotstar', subscription: true },
+  { pattern: /netflix/, name: 'Netflix', subscription: true },
+  { pattern: /spotify/, name: 'Spotify', subscription: true },
+  { pattern: /youtube/, name: 'YouTube Premium', subscription: true },
+  { pattern: /primevideo|amazonprime|amznprime|primemembership/, name: 'Amazon Prime', subscription: true },
+  { pattern: /googleone|googlestorage|googleonestorage/, name: 'Google One', subscription: true },
+  { pattern: /googleplay|playstore/, name: 'Google Play', subscription: true },
+  { pattern: /icloud/, name: 'iCloud+', subscription: true },
+  { pattern: /applecombill|appleservices|itunes|applemusic|appletv/, name: 'Apple', subscription: true },
+  { pattern: /zee5/, name: 'ZEE5', subscription: true },
+  { pattern: /sonyliv/, name: 'SonyLIV', subscription: true },
+  { pattern: /jiosaavn/, name: 'JioSaavn', subscription: true },
+  { pattern: /gaana/, name: 'Gaana', subscription: true },
+  { pattern: /audible/, name: 'Audible', subscription: true },
+  { pattern: /kindleunlimited/, name: 'Kindle Unlimited', subscription: true },
+  { pattern: /linkedin/, name: 'LinkedIn Premium', subscription: true },
+  { pattern: /chatgpt|openai/, name: 'ChatGPT', subscription: true },
+  { pattern: /anthropic|claudeai/, name: 'Claude', subscription: true },
+  { pattern: /cursor(ai|sh)?/, name: 'Cursor', subscription: true },
+  { pattern: /github/, name: 'GitHub', subscription: true },
+  { pattern: /notion/, name: 'Notion', subscription: true },
+  { pattern: /figma/, name: 'Figma', subscription: true },
+  { pattern: /canva(?!s)/, name: 'Canva', subscription: true },
+  { pattern: /adobe/, name: 'Adobe', subscription: true },
+  { pattern: /microsoft365|msft365|office365/, name: 'Microsoft 365', subscription: true },
+  { pattern: /xboxgamepass|xbox/, name: 'Xbox Game Pass', subscription: true },
+  { pattern: /playstation|sonyinteractive|psplus/, name: 'PlayStation Plus', subscription: true },
+  { pattern: /duolingo/, name: 'Duolingo', subscription: true },
+  { pattern: /grammarly/, name: 'Grammarly', subscription: true },
+  { pattern: /dropbox/, name: 'Dropbox', subscription: true },
+  { pattern: /1password|onepassword/, name: '1Password', subscription: true },
+  { pattern: /bitwarden/, name: 'Bitwarden', subscription: true },
+  { pattern: /protonmail|protonag|proton(vpn|ch)/, name: 'Proton', subscription: true },
+  { pattern: /nordvpn/, name: 'NordVPN', subscription: true },
+  { pattern: /cultfit|curefit/, name: 'cult.fit', subscription: true },
+  { pattern: /timesprime/, name: 'Times Prime', subscription: true },
+  { pattern: /swiggyone/, name: 'Swiggy One', subscription: true },
+  { pattern: /zomatogold/, name: 'Zomato Gold', subscription: true },
+  { pattern: /tataplay|tatasky/, name: 'Tata Play', subscription: true },
+  { pattern: /actfibernet|atriaconvergence/, name: 'ACT Fibernet', subscription: true },
+  { pattern: /airtel/, name: 'Airtel', subscription: true },
+  { pattern: /reliancejio|jioprepaid|jiopostpaid|jiofiber|^jio|jiomobility/, name: 'Jio', subscription: true },
+  { pattern: /vodafoneidea|vodafone|myvi/, name: 'Vi', subscription: true },
+  { pattern: /medium/, name: 'Medium', subscription: true },
+  { pattern: /substack/, name: 'Substack', subscription: true },
+  { pattern: /vercel/, name: 'Vercel', subscription: true },
+  { pattern: /supabase/, name: 'Supabase', subscription: true },
+  { pattern: /awsamazon|amazonwebservices|awsemea|awsindia/, name: 'AWS', subscription: true },
+  { pattern: /digitalocean/, name: 'DigitalOcean', subscription: true },
+  { pattern: /hostinger/, name: 'Hostinger', subscription: true },
+  { pattern: /godaddy/, name: 'GoDaddy', subscription: true },
+  { pattern: /zoomus|zoomvideo|zoominfo/, name: 'Zoom', subscription: true },
+  { pattern: /slack/, name: 'Slack', subscription: true },
+  { pattern: /hbomax|maxcom/, name: 'Max', subscription: true },
+  { pattern: /disneyplus/, name: 'Disney+', subscription: true },
+  // Everyday merchants: named nicely, but need a real repeating pattern to count
+  { pattern: /swiggy|bundltechnologies/, name: 'Swiggy', subscription: false },
+  { pattern: /zomato/, name: 'Zomato', subscription: false },
+  { pattern: /blinkit|grofers/, name: 'Blinkit', subscription: false },
+  { pattern: /zepto|kiranakart/, name: 'Zepto', subscription: false },
+  { pattern: /bigbasket|supermarketgrocery/, name: 'BigBasket', subscription: false },
+  { pattern: /flipkart/, name: 'Flipkart', subscription: false },
+  { pattern: /myntra/, name: 'Myntra', subscription: false },
+  { pattern: /amazon|amzn/, name: 'Amazon', subscription: false },
+  { pattern: /uber/, name: 'Uber', subscription: false },
+  { pattern: /olacabs|anitechnologies/, name: 'Ola', subscription: false },
+  { pattern: /rapido|roppen/, name: 'Rapido', subscription: false },
+  { pattern: /irctc/, name: 'IRCTC', subscription: false },
+  { pattern: /bookmyshow|bigtreeentertainment/, name: 'BookMyShow', subscription: false },
 ];
 
+// Words and codes that carry no merchant meaning in Indian narrations
+const NOISE_WORDS = new Set([
+  'upi', 'dr', 'cr', 'p2m', 'p2a', 'p2p', 'nach', 'ach', 'ecs', 'tp', 'mandate', 'emandate', 'si', 'me', 'dc',
+  'pos', 'ecom', 'vps', 'ips', 'neft', 'imps', 'rtgs', 'mmt', 'inb', 'bil', 'billpay', 'onl', 'int', 'debit',
+  'credit', 'card', 'purchase', 'payment', 'payments', 'paid', 'pay', 'to', 'from', 'by', 'via', 'for', 'ref',
+  'refno', 'txn', 'trf', 'transfer', 'autopay', 'auto', 'recurring', 'charge', 'charges', 'collect', 'request',
+  'india', 'in', 'ind', 'pvt', 'ltd', 'private', 'limited', 'llp', 'inc', 'com', 'www', 'the', 'and', 'of',
+  'online', 'services', 'service', 'bill', 'na', 'nil', 'others', 'other', 'sent', 'using', 'mumbai', 'bangalore',
+  'bengaluru', 'delhi', 'new', 'gurgaon', 'gurugram', 'noida', 'pune', 'chennai', 'hyderabad', 'kolkata',
+  'ahmedabad', 'singapore', 'dublin', 'irl', 'usa', 'us', 'gb', 'note', 'yesb', 'hdfc', 'icic', 'sbin', 'utib',
+  'kkbk', 'paytm', 'ptys', 'ybl', 'okaxis', 'oksbi', 'okhdfcbank', 'okicici', 'axl', 'ibl', 'apl', 'ptsbi',
+  'yes', 'bank', 'icici', 'axis', 'kotak', 'sbi', 'idfc', 'indusind', 'rbl', 'federal', 'bharat', 'state',
+  'airtelpaymentsbank', 'phonepe', 'gpay', 'googlepay', 'bhim',
+]);
+
+const IFSC = /^[a-z]{4}0[a-z0-9]{6}$/i;
+
+/** Pull the payee out of a UPI / NACH / mandate / POS narration. */
+function extractPayee(raw: string): string {
+  let s = raw.normalize('NFKC');
+
+  // VPAs: keep the handle as a hint ("spotify@yes" -> "spotify"), drop the bank part
+  // (no '-' in the handle, or it would eat the payee name before it)
+  s = s.replace(/([a-z0-9._]+)@[a-z0-9.]+/gi, '$1');
+  // Masked card numbers and long reference numbers
+  s = s.replace(/\b[0-9x*]{4,}x+[0-9x*]*\b/gi, ' ').replace(/\b\d{5,}\b/g, ' ');
+  // Web addresses
+  s = s.replace(/\b(https?:\/\/)?(www\.)?([a-z0-9-]+)\.(com|in|io|net|org|co|app|me|tv)(\/\S*)?\b/gi, ' $3 ');
+
+  const parts = s
+    .split(/[\/\-|:,*#_\\]+|\s{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  const meaningful = parts
+    .map((p) => {
+      const words = p
+        .toLowerCase()
+        .replace(/[^a-z0-9& ]/g, ' ')
+        .split(/\s+/)
+        .filter((w) => w && !NOISE_WORDS.has(w) && !/^\d+$/.test(w) && !IFSC.test(w) && w.length > 1);
+      return words.join(' ');
+    })
+    .filter((p) => p.length >= 3);
+
+  return meaningful[0] || '';
+}
+
+function titleCase(s: string): string {
+  return s
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 4)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+export function findBrand(raw: string): Brand | null {
+  // Drop the bank part of UPI IDs first: "9876543210@airtel" is a person on
+  // Airtel Payments Bank, not an Airtel bill. "spotify@yes" keeps "spotify".
+  const squashed = raw
+    .toLowerCase()
+    .replace(/@[a-z0-9.]+/g, ' ')
+    .replace(/[^a-z0-9]/g, '');
+  for (const b of BRANDS) {
+    if (b.pattern.test(squashed)) return b;
+  }
+  return null;
+}
+
 /**
- * 1. Deterministic Normalization Pipeline
- * Cleans bank descriptor noise while preserving original identity
+ * 1. Deterministic normalization pipeline
  */
 export function normalizeMerchantDescriptor(rawDesc: string): NormalizedDescriptorResult {
   if (!rawDesc || typeof rawDesc !== 'string') {
-    return { raw: '', normalized: '', canonical: 'Unknown Service', tokens: [] };
+    return { raw: '', normalized: '', canonical: 'Unknown', tokens: [] };
   }
-
   const raw = rawDesc.trim();
+  const brand = findBrand(raw);
+  const payee = extractPayee(raw);
 
-  // 1. Unicode normalization (NFKC) & lowercase
-  let text = raw.normalize('NFKC').toLowerCase();
+  const normalized = (brand ? brand.name.toLowerCase() : payee) || raw.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+  const tokens = normalized.split(' ').filter((t) => t.length > 1);
 
-  // 2. Remove common bank & payment processor noise prefixes
-  for (const pattern of PROCESSOR_NOISE_PATTERNS) {
-    text = text.replace(pattern, '');
-  }
+  const canonical = brand ? brand.name : payee ? titleCase(payee) : raw.slice(0, 32);
 
-  // 3. Remove URLs, phone numbers, state/country codes, and reference IDs
-  text = text.replace(/\b(https?:\/\/)?(www\.)?[a-z0-9-]+\.(com|io|net|org|co|app|me)\b/gi, '');
-  text = text.replace(/\b\d{3}[-.\s]??\d{3}[-.\s]??\d{4}\b/g, ''); // phone numbers
-  text = text.replace(/\b(ca|ny|tx|wa|de|us|usa|gb|uk|irl|nld|deu)\b/gi, ''); // region codes
-  text = text.replace(/[*#_\-\\/]+\s*[a-z0-9]+/gi, ' '); // alphanumeric reference codes (e.g. *1A2B3)
-  text = text.replace(/\b\d{4,}\b/g, ''); // 4+ digit reference numbers
-  text = text.replace(/[^a-z0-9\s]/g, ' '); // remove punctuation
-  text = text.replace(/\s{2,}/g, ' ').trim(); // collapse whitespace
-
-  // 4. Tokenization
-  const tokens = text.split(' ').filter((t) => t.length > 1);
-  const normalized = tokens.join(' ') || text;
-
-  // 5. Canonical Brand Matching
-  let canonical = '';
-  for (const [key, brandName] of Object.entries(CANONICAL_BRAND_DICTIONARY)) {
-    if (normalized.includes(key) || tokens.includes(key)) {
-      canonical = brandName;
-      break;
-    }
-  }
-
-  // Fallback: Title-case the first 2-3 significant tokens
-  if (!canonical) {
-    if (tokens.length > 0) {
-      canonical = tokens
-        .slice(0, 3)
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
-    } else {
-      canonical = raw.slice(0, 24);
-    }
-  }
-
-  return { raw, normalized, canonical, tokens };
+  return { raw, normalized, canonical, tokens, isSubscriptionBrand: brand?.subscription ?? false };
 }
 
 /**
- * 2. Deterministic Levenshtein Distance Scorer
+ * 2. Levenshtein distance
  */
 export function calculateLevenshteinDistance(a: string, b: string): number {
   if (a === b) return 0;
@@ -145,123 +191,73 @@ export function calculateLevenshteinDistance(a: string, b: string): number {
   if (b.length === 0) return a.length;
 
   const matrix: number[][] = [];
-
-  for (let i = 0; i <= b.length; i++) {
-    matrix[i] = [i];
-  }
-
-  for (let j = 0; j <= a.length; j++) {
-    matrix[0][j] = j;
-  }
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
 
   for (let i = 1; i <= b.length; i++) {
     for (let j = 1; j <= a.length; j++) {
       if (b.charAt(i - 1) === a.charAt(j - 1)) {
         matrix[i][j] = matrix[i - 1][j - 1];
       } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1, // insertion
-          matrix[i - 1][j] + 1 // deletion
-        );
+        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
       }
     }
   }
-
   return matrix[b.length][a.length];
 }
 
 /**
- * 3. Combined Similarity Scorer (Levenshtein + Token Overlap)
- * Returns a normalized score between 0.0 (unrelated) and 1.0 (exact match)
+ * 3. Similarity score between two merchant strings (0..1)
  */
 export function calculateMerchantSimilarity(strA: string, strB: string): number {
   const normA = normalizeMerchantDescriptor(strA);
   const normB = normalizeMerchantDescriptor(strB);
 
-  // Exact canonical match (e.g. both identified as "Netflix")
-  if (normA.canonical && normA.canonical === normB.canonical) {
-    return 1.0;
-  }
+  if (normA.canonical && normA.canonical.toLowerCase() === normB.canonical.toLowerCase()) return 1.0;
+  if (normA.normalized && normA.normalized === normB.normalized) return 1.0;
 
-  // Exact normalized string match
-  if (normA.normalized === normB.normalized) {
-    return 1.0;
-  }
-
-  // Jaccard Token Overlap (Intersection / Union)
   const setA = new Set(normA.tokens);
   const setB = new Set(normB.tokens);
-
   if (setA.size === 0 || setB.size === 0) return 0;
 
-  const intersection = new Set([...setA].filter((x) => setB.has(x)));
-  const union = new Set([...setA, ...setB]);
-  const tokenJaccardScore = intersection.size / union.size;
+  const intersection = [...setA].filter((x) => setB.has(x)).length;
+  const union = new Set([...setA, ...setB]).size;
+  const jaccard = intersection / union;
 
-  // Normalized Levenshtein similarity on normalized descriptors
   const maxLen = Math.max(normA.normalized.length, normB.normalized.length);
-  const editDist = calculateLevenshteinDistance(normA.normalized, normB.normalized);
-  const levenshteinScore = maxLen > 0 ? 1 - editDist / maxLen : 0;
+  const lev = maxLen > 0 ? 1 - calculateLevenshteinDistance(normA.normalized, normB.normalized) / maxLen : 0;
 
-  // Weighted score: 55% Token Jaccard + 45% String Levenshtein
-  return Math.round((tokenJaccardScore * 0.55 + levenshteinScore * 0.45) * 100) / 100;
+  return Math.round((jaccard * 0.55 + lev * 0.45) * 100) / 100;
 }
 
 /**
- * 4. Fuzzy Clustering of Transactions
- * Clusters transactions by high-confidence merchant similarity (>= 0.78)
+ * 4. Group transactions by merchant
  */
 export function clusterTransactionsBySimilarity(
   transactions: NormalizedTransaction[]
 ): Map<string, NormalizedTransaction[]> {
-  const clusters: { canonicalName: string; transactions: NormalizedTransaction[] }[] = [];
+  const clusters: { key: string; name: string; normalized: string; transactions: NormalizedTransaction[] }[] = [];
 
   for (const tx of transactions) {
-    const descResult = normalizeMerchantDescriptor(tx.rawDescription || tx.cleanMerchant);
-    let matchedCluster: (typeof clusters)[0] | null = null;
+    const d = normalizeMerchantDescriptor(tx.rawDescription || tx.cleanMerchant);
+    const key = d.canonical.toLowerCase();
 
-    for (const cluster of clusters) {
-      // 1. Direct Canonical Brand Match
-      if (
-        descResult.canonical &&
-        cluster.canonicalName.toLowerCase() === descResult.canonical.toLowerCase()
-      ) {
-        matchedCluster = cluster;
-        break;
-      }
-
-      // 2. High-Confidence Fuzzy Similarity Check
-      const score = calculateMerchantSimilarity(cluster.canonicalName, descResult.normalized);
-      if (score >= 0.78) {
-        matchedCluster = cluster;
-        break;
-      }
+    let match = clusters.find((c) => c.key === key);
+    if (!match && !d.isSubscriptionBrand) {
+      match = clusters.find(
+        (c) => calculateLevenshteinDistance(c.normalized, d.normalized) <= Math.max(1, Math.floor(Math.min(c.normalized.length, d.normalized.length) * 0.15))
+      );
     }
 
-    if (matchedCluster) {
-      matchedCluster.transactions.push({
-        ...tx,
-        cleanMerchant: matchedCluster.canonicalName,
-      });
-    } else {
-      clusters.push({
-        canonicalName: descResult.canonical,
-        transactions: [
-          {
-            ...tx,
-            cleanMerchant: descResult.canonical,
-          },
-        ],
-      });
-    }
+    const item = { ...tx, cleanMerchant: match ? match.name : d.canonical };
+    if (match) match.transactions.push(item);
+    else clusters.push({ key, name: d.canonical, normalized: d.normalized, transactions: [item] });
   }
 
-  // Convert to Map format expected by recurring detector
-  const resultMap = new Map<string, NormalizedTransaction[]>();
-  for (const cluster of clusters) {
-    resultMap.set(cluster.canonicalName.toLowerCase(), cluster.transactions);
+  const result = new Map<string, NormalizedTransaction[]>();
+  for (const c of clusters) {
+    const existing = result.get(c.key);
+    result.set(c.key, existing ? existing.concat(c.transactions) : c.transactions);
   }
-
-  return resultMap;
+  return result;
 }
