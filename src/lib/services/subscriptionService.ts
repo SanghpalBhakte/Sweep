@@ -323,7 +323,7 @@ class SubscriptionService {
       updated_at: new Date().toISOString(),
     };
 
-    const all = this.getLocalData(STORAGE_KEYS.SUBSCRIPTIONS, mockSubscriptions);
+    const all = this.getLocalData(STORAGE_KEYS.SUBSCRIPTIONS, [] as Subscription[]);
     const updated = [newSub, ...all];
     this.setLocalData(STORAGE_KEYS.SUBSCRIPTIONS, updated);
     return newSub;
@@ -425,7 +425,7 @@ class SubscriptionService {
       }
     }
 
-    const all = this.getLocalData(STORAGE_KEYS.SUBSCRIPTIONS, mockSubscriptions);
+    const all = this.getLocalData(STORAGE_KEYS.SUBSCRIPTIONS, [] as Subscription[]);
     const updatedList = all.map((s) => (s.id === id ? updatedSub : s));
     this.setLocalData(STORAGE_KEYS.SUBSCRIPTIONS, updatedList);
 
@@ -443,7 +443,7 @@ class SubscriptionService {
       }
     }
 
-    const all = this.getLocalData(STORAGE_KEYS.SUBSCRIPTIONS, mockSubscriptions);
+    const all = this.getLocalData(STORAGE_KEYS.SUBSCRIPTIONS, [] as Subscription[]);
     const updated = all.filter((s) => s.id !== id);
     this.setLocalData(STORAGE_KEYS.SUBSCRIPTIONS, updated);
   }

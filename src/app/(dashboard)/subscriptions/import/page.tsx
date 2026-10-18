@@ -117,8 +117,8 @@ export default function StatementImportPage() {
     (!isMultiAccountBatch && subscriptions.length > 0);
 
   const trendBadgeText = isMultiAccountBatch
-    ? `Statement ${currentBatchNum} of ${totalBatchNum}: price changes will be checked`
-    : 'Checking for price changes against your current subscriptions';
+    ? `Statement ${currentBatchNum} of ${totalBatchNum}`
+    : 'Compared with what you already track';
 
   // Step 1A: CSV File Loaded
   const handleCsvLoaded = (csvContent: string, name: string) => {
@@ -773,8 +773,8 @@ export default function StatementImportPage() {
             </h2>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
               Added <strong>{importedBatchCount} subscription{importedBatchCount === 1 ? '' : 's'}</strong>{' '}
-              from {selectedGroupKey !== 'ALL' ? `Account (${selectedGroupKey})` : 'your statement'} to
-              the Sweep ledger in <strong className="font-mono">{activeBatchCurrency}</strong>.
+              from {selectedGroupKey !== 'ALL' ? `account ${selectedGroupKey}` : 'your statement'}. You&apos;ll
+              get a reminder before each one renews.
             </p>
             <div className="flex items-center justify-center gap-2 flex-wrap pt-1">
               {hasComparisonData ? (
