@@ -11,7 +11,7 @@ export default function manifest(): MetadataRoute.Manifest {
     // Android paints its button bar with this colour in the installed app, so a light
     // value showed a cream strip under the dark bottom nav.
     background_color: '#191516',
-    theme_color: '#5B294A',
+    theme_color: '#191516',
     icons: [
       {
         src: '/icons/icon-192.png',

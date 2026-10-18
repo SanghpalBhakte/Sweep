@@ -315,6 +315,16 @@
     --_shadow-modal:   0 25px 50px -12px rgb(0 0 0 / 0.75);
   }
 
+  /* Tell the browser and Android which scheme we paint, and colour the page
+     canvas itself, so the area behind the phone's button bar is never cream in dark mode */
+  html {
+    color-scheme: light;
+    background-color: hsl(var(--background));
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+
   /* Base body styles */
   body {
     background-color: hsl(var(--background));
