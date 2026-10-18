@@ -41,7 +41,7 @@ enabled = true
 file_size_limit = "50MiB"
 
 [remotes.production]
-project_id = "omdfankhcusjuqdzmxjc"
+project_id = "zsycpokyuqzilptmdcme"
 
 [remotes.production.db.seed]
 enabled = true

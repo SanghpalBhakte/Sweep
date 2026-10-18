@@ -25,7 +25,7 @@ select
     $$
     select
       net.http_post(
-        url := (select coalesce(current_setting('app.settings.supabase_url', true), 'https://omdfankhcusjuqdzmxjc.supabase.co') || '/functions/v1/dispatch-reminders'),
+        url := (select coalesce(current_setting('app.settings.supabase_url', true), 'https://zsycpokyuqzilptmdcme.supabase.co') || '/functions/v1/dispatch-reminders'),
         headers := jsonb_build_object(
           'Content-Type', 'application/json',
           'Authorization', 'Bearer ' || coalesce(current_setting('app.settings.service_role_key', true), '')
