@@ -12,6 +12,8 @@ import { getSafeNext } from '@/lib/utils/safe-redirect';
 import { CheckCircle2, AlertCircle, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
+const GOOGLE_AUTH_ON = process.env.NEXT_PUBLIC_GOOGLE_AUTH === 'on';
+
 function GoogleIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
@@ -109,25 +111,29 @@ function LoginForm() {
       }
     >
       <div className="space-y-4">
-        {/* Google OAuth Button */}
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleGoogleSignIn}
-          isLoading={isGoogleLoading}
-          className="w-full flex items-center justify-center gap-2 text-xs font-medium bg-surface hover:bg-surface-muted"
-        >
-          <GoogleIcon className="w-4 h-4" />
-          <span>Continue with Google</span>
-        </Button>
+        {/* Google sign-in shows only once the Google provider is set up in Supabase
+            (set NEXT_PUBLIC_GOOGLE_AUTH=on in Vercel), so users never hit a dead button */}
+        {GOOGLE_AUTH_ON ? (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleSignIn}
+              isLoading={isGoogleLoading}
+              className="w-full flex items-center justify-center gap-2 text-xs font-medium bg-surface hover:bg-surface-muted"
+            >
+              <GoogleIcon className="w-4 h-4" />
+              <span>Continue with Google</span>
+            </Button>
 
-        {/* Divider */}
-        <div className="relative flex items-center justify-center">
-          <div className="border-t border-border w-full" />
-          <span className="bg-card px-2 text-[11px] text-muted-foreground uppercase tracking-wider relative">
-            or
-          </span>
-        </div>
+            <div className="relative flex items-center justify-center py-1">
+              <div className="absolute inset-x-0 top-1/2 border-t border-border" />
+              <span className="relative bg-card px-2 text-[11px] text-muted-foreground uppercase tracking-wider">
+                or
+              </span>
+            </div>
+          </>
+        ) : null}
 
         {/* Mode Switcher */}
         <div className="grid grid-cols-2 p-1 bg-surface border border-border rounded-lg text-xs">
