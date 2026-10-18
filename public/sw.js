@@ -4,7 +4,7 @@
 // Path: public/sw.js
 // =============================================================================
 
-const CACHE_VERSION = 'sweep-v1.0.2';
+const CACHE_VERSION = 'sweep-v1.0.3';
 const SHELL_CACHE = `sweep-shell-${CACHE_VERSION}`;
 const STATIC_CACHE = `sweep-static-${CACHE_VERSION}`;
 const MEDIA_CACHE = `sweep-media-${CACHE_VERSION}`;
@@ -14,7 +14,6 @@ const CURRENT_CACHES = [SHELL_CACHE, STATIC_CACHE, MEDIA_CACHE];
 // Core essential static offline assets
 const CORE_STATIC_ASSETS = [
   '/',
-  '/manifest.webmanifest',
   '/icons/favicon.svg',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -145,11 +144,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Strategy C: Icons, Images, and Web App Manifest -> StaleWhileRevalidate
+  // The manifest always comes from the network: a cached copy kept the old
+  // cream colours in the installed Android app even after reinstalling
+  if (url.pathname === '/manifest.webmanifest' || url.pathname === '/manifest.json') {
+    return;
+  }
+
+  // Strategy C: Icons and images -> StaleWhileRevalidate
   if (
     url.pathname.startsWith('/icons/') ||
-    url.pathname === '/manifest.webmanifest' ||
-    url.pathname === '/manifest.json' ||
     url.pathname === '/favicon.ico' ||
     url.pathname === '/og-image.png' ||
     request.destination === 'image'
