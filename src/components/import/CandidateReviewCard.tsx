@@ -159,7 +159,9 @@ export function CandidateReviewCard({
               {formatCurrency(candidate.amount, candidate.currency)}
             </div>
             <div className="text-xs text-muted-foreground capitalize">
-              {candidate.billingCycle}
+              {candidate.billingCycle === 'custom'
+                ? `Every ${candidate.frequencyDays} days`
+                : candidate.billingCycle}
             </div>
           </div>
         </div>
@@ -192,7 +194,7 @@ export function CandidateReviewCard({
             {/* Billing Cycle */}
             <div>
               <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                Cadence
+                Repeats
               </label>
               <select
                 value={candidate.billingCycle}
@@ -201,9 +203,12 @@ export function CandidateReviewCard({
                     billingCycle: e.target.value as RecurringCandidate['billingCycle'],
                   })
                 }
-                aria-label="Cadence"
+                aria-label="Repeats"
                 className="sweep-input w-full h-8 px-2 py-1 text-xs"
               >
+                {candidate.billingCycle === 'custom' ? (
+                  <option value="custom">Every {candidate.frequencyDays} days</option>
+                ) : null}
                 <option value="monthly">Monthly</option>
                 <option value="quarterly">Quarterly</option>
                 <option value="yearly">Yearly</option>

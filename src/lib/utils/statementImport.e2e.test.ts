@@ -61,6 +61,13 @@ function check(label: string, txs: NormalizedTransaction[], opts: { exactDebits?
   expect(netflix.billingCycle).toBe('monthly');
   const jio = cands.find((c) => c.merchantName.startsWith('Jio'))!;
   expect(jio.amount).toBe(349);
+  expect(jio.billingCycle, `${label}: Jio is a 28-day plan`).toBe('custom');
+  expect(jio.frequencyDays).toBe(28);
+  const prime = cands.find((c) => c.merchantName.startsWith('Amazon Prime'))!;
+  expect(prime.billingCycle, `${label}: Prime charged once months ago is yearly`).toBe('yearly');
+  for (const c of cands.filter((x) => !['Jio', 'Amazon Prime'].some((n) => x.merchantName.startsWith(n)))) {
+    expect(c.billingCycle, `${label}: ${c.merchantName}`).toBe('monthly');
+  }
   return cands;
 }
 

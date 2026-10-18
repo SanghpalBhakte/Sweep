@@ -23,6 +23,7 @@ import {
 import { parsePdfStatement } from '@/lib/utils/pdfParser';
 import { detectRecurringCandidates } from '@/lib/utils/recurringDetector';
 import { rollForwardRenewalDate } from '@/lib/utils/dates';
+import { normalizeMonthlyAmount } from '@/lib/utils/currency';
 import dynamic from 'next/dynamic';
 import { StatementDropzone } from '@/components/import/CsvDropzone';
 import { AddPaymentMethodModal } from '@/components/subscriptions/AddPaymentMethodModal';
@@ -328,6 +329,8 @@ export default function StatementImportPage() {
           amount: item.amount,
           currency: item.currency,
           billing_cycle: item.billingCycle,
+          // Keep the real length of custom cycles (28-day prepaid, weekly)
+          custom_interval_days: item.billingCycle === 'custom' ? item.frequencyDays : undefined,
           status: 'active',
           category_id: item.suggestedCategoryId,
           start_date: item.firstDate || new Date().toISOString().split('T')[0],
@@ -372,9 +375,15 @@ export default function StatementImportPage() {
   const selectedCount = candidates.filter((c) => c.selected).length;
   const unselectedCount = candidates.filter((c) => !c.selected).length;
   const flaggedCount = candidates.filter((c) => c.confidence === 'low').length;
+  // Per month, so a ₹1,499 yearly plan counts as about ₹125, not ₹1,499
   const selectedMonthlyTotal = candidates
     .filter((c) => c.selected)
-    .reduce((acc, c) => acc + c.amount, 0);
+    .reduce(
+      (acc, c) =>
+        acc +
+        normalizeMonthlyAmount(c.amount, c.billingCycle, c.billingCycle === 'custom' ? c.frequencyDays : undefined),
+      0
+    );
 
   // Filtered candidate list
   const filteredCandidates = candidates.filter((c) => {
@@ -401,7 +410,7 @@ export default function StatementImportPage() {
               Import a bank statement
             </h1>
             <p className="text-xs text-muted-foreground">
-              Upload a CSV or PDF statement and Sweep will find your subscriptions
+              Upload a CSV, Excel or PDF statement and Sweep will find your subscriptions
             </p>
           </div>
         </div>

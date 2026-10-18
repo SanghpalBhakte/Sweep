@@ -29,8 +29,15 @@ function median(nums: number[]): number {
   return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
 }
 
+// Indian prepaid mobile plans (Jio, Airtel, Vi) renew every 28 days, not monthly.
+// Saving them as monthly would make reminders drift two days a month.
+const PREPAID_28: Cadence = { cycle: 'custom', days: 28, tolerance: 1 };
+
 function matchCadence(intervals: number[]): { cadence: Cadence; regular: boolean } | null {
   if (intervals.length === 0) return null;
+  if (intervals.length >= 2 && intervals.every((g) => Math.abs(g - 28) <= 1)) {
+    return { cadence: PREPAID_28, regular: true };
+  }
   const med = median(intervals);
   const cadence = CADENCES.find((c) => Math.abs(med - c.days) <= c.tolerance);
   if (!cadence) return null;
@@ -82,6 +89,8 @@ export function detectRecurringCandidates(
 
   const groups = clusterTransactionsBySimilarity(transactions);
   const candidates: RecurringCandidate[] = [];
+  // Last day the statement covers, to judge one-off charges
+  const statementEnd = transactions.reduce((max, t) => (t.date > max ? t.date : max), transactions[0].date);
 
   groups.forEach((group, merchantKey) => {
     const sorted = [...group].sort((a, b) => a.date.localeCompare(b.date));
@@ -109,6 +118,13 @@ export function detectRecurringCandidates(
       if (txs.length === 1) {
         if (!isSubBrand) return false;
         confidence = 'medium';
+        // Charged once and not again for over a month: not a monthly plan.
+        // Most likely yearly (Amazon Prime ₹1,499, YouTube ₹1,290 and so on).
+        const quietDays = differenceInDays(parseISO(statementEnd), parseISO(txs[0].date));
+        if (quietDays > 35) {
+          cycle = 'yearly';
+          days = 365;
+        }
       } else if (isEverydayBrand && (txs.length < 3 || !match?.regular || Math.max(...amounts) / Math.min(...amounts) > 1.03)) {
         return false;
       } else if (match && stable) {
