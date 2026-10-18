@@ -68,7 +68,9 @@ function StatementLine({ sub, group }: { sub: Subscription; group: GroupKey }) {
   if (group === 'overdue') notes.push(`Was due ${dateText}`);
   else if (group === 'week') notes.push(`${dateText} · ${countdown.label}`);
   else notes.push(dateText);
-  if (sub.is_trial) notes.push('Free trial');
+  const trialDays = getDaysUntil(sub.next_renewal_date);
+  const trialUrgent = sub.is_trial && trialDays >= 0 && trialDays <= 7;
+  if (sub.is_trial && !trialUrgent) notes.push('Free trial');
   notes.push(
     sub.billing_cycle === 'custom'
       ? `every ${sub.custom_interval_days || 30} days`
@@ -103,8 +105,11 @@ function StatementLine({ sub, group }: { sub: Subscription; group: GroupKey }) {
           ) : null}
         </span>
       </span>
-      <span className="mt-0.5 block font-mono text-xs text-muted-foreground pr-24">
+      <span className={cn('mt-0.5 block font-mono text-xs text-muted-foreground', group === 'overdue' ? 'pr-24' : 'pr-1')}>
         {notes.join(' · ')}
+        {trialUrgent ? (
+          <span className="block font-semibold text-danger">Trial ends {countdown.label.toLowerCase()}</span>
+        ) : null}
       </span>
       {group === 'overdue' ? (
         <span aria-hidden="true" className="stamp text-danger absolute right-1 bottom-1">
@@ -119,6 +124,7 @@ export function DashboardClient() {
   const { subscriptions, stats, displayCurrency, exchangeRates, isLoading } = useSubscriptions();
 
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [period, setPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
   const targetCurrency = stats.displayCurrency || displayCurrency || 'USD';
@@ -174,6 +180,13 @@ export function DashboardClient() {
         ),
       }));
   }, [activeSubscriptions, targetCurrency, exchangeRates.rates]);
+
+  const overdueGroup = groups.find((g) => g.key === 'overdue');
+  const weekGroup = groups.find((g) => g.key === 'week');
+  const trialsEnding = activeSubscriptions.filter((s) => {
+    const d = getDaysUntil(s.next_renewal_date);
+    return s.is_trial && d >= 0 && d <= 7;
+  }).length;
 
   // Spend by category (desktop side panel)
   const categorySpend = useMemo(() => {
@@ -308,6 +321,26 @@ export function DashboardClient() {
               ) : null}
             </div>
 
+            {!isLoading && groups.length > 0 ? (
+              <p className="mt-4 flex flex-wrap justify-center gap-x-2 text-center font-mono text-[13px] leading-snug">
+                {overdueGroup ? (
+                  <span className="whitespace-nowrap font-semibold text-danger">
+                    {overdueGroup.items.length} overdue ({formatCurrency(overdueGroup.total, targetCurrency, { showCents: false })})
+                  </span>
+                ) : null}
+                <span className="whitespace-nowrap">
+                  {weekGroup
+                    ? `${weekGroup.items.length} due this week (${formatCurrency(weekGroup.total, targetCurrency, { showCents: false })})`
+                    : 'Nothing due this week'}
+                </span>
+                {trialsEnding > 0 ? (
+                  <span className="whitespace-nowrap font-semibold text-danger">
+                    {trialsEnding} free trial{trialsEnding === 1 ? '' : 's'} ending soon
+                  </span>
+                ) : null}
+              </p>
+            ) : null}
+
             <div className="rule-double mt-5 mb-2" />
 
             {isLoading ? (
@@ -340,9 +373,22 @@ export function DashboardClient() {
                       {formatCurrency(group.total, targetCurrency, { showCents: false })}
                     </span>
                   </div>
-                  {group.items.map((sub) => (
+                  {(group.key !== 'overdue' && group.key !== 'week' && group.items.length > 4 && !expanded[group.key]
+                    ? group.items.slice(0, 3)
+                    : group.items
+                  ).map((sub) => (
                     <StatementLine key={sub.id} sub={sub} group={group.key} />
                   ))}
+                  {group.key !== 'overdue' && group.key !== 'week' && group.items.length > 4 ? (
+                    <button
+                      type="button"
+                      aria-expanded={!!expanded[group.key]}
+                      onClick={() => setExpanded((e) => ({ ...e, [group.key]: !e[group.key] }))}
+                      className="mt-1 flex min-h-[44px] w-full cursor-pointer items-center justify-center font-mono text-[13px] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
+                    >
+                      {expanded[group.key] ? 'Show fewer' : `Show ${group.items.length - 3} more`}
+                    </button>
+                  ) : null}
                 </section>
               ))
             )}
