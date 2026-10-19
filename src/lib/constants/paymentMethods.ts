@@ -41,10 +41,20 @@ export const BUILTIN_PAYMENT_METHODS: PaymentMethod[] = BUILTIN.map(([id, name, 
 
 const BUILTIN_ORDER = new Map(BUILTIN.map(([id], i) => [id, i]));
 
-/** The user's own methods first (default on top, then by name), then the built-in list. */
+const normName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/**
+ * The user's own methods first (default on top, then by name), then the built-in list.
+ * A built-in is left out when the user already has one with the same name, so
+ * "UPI" never shows twice.
+ */
 export function withBuiltinPaymentMethods(own: PaymentMethod[]): PaymentMethod[] {
   const byId = new Map<string, PaymentMethod>();
-  for (const pm of [...own, ...BUILTIN_PAYMENT_METHODS]) if (!byId.has(pm.id)) byId.set(pm.id, pm);
+  for (const pm of own) if (!byId.has(pm.id)) byId.set(pm.id, pm);
+  const ownNames = new Set([...byId.values()].filter((pm) => !BUILTIN_ORDER.has(pm.id)).map((pm) => normName(pm.name)));
+  for (const pm of BUILTIN_PAYMENT_METHODS) {
+    if (!byId.has(pm.id) && !ownNames.has(normName(pm.name))) byId.set(pm.id, pm);
+  }
   const all = [...byId.values()];
   const mine = all
     .filter((pm) => !BUILTIN_ORDER.has(pm.id))

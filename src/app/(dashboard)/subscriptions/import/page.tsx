@@ -599,7 +599,7 @@ export default function StatementImportPage() {
                   </optgroup>
                 ) : null}
                 <optgroup label="Common">
-                  {withBuiltinPaymentMethods([]).map((pm) => (
+                  {withBuiltinPaymentMethods(paymentMethods).filter(isBuiltinPaymentMethod).map((pm) => (
                     <option key={pm.id} value={pm.id}>
                       {pm.name}
                     </option>

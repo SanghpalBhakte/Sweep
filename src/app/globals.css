@@ -2,7 +2,7 @@
 
 /* Desktop sidebar folded to icons. The attribute is set on <html> before first paint
    (see layout.tsx) so a collapsed sidebar never flashes open. */
-@custom-variant collapsed (&:where([data-sidebar="collapsed"] *));
+@custom-variant collapsed (&:is([data-sidebar="collapsed"] *));
 
 /* ================================================================
    SWEEP DESIGN TOKEN SYSTEM

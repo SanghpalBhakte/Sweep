@@ -56,6 +56,7 @@ import {
   UserPlus,
   Check,
 } from 'lucide-react';
+import { isBuiltinPaymentMethod } from '@/lib/constants/paymentMethods';
 import { cn } from '@/lib/utils/cn';
 
 const REMINDER_OFFSET_OPTIONS = [
@@ -95,6 +96,8 @@ export default function SettingsPage() {
     updatePreferences,
   } = useNotifications();
 
+  // Built-in methods (UPI, cards…) are shared and can't be edited, so only list the user's own
+  const ownPaymentMethods = paymentMethods.filter((pm) => !isBuiltinPaymentMethod(pm));
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [restoreSuccess, setRestoreSuccess] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
@@ -687,10 +690,11 @@ export default function SettingsPage() {
             The cards, bank accounts, and wallets you pay with.
           </p>
 
-          {paymentMethods.length === 0 ? (
+          {ownPaymentMethods.length === 0 ? (
             <div className="p-4 rounded-xl bg-surface/50 border border-border text-center space-y-2">
               <p className="text-muted-foreground">
-                No payment methods yet. Add one to see which card pays for what.
+                UPI, cards, net banking and PayPal are already in the list when you add a
+                subscription. Add your own, like a specific card, to tell them apart.
               </p>
               <Button
                 type="button"
@@ -705,7 +709,7 @@ export default function SettingsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {paymentMethods.map((pm) => (
+              {ownPaymentMethods.map((pm) => (
                 <div
                   key={pm.id}
                   className="p-3 rounded-xl bg-surface/50 border border-border flex items-center justify-between gap-3"
