@@ -52,8 +52,8 @@ const OG_IMAGE = {
 };
 
 // Runs before the first paint so the page never flashes the wrong theme.
-// Keep the storage keys in sync with ThemeContext.
-const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('sweep_theme_preference')||localStorage.getItem('sift_theme_preference');if(t!=='paper-ledger'&&t!=='night-shelf'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'night-shelf':'paper-ledger';}var r=document.documentElement;if(t==='night-shelf'){r.classList.add('dark');}else{r.classList.remove('dark');}r.setAttribute('data-theme',t);}catch(e){}})();`;
+// Keep the storage keys in sync with ThemeContext and DesktopSidebar.
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('sweep_theme_preference')||localStorage.getItem('sift_theme_preference');if(t!=='paper-ledger'&&t!=='night-shelf'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'night-shelf':'paper-ledger';}var r=document.documentElement;if(t==='night-shelf'){r.classList.add('dark');}else{r.classList.remove('dark');}r.setAttribute('data-theme',t);if(localStorage.getItem('sweep_sidebar_collapsed')==='1'){r.setAttribute('data-sidebar','collapsed');}}catch(e){}})();`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

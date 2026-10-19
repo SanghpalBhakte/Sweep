@@ -54,15 +54,25 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
+      {/* Toasts use the theme's paper card, not a fixed brown box, and sit just under the top bar */}
       <Toaster
-        position="top-right"
+        position="top-center"
+        gutter={8}
+        containerStyle={{ top: 68 }}
         toastOptions={{
           style: {
-            borderRadius: "12px",
-            background: "#2a2221",
-            color: "#f7efe7",
-            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "10px",
+            background: "hsl(var(--card))",
+            color: "hsl(var(--card-foreground))",
+            border: "1px solid hsl(var(--border))",
+            boxShadow: "var(--_shadow-popover)",
+            fontSize: "14px",
+            lineHeight: "1.4",
+            padding: "10px 14px",
+            maxWidth: "380px",
           },
+          success: { iconTheme: { primary: "hsl(var(--success))", secondary: "hsl(var(--card))" } },
+          error: { iconTheme: { primary: "hsl(var(--danger))", secondary: "hsl(var(--card))" } },
         }}
       />
     </QueryClientProvider>

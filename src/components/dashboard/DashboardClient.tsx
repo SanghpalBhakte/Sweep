@@ -16,7 +16,7 @@ import {
   normalizeMonthlyAmount,
 } from '@/lib/utils/currency';
 import { formatShortDate, getCountdownBadge, getDaysUntil } from '@/lib/utils/dates';
-import { Plus, UploadCloud } from 'lucide-react';
+import { Plus, UploadCloud, ChevronRight, CheckCircle2, WalletCards } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 const RestoreModal = dynamic(
@@ -56,6 +56,50 @@ function TallyLine({
       </span>
     </div>
   );
+}
+
+// A card in the dashboard side column.
+function SidePanel({
+  title,
+  href,
+  linkLabel,
+  children,
+}: {
+  title: string;
+  href?: string;
+  linkLabel?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="sweep-card p-5" aria-label={title}>
+      <div className="flex items-baseline justify-between mb-4">
+        <h2 className="font-serif text-lg leading-tight">{title}</h2>
+        {href ? (
+          <Link
+            href={href}
+            className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+          >
+            {linkLabel}
+          </Link>
+        ) : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function PanelSkeleton({ rows }: { rows: number }) {
+  return (
+    <div className="space-y-3" aria-hidden="true">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="h-4 w-full sweep-skeleton" />
+      ))}
+    </div>
+  );
+}
+
+function PanelEmpty({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm text-muted-foreground">{children}</p>;
 }
 
 // One subscription on the statement.
@@ -188,37 +232,89 @@ export function DashboardClient() {
     return s.is_trial && d >= 0 && d <= 7;
   }).length;
 
-  // Spend by category (desktop side panel)
+  // Each active subscription's cost per month, in the display currency
+  const monthlyCosts = useMemo(
+    () =>
+      activeSubscriptions.map((sub) => ({
+        sub,
+        monthly: convertCurrency(
+          sub.monthly_amount ||
+            normalizeMonthlyAmount(sub.amount, sub.billing_cycle, sub.custom_interval_days),
+          sub.currency || 'USD',
+          targetCurrency,
+          exchangeRates.rates
+        ),
+      })),
+    [activeSubscriptions, targetCurrency, exchangeRates.rates]
+  );
+
+  const share = (monthly: number) =>
+    stats.monthlyTotal > 0 ? Math.min(100, Math.round((monthly / stats.monthlyTotal) * 100)) : 0;
+
+  // Side panels: spend by category, biggest costs, what pays for it, what needs a look
   const categorySpend = useMemo(() => {
-    if (stats.monthlyTotal === 0 || activeSubscriptions.length === 0) return [];
     const map: Record<string, { name: string; color: string; monthly: number }> = {};
-    for (const sub of activeSubscriptions) {
+    for (const { sub, monthly } of monthlyCosts) {
       const id = sub.category_id || 'unassigned';
-      const monthly = convertCurrency(
-        sub.monthly_amount ||
-          normalizeMonthlyAmount(sub.amount, sub.billing_cycle, sub.custom_interval_days),
-        sub.currency || 'USD',
-        targetCurrency,
-        exchangeRates.rates
-      );
-      if (!map[id]) {
-        map[id] = {
-          name: sub.category?.name || 'Unassigned',
-          color: sub.category?.color || 'hsl(var(--chart-5))',
-          monthly: 0,
-        };
-      }
+      map[id] ??= { name: sub.category?.name || 'Unassigned', color: '', monthly: 0 };
       map[id].monthly += monthly;
     }
+    const sorted = Object.entries(map)
+      .map(([id, d]) => ({ id, ...d }))
+      .sort((a, b) => b.monthly - a.monthly);
+    const top =
+      sorted.length <= 5
+        ? sorted
+        : [
+            ...sorted.slice(0, 4),
+            { id: 'other', name: 'Everything else', color: '', monthly: sorted.slice(4).reduce((sum, c) => sum + c.monthly, 0) },
+          ];
+    // Stored category colours are names ('moss', 'ochre') with no CSS behind them,
+    // so colour by rank from the theme's chart palette instead.
+    return top.map((c, i) => ({
+      ...c,
+      color: c.id === 'other' ? 'hsl(var(--muted-foreground))' : `hsl(var(--chart-${i + 1}))`,
+    }));
+  }, [monthlyCosts]);
+
+  const biggestCosts = useMemo(
+    () => [...monthlyCosts].sort((a, b) => b.monthly - a.monthly).slice(0, 4),
+    [monthlyCosts]
+  );
+
+  const paymentSpend = useMemo(() => {
+    const map: Record<string, { name: string; monthly: number; count: number }> = {};
+    for (const { sub, monthly } of monthlyCosts) {
+      if (!sub.payment_method) continue;
+      const pm = sub.payment_method;
+      map[pm.id] ??= { name: pm.last4 ? `${pm.name} ·· ${pm.last4}` : pm.name, monthly: 0, count: 0 };
+      map[pm.id].monthly += monthly;
+      map[pm.id].count += 1;
+    }
     return Object.entries(map)
-      .map(([id, d]) => ({
-        id,
-        ...d,
-        percentage: Math.min(100, Math.round((d.monthly / stats.monthlyTotal) * 100)),
-      }))
+      .map(([id, d]) => ({ id, ...d }))
       .sort((a, b) => b.monthly - a.monthly)
-      .slice(0, 5);
-  }, [activeSubscriptions, stats.monthlyTotal, targetCurrency, exchangeRates.rates]);
+      .slice(0, 4);
+  }, [monthlyCosts]);
+
+  const priceHikes = activeSubscriptions.filter(
+    (s) => s.previous_amount != null && s.amount > s.previous_amount && !s.price_hike_reviewed_at
+  ).length;
+
+  const attention = [
+    overdueGroup
+      ? { key: 'overdue', tone: 'danger', text: `${overdueGroup.items.length} overdue payment${overdueGroup.items.length === 1 ? '' : 's'}`, href: '/subscriptions' }
+      : null,
+    trialsEnding > 0
+      ? { key: 'trials', tone: 'danger', text: `${trialsEnding} free trial${trialsEnding === 1 ? '' : 's'} ending this week`, href: '/subscriptions' }
+      : null,
+    priceHikes > 0
+      ? { key: 'hikes', tone: 'warning', text: `${priceHikes} price increase${priceHikes === 1 ? '' : 's'} to review`, href: '/insights' }
+      : null,
+    stats.cancelCandidateCount > 0
+      ? { key: 'cancel', tone: 'muted', text: `${stats.cancelCandidateCount} marked to cancel`, href: '/insights' }
+      : null,
+  ].filter(Boolean) as { key: string; tone: 'danger' | 'warning' | 'muted'; text: string; href: string }[];
 
   const heroValue = period === 'monthly' ? stats.monthlyTotal : stats.yearlyProjected;
   const now = new Date();
@@ -239,24 +335,33 @@ export function DashboardClient() {
 
   return (
     <div className="animate-in fade-in duration-150">
-      {/* Desktop actions (phones use the Add button in the top bar) */}
-      <div className="hidden sm:flex items-center justify-end gap-2 mb-5">
-        <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="gap-1.5">
-          <UploadCloud className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>Import statement</span>
-        </ButtonLink>
-        <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1.5 px-3">
-          <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>Add subscription</span>
-        </ButtonLink>
+      {/* Page title + actions (phones use the Add button in the top bar) */}
+      <div className="flex items-end justify-between gap-4 mb-6 max-sm:mb-0">
+        <div className="max-sm:sr-only">
+          <h1 className="font-serif text-2xl lg:text-[1.75rem] leading-tight tracking-tight">Overview</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {format(now, 'EEEE, d MMMM')}
+            {!isLoading ? ` · ${activeSubscriptions.length} active` : ''}
+          </p>
+        </div>
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
+          <ButtonLink href="/subscriptions/import" variant="outline" size="sm" className="gap-1.5">
+            <UploadCloud className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Import statement</span>
+          </ButtonLink>
+          <ButtonLink href="/subscriptions/new" variant="primary" size="sm" className="gap-1.5 px-3">
+            <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Add subscription</span>
+          </ButtonLink>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start">
         {/* ─── The statement ─────────────────────────────────────── */}
         <div className="paper-sheet lg:col-span-7">
           <section aria-label="Spending statement" className="paper px-5 sm:px-8 pt-10 pb-10">
             <header className="flex flex-col items-center gap-1 text-center">
-              <h1 className="ink-label">Statement · {format(now, 'MMM yyyy')}</h1>
+              <h2 className="ink-label">Statement · {format(now, 'MMM yyyy')}</h2>
               <p className="font-mono text-xs text-muted-foreground">
                 Printed {format(now, 'd MMM')} · {activeSubscriptions.length} subscription
                 {activeSubscriptions.length === 1 ? '' : 's'}
@@ -434,45 +539,112 @@ export function DashboardClient() {
           </section>
         </div>
 
-        {/* ─── Desktop side note: where the money goes ────────────── */}
-        <aside className="hidden lg:block lg:col-span-5">
-          <div className="sweep-card p-5 space-y-4">
-            <div className="flex items-baseline justify-between">
-              <h2 className="font-serif text-lg">Spend by category</h2>
-              <Link
-                href="/insights"
-                className="font-mono text-xs underline underline-offset-4 text-muted-foreground hover:text-foreground"
-              >
-                Insights
-              </Link>
-            </div>
+        {/* ─── Side column: where the money goes ───────────────────── */}
+        <aside className="hidden md:grid md:grid-cols-2 lg:grid-cols-1 gap-4 lg:col-span-5 lg:sticky lg:top-20 items-start">
+          <SidePanel title="Spend by category" href="/insights" linkLabel="Insights">
+            {isLoading ? (
+              <PanelSkeleton rows={3} />
+            ) : categorySpend.length > 0 ? (
+              <>
+                <div className="flex h-2 w-full overflow-hidden rounded-full bg-surface gap-px" aria-hidden="true">
+                  {categorySpend.map((cat) => (
+                    <div key={cat.id} style={{ width: `${share(cat.monthly)}%`, backgroundColor: cat.color }} />
+                  ))}
+                </div>
+                <ul className="mt-4 space-y-2.5">
+                  {categorySpend.map((cat) => (
+                    <li key={cat.id} className="flex items-center gap-2.5 text-sm">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} aria-hidden="true" />
+                      <span className="truncate flex-1">{cat.name}</span>
+                      <span className="font-mono text-xs tabular-nums text-muted-foreground w-9 text-right">{share(cat.monthly)}%</span>
+                      <span className="font-mono text-xs tabular-nums font-semibold w-16 text-right">
+                        {formatCurrency(cat.monthly, targetCurrency, { showCents: false })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <PanelEmpty>Add a subscription to see where your money goes.</PanelEmpty>
+            )}
+          </SidePanel>
 
-            {categorySpend.length > 0 ? (
-              <div className="space-y-3">
-                {categorySpend.map((cat) => (
-                  <div key={cat.id} className="space-y-1">
-                    <div className="flex items-baseline justify-between text-sm">
-                      <span className="truncate pr-2">{cat.name}</span>
-                      <span className="font-mono text-xs tabular-nums shrink-0">
-                        <span className="text-muted-foreground">{cat.percentage}%</span>{' '}
-                        <span className="font-semibold">
-                          {formatCurrency(cat.monthly, targetCurrency, { showCents: false })}
+          <SidePanel title="Needs a look">
+            {isLoading ? (
+              <PanelSkeleton rows={2} />
+            ) : attention.length > 0 ? (
+              <ul className="-my-1">
+                {attention.map((item) => (
+                  <li key={item.key}>
+                    <Link
+                      href={item.href}
+                      className="group flex items-center gap-2.5 min-h-[40px] text-sm hover:text-foreground transition-colors"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          'w-2 h-2 rounded-full shrink-0',
+                          item.tone === 'danger' ? 'bg-danger' : item.tone === 'warning' ? 'bg-warning' : 'bg-muted-foreground'
+                        )}
+                      />
+                      <span className="flex-1">{item.text}</span>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                <CheckCircle2 className="w-4 h-4 text-success shrink-0" aria-hidden="true" />
+                All clear. Nothing overdue or ending soon.
+              </p>
+            )}
+          </SidePanel>
+
+          <SidePanel title="Biggest costs" href="/subscriptions" linkLabel="All">
+            {isLoading ? (
+              <PanelSkeleton rows={3} />
+            ) : biggestCosts.length > 0 ? (
+              <ol className="space-y-3">
+                {biggestCosts.map(({ sub, monthly }, i) => (
+                  <li key={sub.id}>
+                    <Link href={`/subscriptions/${sub.id}/edit`} className="group block">
+                      <span className="flex items-baseline gap-2.5 text-sm">
+                        <span className="font-mono text-xs text-muted-foreground w-3">{i + 1}</span>
+                        <span className="truncate flex-1 group-hover:underline underline-offset-4">{sub.name}</span>
+                        <span className="font-mono text-xs tabular-nums font-semibold">
+                          {formatCurrency(monthly, targetCurrency, { showCents: false })}
+                          <span className="font-normal text-muted-foreground">/mo</span>
                         </span>
                       </span>
-                    </div>
-                    <div className="h-1.5 w-full bg-surface overflow-hidden" aria-hidden="true">
-                      <div
-                        className="h-full"
-                        style={{ width: `${cat.percentage}%`, backgroundColor: cat.color }}
-                      />
-                    </div>
-                  </div>
+                      <span className="mt-1.5 ml-5.5 block h-1 rounded-full bg-surface overflow-hidden" aria-hidden="true">
+                        <span className="block h-full rounded-full bg-foreground/70" style={{ width: `${share(monthly)}%` }} />
+                      </span>
+                    </Link>
+                  </li>
                 ))}
-              </div>
+              </ol>
             ) : (
-              <p className="py-4 text-center text-xs text-muted-foreground">No categories yet.</p>
+              <PanelEmpty>No active subscriptions yet.</PanelEmpty>
             )}
-          </div>
+          </SidePanel>
+
+          {paymentSpend.length > 0 ? (
+            <SidePanel title="Paid with" href="/settings" linkLabel="Manage">
+              <ul className="space-y-2.5">
+                {paymentSpend.map((pm) => (
+                  <li key={pm.id} className="flex items-center gap-2.5 text-sm">
+                    <WalletCards className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
+                    <span className="truncate flex-1">{pm.name}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{pm.count}</span>
+                    <span className="font-mono text-xs tabular-nums font-semibold w-16 text-right">
+                      {formatCurrency(pm.monthly, targetCurrency, { showCents: false })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </SidePanel>
+          ) : null}
         </aside>
       </div>
     </div>

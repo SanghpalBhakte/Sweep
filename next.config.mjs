@@ -48,11 +48,12 @@ const securityHeaders = [
   // domain). No *.vercel.app: anyone can host a script there. No unsafe-eval:
   // nothing in the app needs it (pdf.js runs with isEvalSupported: false).
   // 'unsafe-inline' stays for the small theme script that prevents a flash.
+  // `next dev` (React Refresh) does need eval, so it is allowed in development only.
   {
     key: 'Content-Security-Policy',
     value: [
       `default-src 'self'`,
-      `script-src 'self' 'unsafe-inline' https://vercel.live`,
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://vercel.live`,
       `style-src 'self' 'unsafe-inline'`,
       `font-src 'self' data:`,
       `img-src 'self' data: blob: https://*.supabase.co https://vercel.com`,

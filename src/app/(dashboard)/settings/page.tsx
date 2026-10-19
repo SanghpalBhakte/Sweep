@@ -2,13 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useTheme } from '@/context/ThemeContext';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Select } from '@/components/ui/Select';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -34,7 +32,6 @@ const CustomBankRulesManager = dynamic(
 );
 import { AddPaymentMethodModal } from '@/components/subscriptions/AddPaymentMethodModal';
 import {
-  Palette,
   Database,
   Download,
   FileSpreadsheet,
@@ -76,7 +73,6 @@ const ANNUAL_BENCHMARK_OPTIONS = [
 ];
 
 export default function SettingsPage() {
-  const { resolvedTheme } = useTheme();
   const { user, isConfigured, signOut, unenrollMFA } = useAuth();
   const {
     subscriptions,
@@ -810,29 +806,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       ) : null}
-
-      {/* ========================================================================= */}
-      {/* 3. APPEARANCE SECTION */}
-      {/* ========================================================================= */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Palette className="w-4 h-4 text-primary" />
-            <CardTitle>Appearance</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3 pt-0">
-          <div className="flex items-center justify-between text-xs">
-            <div>
-              <span className="font-semibold text-foreground block">Theme mode</span>
-              <span className="text-muted-foreground text-[11px]">
-                Light, dark, or match your device.
-              </span>
-            </div>
-            <ThemeToggle />
-          </div>
-        </CardContent>
-      </Card>
 
       {/* ========================================================================= */}
       {/* 4. DATA SECTION (Export, Import, Prominent Restore, Delete All Data) */}
