@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseRawCsv, autoDetectColumnMapping, normalizeTransactions } from './csvParser';
-import { detectRecurringCandidates } from './recurringDetector';
+import { detectRecurringCandidates, suggestCategoryForMerchant } from './recurringDetector';
+import { CANONICAL_CATEGORIES } from '../constants/categories';
 
 // Three months of a typical Indian student's account: real subscriptions mixed with
 // food orders, rent, an EMI, an SIP, petrol and money sent to friends.
@@ -78,5 +79,33 @@ describe('only subscriptions, never daily spending with a fixed amount', () => {
 
   it('keeps an unknown online service that says subscription', () => {
     expect(names.some((n) => n.includes('leetcode'))).toBe(true);
+  });
+});
+
+describe('category is guessed from the service name', () => {
+  const guess = (name: string) => suggestCategoryForMerchant(name, CANONICAL_CATEGORIES)?.slug ?? null;
+
+  it.each([
+    ['Netflix', 'entertainment-games'],
+    ['JioHotstar', 'entertainment-games'],
+    ['Spotify Premium', 'entertainment-games'],
+    ['Coursera Plus', 'education-learning'],
+    ['Physics Wallah', 'education-learning'],
+    ['Swiggy One', 'food-delivery'],
+    ['Amazon Prime', 'entertainment-games'],
+    ['Zerodha', 'finance-money'],
+    ['Airtel Broadband', 'utilities-sync'],
+    ['ChatGPT Plus', 'software-dev'],
+    ['Kindle Unlimited', 'media-reading'],
+    ['Cult.fit', 'health-routine'],
+    ['MakeMyTrip', 'travel-transport'],
+  ])('%s → %s', (name, slug) => {
+    expect(guess(name)).toBe(slug);
+  });
+
+  it('does not match short keywords inside other words', () => {
+    expect(guess('LinkedIn Premium')).toBe('utilities-sync'); // not "emi" → finance
+    expect(guess('Motorola Care')).toBeNull(); // not "ola" → travel
+    expect(guess('Gossip Weekly')).toBeNull(); // not "sip" → finance
   });
 });

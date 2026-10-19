@@ -7,6 +7,8 @@ import {
   mapPaymentMethodToOption,
 } from "@/lib/subscriptions/mappers";
 import type { CategoryRow, PaymentMethodRow } from "@/lib/subscriptions/types";
+import { withBuiltinPaymentMethods } from "@/lib/constants/paymentMethods";
+import type { PaymentMethod } from "@/lib/types";
 import { CANONICAL_CATEGORIES } from "@/lib/constants/categories";
 
 async function fetchCategories(): Promise<CategoryRow[]> {
@@ -48,7 +50,11 @@ async function fetchPaymentMethods(): Promise<PaymentMethodRow[]> {
     throw error;
   }
 
-  return (data as unknown as PaymentMethodRow[]) ?? [];
+  // Built-in methods (UPI, cards, PayPal…) are always offered, even before the
+  // database has its shared rows.
+  return withBuiltinPaymentMethods(
+    ((data as unknown as PaymentMethodRow[]) ?? []) as unknown as PaymentMethod[]
+  ) as unknown as PaymentMethodRow[];
 }
 
 export function useSubscriptionLookups() {

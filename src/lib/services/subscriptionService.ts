@@ -9,6 +9,7 @@ import {
 } from '../types';
 import { defaultProfile, mockCategories, mockSubscriptions } from '../mock/sampleData';
 import { CANONICAL_CATEGORIES } from '../constants/categories';
+import { withBuiltinPaymentMethods } from '../constants/paymentMethods';
 import {
   buildSubscriptionInsertPayload,
   buildSubscriptionUpdatePayload,
@@ -612,7 +613,7 @@ class SubscriptionService {
         if (!error && data) {
           const dbPaymentMethods = data as PaymentMethod[];
           this.setLocalData(STORAGE_KEYS.PAYMENT_METHODS, dbPaymentMethods);
-          return dbPaymentMethods;
+          return withBuiltinPaymentMethods(dbPaymentMethods);
         }
       } catch (err) {
         console.warn('Error querying payment methods from Supabase:', err);
@@ -620,7 +621,7 @@ class SubscriptionService {
     }
 
     const cached = this.getLocalData(STORAGE_KEYS.PAYMENT_METHODS, [] as PaymentMethod[]);
-    return cached;
+    return withBuiltinPaymentMethods(cached);
   }
 
   private normalizePaymentMethodType(raw?: string | null): string {
@@ -631,6 +632,7 @@ class SubscriptionService {
     if (t === 'bank_account' || t === 'bank') return 'bank_account';
     if (t === 'paypal') return 'paypal';
     if (t === 'apple_pay') return 'apple_pay';
+    if (t === 'upi' || t === 'google_pay' || t === 'cash') return t;
     return 'other';
   }
 

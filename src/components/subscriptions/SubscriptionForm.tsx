@@ -31,6 +31,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 import { POPULAR_SERVICES, PopularService } from '@/lib/constants/popularServices';
 import { AddPaymentMethodModal } from './AddPaymentMethodModal';
+import { withBuiltinPaymentMethods, isBuiltinPaymentMethod } from '@/lib/constants/paymentMethods';
+import { suggestCategoryForMerchant } from '@/lib/utils/recurringDetector';
 import { AddCategoryModal } from './AddCategoryModal';
 
 interface SubscriptionFormProps {
@@ -83,9 +85,10 @@ export function SubscriptionForm({
     ) {
       list.push(initialData.payment_method);
     }
-    const unique = Array.from(new Map(list.map((pm) => [pm.id, pm])).values());
-    return unique.sort((a, b) => a.name.localeCompare(b.name));
+    return withBuiltinPaymentMethods(list);
   }, [paymentMethods, extraPaymentMethods, initialData?.payment_method]);
+  const ownPaymentMethods = availablePaymentMethods.filter((pm) => !isBuiltinPaymentMethod(pm));
+  const commonPaymentMethods = availablePaymentMethods.filter(isBuiltinPaymentMethod);
 
   // Core Required Form State
   const [name, setName] = useState(initialData?.name || '');
@@ -108,9 +111,19 @@ export function SubscriptionForm({
 
   // Category & Payment Method State
   const [categoryId, setCategoryId] = useState<string>(initialData?.category_id || '');
+  // New subscriptions get a category guessed from the name until the user picks one.
+  const [categoryTouched, setCategoryTouched] = useState(Boolean(initialData));
+  const [categoryAuto, setCategoryAuto] = useState(false);
   const [paymentMethodId, setPaymentMethodId] = useState<string>(
     initialData?.payment_method_id || paymentMethods.find((pm) => pm.is_default)?.id || ''
   );
+
+  useEffect(() => {
+    if (categoryTouched) return;
+    const guess = name.trim().length >= 2 ? suggestCategoryForMerchant(name, availableCategories) : null;
+    setCategoryId(guess?.id || '');
+    setCategoryAuto(Boolean(guess));
+  }, [name, categoryTouched, availableCategories]);
 
   // Optional / Advanced State
   const hasOptionalInitialData = Boolean(
@@ -254,6 +267,8 @@ export function SubscriptionForm({
       );
       if (matchedCat) {
         setCategoryId(matchedCat.id);
+        setCategoryTouched(true);
+        setCategoryAuto(false);
       }
     }
 
@@ -700,7 +715,11 @@ export function SubscriptionForm({
                   id="subscription-category"
                   aria-label="Category"
                   value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
+                  onChange={(e) => {
+                    setCategoryId(e.target.value);
+                    setCategoryTouched(true);
+                    setCategoryAuto(false);
+                  }}
                 >
                   <option value="">None / Unassigned</option>
                   {availableCategories.map((c) => (
@@ -709,6 +728,9 @@ export function SubscriptionForm({
                     </option>
                   ))}
                 </Select>
+                {categoryAuto ? (
+                  <p className="text-[11px] text-muted-foreground pt-0.5">Picked from the name. Change it if it&apos;s wrong.</p>
+                ) : null}
               </div>
 
               <div className="space-y-1.5">
@@ -733,15 +755,22 @@ export function SubscriptionForm({
                   onChange={(e) => setPaymentMethodId(e.target.value)}
                 >
                   <option value="">None / Unassigned</option>
-                  {availablePaymentMethods.length === 0 ? (
-                    <option value="" disabled>No payment methods yet</option>
-                  ) : (
-                    availablePaymentMethods.map((pm) => (
+                  {ownPaymentMethods.length > 0 ? (
+                    <optgroup label="Yours">
+                      {ownPaymentMethods.map((pm) => (
+                        <option key={pm.id} value={pm.id}>
+                          {pm.name} {pm.last4 ? `(•••• ${pm.last4})` : ''}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ) : null}
+                  <optgroup label="Common">
+                    {commonPaymentMethods.map((pm) => (
                       <option key={pm.id} value={pm.id}>
-                        {pm.name} {pm.last4 ? `(•••• ${pm.last4})` : ''}
+                        {pm.name}
                       </option>
-                    ))
-                  )}
+                    ))}
+                  </optgroup>
                 </Select>
                 {availablePaymentMethods.length === 0 ? (
                   <p className="text-[11px] text-muted-foreground flex items-center justify-between pt-0.5">

@@ -269,19 +269,34 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     await loadAll();
   };
 
+  // Rows saved without a joined category / payment method (offline mode, optimistic
+  // updates) only carry the ids, so fill the objects in from the loaded lists.
+  const hydratedSubscriptions = useMemo(() => {
+    const catById = new Map(categories.map((c) => [c.id, c]));
+    const pmById = new Map(paymentMethods.map((pm) => [pm.id, pm]));
+    return subscriptions.map((sub) => {
+      const category = sub.category ?? (sub.category_id ? catById.get(sub.category_id) : undefined);
+      const payment_method =
+        sub.payment_method ?? (sub.payment_method_id ? pmById.get(sub.payment_method_id) : undefined);
+      return category === sub.category && payment_method === sub.payment_method
+        ? sub
+        : { ...sub, category, payment_method };
+    });
+  }, [subscriptions, categories, paymentMethods]);
+
   // Compute live dashboard stats reactively from current optimistic subscriptions
   const stats: DashboardStats = useMemo(() => {
     return calculateDashboardStats(
-      subscriptions,
+      hydratedSubscriptions,
       displayCurrency,
       exchangeRates.rates
     );
-  }, [subscriptions, displayCurrency, exchangeRates.rates]);
+  }, [hydratedSubscriptions, displayCurrency, exchangeRates.rates]);
 
   return (
     <SubscriptionContext.Provider
       value={{
-        subscriptions,
+        subscriptions: hydratedSubscriptions,
         categories,
         paymentMethods,
         profile,

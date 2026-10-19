@@ -25,7 +25,7 @@ const CADENCES: Cadence[] = [
 // Regular payments that are not subscriptions: loans, rent, investments, bills,
 // cash, fuel and money sent to people. Only checked for merchants we don't know.
 const NOT_A_SUBSCRIPTION =
-  /\b(emi|loan|rent|rental|sip|mutual ?fund|nach|ach ?dr?|insurance|lic|policy|credit ?card|cc ?(bill|payment)|card ?payment|atm|cash|neft|imps|rtgs|salary|fd|rd|ppf|nps|tax|gst|challan|school|college|tuition|fees?|electricity|bescom|msedcl|tneb|water ?bill|gas ?bill|petrol|diesel|fuel|hpcl|iocl|bpcl|indian ?oil|bharat ?petroleum|self ?transfer|own ?account)\b/i;
+  /\b(emi|loan|rent|rental|\bsip\b|mutual ?fund|nach|ach ?dr?|insurance|lic|policy|credit ?card|cc ?(bill|payment)|card ?payment|atm|cash|neft|imps|rtgs|salary|fd|rd|ppf|nps|tax|gst|challan|school|college|tuition|fees?|electricity|bescom|msedcl|tneb|water ?bill|gas ?bill|petrol|diesel|fuel|hpcl|iocl|bpcl|indian ?oil|bharat ?petroleum|self ?transfer|own ?account)\b/i;
 // UPI to a person: phone-number VPAs, Google Pay personal handles, P2P/P2A tags
 const PERSON_TRANSFER = /\b\d{10}@|@ok(axis|sbi|hdfcbank|icici)\b|\bP2[AP]\b/i;
 // An unknown merchant only counts when its narration looks like a paid plan or an
@@ -224,13 +224,21 @@ export function detectRecurringCandidates(
 export function suggestCategoryForMerchant(merchantName: string, categories: Category[]): Category | null {
   const lower = merchantName.toLowerCase();
 
+  // First match wins, so the more specific groups come first.
   const slugMap: [RegExp, string][] = [
-    [/github|vercel|cursor|chatgpt|claude|figma|canva|adobe|notion|linear/, 'software-dev'],
-    [/aws|supabase|digitalocean|hostinger|godaddy|google one|icloud|dropbox/, 'infra-cloud'],
-    [/slack|zoom|microsoft 365|grammarly|1password|bitwarden|proton|nordvpn/, 'productivity'],
-    [/netflix|spotify|youtube|jiohotstar|amazon prime|zee5|sonyliv|jiosaavn|gaana|audible|kindle|apple|medium|substack|disney|max|tata play|google play|xbox|playstation/, 'media-reading'],
-    [/cult\.fit|gym|fitness|duolingo/, 'health-routine'],
-    [/airtel|jio|^vi$|act fibernet|times prime|swiggy one|zomato gold|linkedin/, 'utilities-sync'],
+    [/github|vercel|cursor|chatgpt|openai|claude|anthropic|perplexity|gemini|copilot|figma|canva|adobe|notion|linear|jetbrains|replit|framer|webflow/, 'software-dev'],
+    [/aws|amazon web services|azure|supabase|digitalocean|hostinger|godaddy|namecheap|cloudflare|google one|google workspace|icloud|dropbox|onedrive|backblaze/, 'infra-cloud'],
+    [/slack|zoom|microsoft 365|office 365|grammarly|1password|bitwarden|lastpass|proton|nordvpn|expressvpn|surfshark|todoist|evernote|calendly/, 'productivity'],
+    [/coursera|udemy|unacademy|byju|vedantu|physics ?wallah|\bpw\b|skillshare|masterclass|brilliant\.org|duolingo|khan academy|edx|testbook|adda247|upgrad|scaler|leetcode|codecademy|datacamp|linkedin learning|chegg/, 'education-learning'],
+    [/netflix|jiohotstar|hotstar|disney|prime video|amazon prime|zee5|sonyliv|sony liv|voot|mxplayer|\baha\b|sun ?nxt|hoichoi|altbalaji|\beros\b|youtube|twitch|crunchyroll|mubi|apple tv|\bhbo\b|\bmax\b|tata play|dish ?tv|airtel dth|d2h|spotify|jiosaavn|gaana|wynk|apple music|amazon music|xbox|playstation|psn|steam|nintendo|ea play|ubisoft|epic games|google play|bgmi|discord nitro/, 'entertainment-games'],
+    [/kindle|audible|pocket fm|kuku fm|storytel|scribd|medium|substack|times of india|toi\+|the hindu|indian express|hindustan times|economic times|\bet prime\b|\bmint\b|magzter|readly|nytimes|new york times|washington post|economist|bloomberg/, 'media-reading'],
+    [/cult\.?fit|cultfit|gym|fitness|healthifyme|fittr|strava|headspace|\bcalm\b|practo|pharmeasy|1mg|netmeds|apollo 24|insurance|health/, 'health-routine'],
+    [/swiggy|zomato|blinkit|zepto|instamart|bigbasket|dunzo|eatsure|box8|domino|eazydiner|dineout/, 'food-delivery'],
+    [/amazon(?! web| prime| music)|flipkart|myntra|ajio|nykaa|meesho|tata ?neu|tata cliq|croma|reliance digital|lenskart|urban company|first ?cry|times prime/, 'shopping-commerce'],
+    [/\buber\b|\bola\b|rapido|irctc|makemytrip|goibibo|cleartrip|ixigo|redbus|yatra|airbnb|booking\.com|indigo|air india|vistara|akasa|fastag|\bmetro\b/, 'travel-transport'],
+    [/zerodha|groww|upstox|angel one|\bkite\b|smallcase|cred\b|paytm money|indmoney|et money|kuvera|\bsip\b|mutual fund|\blic\b|policybazaar|acko|digit insurance|loan|\bemi\b|credit card fee|annual fee|bank charge/, 'finance-money'],
+    [/airtel|jio|\bvi\b|vodafone|\bidea\b|bsnl|act fibernet|hathway|excitel|tata sky|broadband|electricity|bescom|tneb|msedcl|water bill|\bgas\b|piped gas|indane|bharat gas|linkedin/, 'utilities-sync'],
+    [/school|tuition|daycare|creche|society maintenance|maintenance|\brent\b|housekeeping|\bmaid\b|nanny|\bpet\b/, 'family-home'],
   ];
 
   for (const [re, slug] of slugMap) {

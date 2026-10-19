@@ -48,7 +48,7 @@ export interface Category {
 
 export interface PaymentMethod {
   id: string;
-  user_id: string;
+  user_id: string | null;
   name: string;
   type: string;
   last4?: string | null;

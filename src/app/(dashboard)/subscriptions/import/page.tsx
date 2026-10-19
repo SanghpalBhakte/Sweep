@@ -57,6 +57,7 @@ import {
   TrendingUp,
   Lock,
 } from 'lucide-react';
+import { isBuiltinPaymentMethod, withBuiltinPaymentMethods } from '@/lib/constants/paymentMethods';
 import { cn } from '@/lib/utils/cn';
 
 type ImportStep = 'upload' | 'account_select' | 'map' | 'review' | 'success';
@@ -588,11 +589,22 @@ export default function StatementImportPage() {
                 className="sweep-input h-8 px-2 py-1 text-xs flex-1 min-w-[140px] max-w-[240px]"
               >
                 <option value="">None / Unassigned</option>
-                {paymentMethods.map((pm) => (
-                  <option key={pm.id} value={pm.id}>
-                    {pm.name} {pm.last4 ? `(•••• ${pm.last4})` : ''}
-                  </option>
-                ))}
+                {paymentMethods.some((pm) => !isBuiltinPaymentMethod(pm)) ? (
+                  <optgroup label="Yours">
+                    {paymentMethods.filter((pm) => !isBuiltinPaymentMethod(pm)).map((pm) => (
+                      <option key={pm.id} value={pm.id}>
+                        {pm.name} {pm.last4 ? `(•••• ${pm.last4})` : ''}
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : null}
+                <optgroup label="Common">
+                  {withBuiltinPaymentMethods([]).map((pm) => (
+                    <option key={pm.id} value={pm.id}>
+                      {pm.name}
+                    </option>
+                  ))}
+                </optgroup>
               </select>
               <button
                 type="button"
