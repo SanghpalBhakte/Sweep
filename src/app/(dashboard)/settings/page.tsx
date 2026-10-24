@@ -12,6 +12,7 @@ import { Select } from '@/components/ui/Select';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { SUPPORTED_CURRENCIES } from '@/lib/utils/currency';
+import { isValidUpiId } from '@/lib/utils/shares';
 import dynamic from 'next/dynamic';
 import {
   generateFullBackupJson,
@@ -119,6 +120,11 @@ export default function SettingsPage() {
 
   // Settings form state
   const [currency, setCurrency] = useState(profile?.currency_preference || 'USD');
+  const [upiId, setUpiId] = useState(profile?.upi_id || '');
+  useEffect(() => {
+    if (profile?.upi_id) setUpiId(profile.upi_id);
+  }, [profile?.upi_id]);
+  const upiInvalid = upiId.trim() !== '' && !isValidUpiId(upiId);
   const [annualBenchmark, setAnnualBenchmark] = useState<number>(
     profile?.annual_benchmark_percent || 16.7
   );
@@ -192,10 +198,12 @@ export default function SettingsPage() {
 
   const handleSaveGeneral = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (upiInvalid) return;
     setIsSaving(true);
     try {
       await updateProfile({
         currency_preference: currency,
+        upi_id: upiId.trim() || null,
         annual_benchmark_percent: Number(annualBenchmark),
         category_annual_benchmarks: categoryBenchmarks,
         default_reminder_days: selectedOffsets,
@@ -440,6 +448,29 @@ export default function SettingsPage() {
                   </option>
                 ))}
               </Select>
+            </div>
+
+            {/* UPI ID for asking friends to pay their share */}
+            <div className="space-y-1.5">
+              <label htmlFor="upi-id" className="block text-xs font-medium text-foreground">
+                Your UPI ID
+              </label>
+              <input
+                id="upi-id"
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+                placeholder="yourname@okaxis"
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                aria-invalid={upiInvalid}
+                className="sweep-input text-sm"
+              />
+              <p className={upiInvalid ? 'text-[11px] text-danger' : 'text-[11px] text-muted-foreground'}>
+                {upiInvalid
+                  ? 'This does not look like a UPI ID. It should look like name@bank.'
+                  : 'Used when you ask friends to pay their share of a split plan.'}
+              </p>
             </div>
 
             {/* Notification Controls */}

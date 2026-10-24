@@ -17,6 +17,8 @@ import { getCountdownBadge, getDaysUntil, formatDate } from '@/lib/utils/dates';
 import { cn } from '@/lib/utils/cn';
 import { cancelStepsFor } from '@/lib/constants/paymentMethods';
 import { downloadSubscriptionIcs } from '@/lib/utils/calendar';
+import { shareSummary } from '@/lib/utils/shares';
+import { SharesPanel } from './SharesPanel';
 
 const CancellationReviewModal = dynamic(
   () => import('./CancellationReviewModal').then((m) => m.CancellationReviewModal),
@@ -90,6 +92,12 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
   if (hasUnreviewedPriceHike) notes.push({ text: 'Price went up', tone: 'warning' });
   if (subscription.value_rating === 'cancel_candidate' && isActive) {
     notes.push({ text: 'Marked to cancel' });
+  }
+  if (subscription.shares?.length && isActive) {
+    const owed = shareSummary(subscription).stillOwed;
+    notes.push({
+      text: owed > 0 ? `${formatCurrency(owed, subscription.currency, { showCents: false })} to collect` : 'Split',
+    });
   }
   if (subscription.payment_method) {
     notes.push({
@@ -196,6 +204,8 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
                 </ol>
               </div>
             ) : null}
+
+            {isActive ? <SharesPanel subscription={subscription} /> : null}
 
             <div className="mt-0.5 flex flex-wrap items-center gap-x-4">
               <Link href={`/subscriptions/${subscription.id}/edit`} className={actionClass}>

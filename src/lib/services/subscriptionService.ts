@@ -765,6 +765,12 @@ class SubscriptionService {
             default_reminder_days: updated.default_reminder_days,
             updated_at: updated.updated_at,
           });
+          // Separate call so the rest still saves if the upi_id column is not there yet
+          if (updates.upi_id !== undefined) {
+            await (supabase.from('profiles') as any)
+              .update({ upi_id: updates.upi_id || null })
+              .eq('id', user.id);
+          }
         }
       } catch {
         // Fallback

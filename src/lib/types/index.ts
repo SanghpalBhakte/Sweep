@@ -31,6 +31,8 @@ export interface Profile {
   notifications_enabled?: boolean;
   notify_renewals?: boolean;
   notify_trials?: boolean;
+  /** Used to build UPI pay links when asking friends for their share */
+  upi_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -87,12 +89,22 @@ export interface Subscription {
   cancellation_notes?: string | null;
   cancellation_effective_date?: string | null;
 
+  /** Friends who pay you back for part of this plan */
+  shares?: SubscriptionShare[] | null;
+
   created_at: string;
   updated_at: string;
   
   // Expanded relations (optional, when joined)
   category?: Category;
   payment_method?: PaymentMethod;
+}
+
+export interface SubscriptionShare {
+  name: string;
+  amount: number;
+  /** The renewal date this person last paid for. Matches next_renewal_date when paid this cycle. */
+  paid_for?: string | null;
 }
 
 export type CancellationReason =

@@ -1,4 +1,4 @@
-import { BillingCycle, SubscriptionFormData } from '../types';
+import { BillingCycle, SubscriptionFormData, SubscriptionShare } from '../types';
 import { normalizeMonthlyAmount } from '../utils/currency';
 
 export interface ProductionSubscriptionInsertPayload {
@@ -42,6 +42,7 @@ export interface ProductionSubscriptionUpdatePayload {
   cancel_url?: string | null;
   notes?: string | null;
   monthly_amount?: number;
+  shares?: SubscriptionShare[] | null;
   updated_at?: string;
 }
 
@@ -145,6 +146,7 @@ export function buildSubscriptionUpdatePayload(
   if (updates.value_rating !== undefined) payload.value_rating = updates.value_rating;
   if (updates.cancel_url !== undefined) payload.cancel_url = updates.cancel_url?.trim() || null;
   if (updates.notes !== undefined) payload.notes = updates.notes?.trim() || null;
+  if (updates.shares !== undefined) payload.shares = updates.shares?.length ? updates.shares : null;
   payload.monthly_amount = monthlyAmount;
 
   return payload;
