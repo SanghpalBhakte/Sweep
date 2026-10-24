@@ -38,55 +38,55 @@ export function getCancellationMatchedAlternative(
   switch (reason) {
     case 'too_expensive':
       return {
-        title: 'Check Plan Tiers or Annual Discount',
-        description: `Based on standard pricing models, many services offer lower tiers or annual discounts. Sweep does not track internal plan-limit changes, so verify feature requirements on ${subscription.name}'s portal before changing plans.`,
+        title: 'Try a cheaper plan first',
+        description: `Many apps have a cheaper plan, a student plan, or a lower price if you pay yearly. Check ${subscription.name}'s plans before you cancel.`,
         recommendedAction: 'downgrade_review',
-        actionButtonLabel: 'Review / Edit Plan',
-        secondaryOptionLabel: 'Set Reminder Before Renewal',
-        externalLinkText: subscription.cancel_url ? `Open ${subscription.name} Account Page` : undefined,
+        actionButtonLabel: 'Change plan',
+        secondaryOptionLabel: 'Remind me before it renews',
+        externalLinkText: subscription.cancel_url ? `See ${subscription.name} plans` : undefined,
         externalLinkUrl: subscription.cancel_url,
       };
 
     case 'temporary_pause':
       return {
-        title: 'Pause Subscription in Sweep',
-        description: `Pausing in Sweep will exclude this charge from your active monthly budget while keeping renewal dates and notes intact for when you return.`,
+        title: 'Pause it instead',
+        description: `Pausing takes it out of your monthly total but keeps the date and notes, so it is easy to turn back on later.`,
         recommendedAction: 'pause_review',
         actionButtonLabel: 'Pause in Sweep',
-        secondaryOptionLabel: 'Proceed with Full Cancellation',
-        externalLinkText: subscription.cancel_url ? `Open ${subscription.name} Portal` : undefined,
+        secondaryOptionLabel: 'Cancel it fully',
+        externalLinkText: subscription.cancel_url ? `Open ${subscription.name}` : undefined,
         externalLinkUrl: subscription.cancel_url,
       };
 
     case 'not_using_enough':
       return {
-        title: `Keep Until Next Renewal (${nextRenewalFormatted})`,
-        description: `You have already paid for the current cycle (${daysUntil > 0 ? `${daysUntil} days remaining` : 'renewing soon'}). You can set a reminder to cancel right before the next charge.`,
+        title: `Use it until ${nextRenewalFormatted}`,
+        description: `You already paid for this cycle (${daysUntil > 0 ? `${daysUntil} days left` : 'it renews soon'}). Cancel on their site now and you can usually keep using it until then.`,
         recommendedAction: 'keep_until_renewal',
-        actionButtonLabel: `Set Reminder for ${nextRenewalFormatted}`,
-        secondaryOptionLabel: 'Cancel in Sweep Immediately',
-        externalLinkText: subscription.cancel_url ? `Direct ${subscription.name} Cancel Page` : undefined,
+        actionButtonLabel: `Remind me on ${nextRenewalFormatted}`,
+        secondaryOptionLabel: 'Cancel now',
+        externalLinkText: subscription.cancel_url ? `Cancel on ${subscription.name}` : undefined,
         externalLinkUrl: subscription.cancel_url,
       };
 
     case 'duplicate_overlap':
       return {
-        title: 'Compare with Other Active Subscriptions',
-        description: `Review your active subscription list to ensure you keep only your preferred tool in this category.`,
+        title: 'Keep just one',
+        description: `Look at your list and keep the one you use most. Cancel the rest.`,
         recommendedAction: 'overlap_review',
-        actionButtonLabel: 'View All Subscriptions',
-        secondaryOptionLabel: 'Proceed with Cancellation',
+        actionButtonLabel: 'See all subscriptions',
+        secondaryOptionLabel: 'Cancel it',
         externalLinkText: subscription.cancel_url ? `Cancel ${subscription.name}` : undefined,
         externalLinkUrl: subscription.cancel_url,
       };
 
     case 'switching_service':
       return {
-        title: 'Confirm Replacement & Cancel',
-        description: `Ensure your data is backed up or migrated before closing your ${subscription.name} account.`,
+        title: 'Save your stuff first',
+        description: `Download or move anything you need from ${subscription.name} before you close it.`,
         recommendedAction: 'confirm_cancel',
-        actionButtonLabel: 'Proceed with Cancellation',
-        externalLinkText: subscription.cancel_url ? `Open ${subscription.name} Account Page` : undefined,
+        actionButtonLabel: 'Cancel it',
+        externalLinkText: subscription.cancel_url ? `Open ${subscription.name}` : undefined,
         externalLinkUrl: subscription.cancel_url,
       };
 
@@ -94,11 +94,11 @@ export function getCancellationMatchedAlternative(
     case 'other':
     default:
       return {
-        title: 'Confirm Official Cancellation',
-        description: `Sweep will mark this subscription as canceled in your personal ledger. To stop charges, remember to also cancel on ${subscription.name}'s website.`,
+        title: 'Also cancel on their site',
+        description: `Sweep marks it canceled here. To stop the charge, also cancel it on ${subscription.name}'s app or website.`,
         recommendedAction: 'confirm_cancel',
-        actionButtonLabel: 'Mark as Canceled in Sweep',
-        externalLinkText: subscription.cancel_url ? `Open ${subscription.name} Cancellation Link` : undefined,
+        actionButtonLabel: 'Mark canceled',
+        externalLinkText: subscription.cancel_url ? `Cancel on ${subscription.name}` : undefined,
         externalLinkUrl: subscription.cancel_url,
       };
   }

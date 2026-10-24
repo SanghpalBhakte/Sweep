@@ -80,7 +80,7 @@ describe('getCancellationMatchedAlternative', () => {
     const alternative = getCancellationMatchedAlternative('too_expensive', sub);
 
     expect(alternative.recommendedAction).toBe('downgrade_review');
-    expect(alternative.title).toContain('Check Plan Tiers');
+    expect(alternative.title).toContain('cheaper plan');
     expect(alternative.externalLinkUrl).toBe('https://framer.com/cancel');
   });
 
@@ -97,7 +97,7 @@ describe('getCancellationMatchedAlternative', () => {
     const alternative = getCancellationMatchedAlternative('not_using_enough', sub);
 
     expect(alternative.recommendedAction).toBe('keep_until_renewal');
-    expect(alternative.actionButtonLabel).toContain('Set Reminder');
+    expect(alternative.actionButtonLabel).toContain('Remind me');
   });
 
   it('returns overlap check recommendation when reason is duplicate_overlap', () => {
@@ -105,6 +105,6 @@ describe('getCancellationMatchedAlternative', () => {
     const alternative = getCancellationMatchedAlternative('duplicate_overlap', sub);
 
     expect(alternative.recommendedAction).toBe('overlap_review');
-    expect(alternative.title).toContain('Compare with Other Active Subscriptions');
+    expect(alternative.title).toBe('Keep just one');
   });
 });
