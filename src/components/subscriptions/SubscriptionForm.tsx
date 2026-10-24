@@ -341,6 +341,18 @@ export function SubscriptionForm({
       setError('Please enter a valid cost (0 or greater).');
       return null;
     }
+    // Catch typos like an extra 000 before they throw off every total
+    if (parsedAmount >= 100000000) {
+      setError('That cost is too high. Check the amount.');
+      return null;
+    }
+    if (
+      parsedAmount > 100000 &&
+      !['JPY', 'KRW'].includes(currency) &&
+      !window.confirm(`${formatCurrency(parsedAmount, currency)} is a lot for one subscription. Save it anyway?`)
+    ) {
+      return null;
+    }
     if (!validateDateString(nextRenewalDate, 'Next Billing Date')) {
       return null;
     }
