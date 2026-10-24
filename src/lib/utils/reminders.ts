@@ -39,8 +39,8 @@ export function deriveAppAlerts(
           severity = 'urgent';
           message =
             daysUntilTrial === 0
-              ? 'Free trial ends TODAY! Action required to prevent charge.'
-              : `Trial ended ${Math.abs(daysUntilTrial)}d ago. Review active status.`;
+              ? 'Free trial ends today. Cancel now if you do not want to pay.'
+              : `Trial ended ${Math.abs(daysUntilTrial)} days ago. Check if you were charged.`;
         } else if (daysUntilTrial === 1) {
           severity = 'urgent';
           message = 'Free trial ends tomorrow. Cancel today if you don\'t want it.';
@@ -72,8 +72,12 @@ export function deriveAppAlerts(
       }
     }
 
-    // 2. Upcoming Renewal Alerts
-    if (notifyRenewals) {
+    // 2. Upcoming Renewal Alerts. Skipped when the trial alert above already covers the same day.
+    const trialAlertSameDay =
+      alerts.at(-1)?.subscriptionId === sub.id &&
+      alerts.at(-1)?.type === 'trial_ending' &&
+      sub.trial_end_date === sub.next_renewal_date;
+    if (notifyRenewals && !trialAlertSameDay) {
       const daysUntilRenewal = getDaysUntil(sub.next_renewal_date);
 
       // We surface renewals within lookahead window or slightly overdue
