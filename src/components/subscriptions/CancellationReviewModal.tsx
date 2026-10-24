@@ -35,32 +35,32 @@ const REASON_OPTIONS: { id: CancellationReason; label: string; description: stri
   {
     id: 'too_expensive',
     label: 'Too expensive or price increased',
-    description: 'Cost has become difficult to justify for current usage.',
+    description: 'It costs more than it is worth to you.',
   },
   {
     id: 'not_using_enough',
     label: 'Not using it enough',
-    description: 'Underutilized relative to the recurring charge.',
+    description: 'You hardly open it.',
   },
   {
     id: 'temporary_pause',
-    label: 'Temporary break / pause',
-    description: 'Finished a project or taking a break and may return later.',
+    label: 'Taking a break',
+    description: 'You might come back to it later.',
   },
   {
     id: 'switching_service',
-    label: 'Switching to an alternative',
-    description: 'Found a better tool, free tier, or bundled alternative.',
+    label: 'Switching to something else',
+    description: 'You found a better or free option.',
   },
   {
     id: 'duplicate_overlap',
-    label: 'Duplicate / overlapping tool',
-    description: 'Another active subscription fulfills the same need.',
+    label: 'I have another one like it',
+    description: 'Another subscription does the same job.',
   },
   {
     id: 'other',
     label: 'Other reason',
-    description: 'No longer needed or service quality changed.',
+    description: 'You do not need it any more.',
   },
 ];
 
@@ -165,13 +165,12 @@ export function CancellationReviewModal({
             </div>
             <div className="min-w-0">
               <h2 id="cancel-modal-title" className="text-sm sm:text-base font-bold text-foreground truncate">
-                Cancel Review: {subscription.name}
+                Cancel {subscription.name}?
               </h2>
               <p className="text-xs text-muted-foreground">
                 {formatCurrency(subscription.amount, subscription.currency)}
                 <span className="text-[11px]">
-                  {' '}
-                  / {formatCycle(subscription.billing_cycle, subscription.custom_interval_days)}
+                  {formatCycle(subscription.billing_cycle, subscription.custom_interval_days)}
                 </span>
                 {' · '}Renews {formatDate(subscription.next_renewal_date)}
               </p>
@@ -198,13 +197,13 @@ export function CancellationReviewModal({
               <div className="space-y-1">
                 <h3 className="text-sm font-bold text-foreground">
                   {completedAction === 'paused'
-                    ? 'Subscription Paused in Sweep'
-                    : 'Subscription Marked Canceled'}
+                    ? 'Paused in Sweep'
+                    : 'Marked as canceled'}
                 </h3>
                 <p className="text-xs text-muted-foreground max-w-xs mx-auto">
                   {completedAction === 'paused'
-                    ? 'Excluded from active spend run-rate. You can resume anytime.'
-                    : 'Updated your Sweep ledger. Remember to also cancel on the merchant portal if active.'}
+                    ? 'It no longer counts in your monthly total. You can resume any time.'
+                    : 'Done in Sweep. Also cancel it on the app or website so you stop being charged.'}
                 </p>
               </div>
             </div>
@@ -212,14 +211,16 @@ export function CancellationReviewModal({
             <>
               {/* Question: One Short Reason */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                   <HelpCircle className="w-3.5 h-3.5 text-primary" />
-                  What is the main reason for canceling?
-                </label>
+                  Why are you canceling?
+                </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {REASON_OPTIONS.map((opt) => (
-                    <div
+                    <button
+                      type="button"
                       key={opt.id}
+                      aria-pressed={selectedReason === opt.id}
                       onClick={() => setSelectedReason(opt.id)}
                       className={cn(
                         'p-2.5 rounded-xl border text-left cursor-pointer transition-all shadow-xs',
@@ -234,7 +235,7 @@ export function CancellationReviewModal({
                       <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                         {opt.description}
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -283,8 +284,8 @@ export function CancellationReviewModal({
               <div className="p-3 rounded-xl bg-surface/70 border border-border flex items-start gap-2.5 text-xs text-muted-foreground">
                 <ShieldCheck className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                 <div className="space-y-0.5 text-[11px] leading-relaxed">
-                  <span className="font-semibold text-foreground">Client-Side & Privacy-First: </span>
-                  Sweep updates your personal ledger and stops renewal notifications. Because Sweep does not store merchant credentials or track bank logins, remember to also complete cancellation directly on {subscription.name}&apos;s billing portal if you haven&apos;t done so.
+                  <span className="font-semibold text-foreground">Sweep cannot cancel it for you. </span>
+                  This only marks it canceled here and stops reminders. To stop the charge, also cancel it on {subscription.name}&apos;s app or website.
                 </div>
               </div>
             </>
@@ -313,7 +314,7 @@ export function CancellationReviewModal({
                   className="inline-flex"
                 >
                   <Button variant="outline" size="sm" className="text-xs gap-1 text-danger hover:border-danger">
-                    Direct cancel <ExternalLink className="w-3 h-3" />
+                    Cancel on their site <ExternalLink className="w-3 h-3" />
                   </Button>
                 </a>
               ) : null}
@@ -326,7 +327,7 @@ export function CancellationReviewModal({
                 onClick={handleConfirmCancelInSweep}
                 className="text-xs gap-1 bg-danger hover:bg-danger/90 text-danger-foreground border-danger shadow-xs"
               >
-                <Scissors className="w-3.5 h-3.5" /> Mark canceled in Sweep
+                <Scissors className="w-3.5 h-3.5" /> Mark canceled
               </Button>
             </div>
           </div>
