@@ -294,7 +294,7 @@ export function CancellationReviewModal({
 
         {/* Footer Actions */}
         {!completedAction ? (
-          <div className="p-4 sm:p-5 border-t border-border flex items-center justify-between gap-3 shrink-0 bg-surface/30">
+          <div className="p-4 sm:p-5 border-t border-border flex flex-wrap items-center justify-between gap-3 shrink-0 bg-surface/30">
             <Button
               type="button"
               variant="ghost"
@@ -305,7 +305,7 @@ export function CancellationReviewModal({
               Keep active
             </Button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
               {subscription.cancel_url ? (
                 <a
                   href={subscription.cancel_url}
