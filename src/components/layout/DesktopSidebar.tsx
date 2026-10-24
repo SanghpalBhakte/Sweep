@@ -198,6 +198,7 @@ export function DesktopSidebar() {
                   <AnimatedCurrency
                     value={stats.monthlyTotal}
                     currency={profile?.currency_preference || 'USD'}
+                    showCents={false}
                   />
                 </span>
               </div>
