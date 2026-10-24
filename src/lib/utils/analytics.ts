@@ -98,7 +98,7 @@ export function calculateUpcoming30DayCharges(
     const first = parseISO(sub.next_renewal_date);
     if (Number.isNaN(first.getTime())) return;
     const converted = convertCurrency(sub.amount, sub.currency || 'USD', targetCurrency, rates);
-    // Count every charge in the window (today plus the next daysWindow - 1 days),
+    // Count every charge from today to daysWindow days out,
     // so a 7 day plan counts 4 or 5 times, not once. Steps are counted from the
     // first date so month ends do not drift.
     for (let k = 0; k < 400; k++) {
@@ -107,7 +107,7 @@ export function calculateUpcoming30DayCharges(
           ? addDays(first, k * Math.max(1, sub.custom_interval_days || 30))
           : addMonths(first, k * (sub.billing_cycle === 'yearly' ? 12 : sub.billing_cycle === 'quarterly' ? 3 : 1));
       const daysUntil = getDaysUntil(date);
-      if (daysUntil >= daysWindow) break;
+      if (daysUntil > daysWindow) break;
       if (daysUntil < 0) continue;
       upcoming.push({
         subscription: sub,

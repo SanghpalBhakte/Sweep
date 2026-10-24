@@ -27,12 +27,12 @@ describe('calculateUpcoming30DayCharges', () => {
   });
 
   it('counts short custom plans every time they repeat', () => {
-    // day 2, 9, 16, 23 are inside the 30 days; day 30 is not
-    expect(total([sub({ name: 'w', billing_cycle: 'custom', custom_interval_days: 7, next_renewal_date: day(2) })])).toBe(400);
+    // day 2, 9, 16, 23, 30
+    expect(total([sub({ name: 'w', billing_cycle: 'custom', custom_interval_days: 7, next_renewal_date: day(2) })])).toBe(500);
   });
 
-  it('leaves out charges 30 or more days away', () => {
-    expect(total([sub({ name: 'far', next_renewal_date: day(30) })])).toBe(0);
-    expect(total([sub({ name: 'near', next_renewal_date: day(29) })])).toBe(100);
+  it('includes day 30 and leaves out day 31', () => {
+    expect(total([sub({ name: 'far', next_renewal_date: day(31) })])).toBe(0);
+    expect(total([sub({ name: 'near', next_renewal_date: day(30) })])).toBe(100);
   });
 });
