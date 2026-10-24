@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { studentPlanHint } from './popularServices';
+import { findPreset, studentPlanHint } from './popularServices';
 
 const sub = { name: 'Spotify', amount: 139, currency: 'INR', billing_cycle: 'monthly' as const };
 
@@ -20,5 +20,18 @@ describe('studentPlanHint', () => {
     expect(studentPlanHint({ ...sub, description: 'Spotify Student' })).toBeNull();
     expect(studentPlanHint({ ...sub, currency: 'USD' })).toBeNull();
     expect(studentPlanHint({ ...sub, name: 'Netflix' })).toBeNull();
+  });
+});
+
+describe('findPreset', () => {
+  it('matches names with extra words', () => {
+    expect(findPreset('Spotify Premium')?.name).toBe('Spotify');
+    expect(findPreset('YouTube Premium (Trial)')?.name).toBe('YouTube Premium');
+    expect(findPreset('Netflix subscription')?.name).toBe('Netflix');
+  });
+
+  it('does not guess for unknown names', () => {
+    expect(findPreset('Premium')).toBeUndefined();
+    expect(findPreset('My gym plan')).toBeUndefined();
   });
 });

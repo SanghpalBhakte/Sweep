@@ -312,11 +312,22 @@ export const POPULAR_SERVICES: PopularService[] = [...INDIA_SERVICES, ...GLOBAL_
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-/** The preset whose name matches exactly (ignoring case and spaces), if any. */
+const matchExact = (n: string) =>
+  POPULAR_SERVICES.find((s) => norm(s.name) === n || s.aliases?.some((a) => norm(a) === n));
+
+/**
+ * The preset whose name matches (ignoring case and spaces), if any. Also matches names
+ * like "Spotify Premium" or "YouTube Premium (Trial)" by dropping the extra words.
+ */
 export function findPreset(name: string): PopularService | undefined {
   const n = norm(name);
   if (!n) return undefined;
-  return POPULAR_SERVICES.find((s) => norm(s.name) === n || s.aliases?.some((a) => norm(a) === n));
+  const exact = matchExact(n);
+  if (exact) return exact;
+  const trimmed = norm(
+    name.replace(/\(.*?\)/g, ' ').replace(/\b(premium|subscription|plan|membership|trial)\b/gi, ' ')
+  );
+  return trimmed && trimmed !== n ? matchExact(trimmed) : undefined;
 }
 
 /** Presets for the search box: name, alias or description contains the query. */
