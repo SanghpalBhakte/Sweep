@@ -39,7 +39,7 @@ const splineMono = Spline_Sans_Mono({
   variable: '--font-spline-mono',
 });
 
-const SITE_URL = 'https://sift-sand.vercel.app';
+const SITE_URL = 'https://sweep-subs.vercel.app';
 const SITE_TITLE = 'Sweep: Keep track of your subscriptions';
 const SITE_DESCRIPTION =
   'Put all your subscriptions in one place. Get a reminder before something renews or a free trial ends, and see how much you spend each month.';

@@ -272,7 +272,7 @@ serve(async (req: Request) => {
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const resendFromEmail =
       Deno.env.get('RESEND_FROM_EMAIL') || 'Sweep Reminders <onboarding@resend.dev>';
-    const appUrl = Deno.env.get('APP_URL') || 'https://sweep-workspace.vercel.app';
+    const appUrl = Deno.env.get('APP_URL') || 'https://sweep-subs.vercel.app';
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
