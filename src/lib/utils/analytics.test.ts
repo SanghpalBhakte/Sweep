@@ -52,4 +52,9 @@ describe('kill list', () => {
   it('adds up a year of each', () => {
     expect(calculateKillListYearlySavings(subs, 'INR')).toBe(149 * 12 + 599 * 4);
   });
+
+  it('counts only your part of a split sub', () => {
+    const split = sub({ name: 's', value_rating: 'rarely_used', amount: 139, shares: [{ name: 'Rahul', amount: 70 }] });
+    expect(calculateKillListYearlySavings([split], 'INR')).toBe(69 * 12);
+  });
 });

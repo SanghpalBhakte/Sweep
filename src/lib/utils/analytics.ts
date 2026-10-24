@@ -10,6 +10,7 @@ import {
 import { convertCurrency, normalizeMonthlyAmount } from './currency';
 import { getDaysUntil, isUpcomingSoon } from './dates';
 import { DEFAULT_OFFLINE_RATES } from '../services/exchangeRateService';
+import { shareSummary } from './shares';
 import { addDays, addMonths, format, subMonths, startOfMonth, parseISO, isBefore } from 'date-fns';
 
 /**
@@ -347,14 +348,18 @@ export function getKillList(subscriptions: Subscription[]): Subscription[] {
   );
 }
 
-/** What you save in a year if every sub on the kill list is cancelled, in the display currency. */
+/**
+ * What you save in a year if every sub on the kill list is cancelled, in the display currency.
+ * For split subs only your own part counts, since friends pay the rest.
+ */
 export function calculateKillListYearlySavings(
   subscriptions: Subscription[],
   targetCurrency: string = 'USD',
   rates: Record<string, number> = DEFAULT_OFFLINE_RATES
 ): number {
   const yearly = getKillList(subscriptions).reduce((acc, s) => {
-    const monthly = normalizeMonthlyAmount(s.amount, s.billing_cycle, s.custom_interval_days);
+    const amount = s.shares?.length ? shareSummary(s).yourPart : s.amount;
+    const monthly = normalizeMonthlyAmount(amount, s.billing_cycle, s.custom_interval_days);
     return acc + convertCurrency(monthly * 12, s.currency || 'USD', targetCurrency, rates);
   }, 0);
   return Math.round(yearly);
