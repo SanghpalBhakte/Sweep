@@ -337,3 +337,25 @@ export function calculateValueRatingBreakdown(
     };
   });
 }
+
+/** Active subs you rated "Rarely used" or "Cancel". */
+export function getKillList(subscriptions: Subscription[]): Subscription[] {
+  return subscriptions.filter(
+    (s) =>
+      s.status === 'active' &&
+      (s.value_rating === 'rarely_used' || s.value_rating === 'cancel_candidate')
+  );
+}
+
+/** What you save in a year if every sub on the kill list is cancelled, in the display currency. */
+export function calculateKillListYearlySavings(
+  subscriptions: Subscription[],
+  targetCurrency: string = 'USD',
+  rates: Record<string, number> = DEFAULT_OFFLINE_RATES
+): number {
+  const yearly = getKillList(subscriptions).reduce((acc, s) => {
+    const monthly = normalizeMonthlyAmount(s.amount, s.billing_cycle, s.custom_interval_days);
+    return acc + convertCurrency(monthly * 12, s.currency || 'USD', targetCurrency, rates);
+  }, 0);
+  return Math.round(yearly);
+}

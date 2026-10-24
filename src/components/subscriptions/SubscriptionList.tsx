@@ -7,6 +7,8 @@ import { Button, ButtonLink } from '../ui/Button';
 import { Search, Plus, Layers, Sparkles, UploadCloud, RotateCcw } from 'lucide-react';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { cn } from '@/lib/utils/cn';
+import { calculateKillListYearlySavings, getKillList } from '@/lib/utils/analytics';
+import { formatCurrency } from '@/lib/utils/currency';
 
 interface SubscriptionListProps {
   subscriptions: Subscription[];
@@ -21,16 +23,23 @@ export function SubscriptionList({
   onDelete,
   isLoading: propLoading,
 }: SubscriptionListProps) {
-  const { categories, populateStarterTemplates, isLoading: contextLoading } = useSubscriptions();
+  const {
+    categories,
+    populateStarterTemplates,
+    isLoading: contextLoading,
+    displayCurrency,
+    exchangeRates,
+  } = useSubscriptions();
   const isLoading = propLoading !== undefined ? propLoading : contextLoading;
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'trials' | 'candidates' | 'paused'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'trials' | 'kill' | 'paused'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'next_renewal_date' | 'amount' | 'name'>('next_renewal_date');
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'kill') setActiveTab('kill');
       if (params.get('focusSearch') === 'true') {
         const input = document.getElementById('subscription-search-input') as HTMLInputElement | null;
         if (input) {
@@ -58,7 +67,11 @@ export function SubscriptionList({
     }
     if (activeTab === 'active' && sub.status !== 'active') return false;
     if (activeTab === 'trials' && (!sub.is_trial || sub.status !== 'active')) return false;
-    if (activeTab === 'candidates' && (sub.value_rating !== 'cancel_candidate' || sub.status !== 'active')) return false;
+    if (
+      activeTab === 'kill' &&
+      (sub.status !== 'active' || (sub.value_rating !== 'cancel_candidate' && sub.value_rating !== 'rarely_used'))
+    )
+      return false;
     if (activeTab === 'paused' && sub.status !== 'paused') return false;
     if (categoryFilter !== 'all' && sub.category_id !== categoryFilter) return false;
     return true;
@@ -136,7 +149,7 @@ export function SubscriptionList({
     { id: 'all', label: 'All', count: subscriptions.length },
     { id: 'active', label: 'Active', count: subscriptions.filter((s) => s.status === 'active').length },
     { id: 'trials', label: 'Trials', count: subscriptions.filter((s) => s.is_trial && s.status === 'active').length },
-    { id: 'candidates', label: 'To cancel', count: subscriptions.filter((s) => s.value_rating === 'cancel_candidate' && s.status === 'active').length },
+    { id: 'kill', label: 'Kill list', count: getKillList(subscriptions).length },
     { id: 'paused', label: 'Paused', count: subscriptions.filter((s) => s.status === 'paused').length },
   ];
 
@@ -213,6 +226,23 @@ export function SubscriptionList({
             </button>
           ))}
         </div>
+
+        {activeTab === 'kill' && sorted.length > 0 ? (
+          <p className="mx-[var(--ledger-pad)] mb-2 text-sm">
+            Cancel {sorted.length === 1 ? 'this one' : `these ${sorted.length}`} and save{' '}
+            <b className="font-mono text-danger">
+              {formatCurrency(
+                calculateKillListYearlySavings(sorted, displayCurrency, exchangeRates.rates),
+                displayCurrency,
+                { showCents: false }
+              )}
+            </b>{' '}
+            a year.
+            <span className="block text-xs text-muted-foreground">
+              Subs you rated Rarely used or Cancel. Change the rating in Edit.
+            </span>
+          </p>
+        ) : null}
 
         {sorted.length > 0 ? (
           <>

@@ -7,6 +7,7 @@ import { calculateValueRatingBreakdown } from '@/lib/utils/analytics';
 import { formatCurrency } from '@/lib/utils/currency';
 import { ShieldCheck, ThumbsUp, HelpCircle, Scissors, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import Link from 'next/link';
 
 export function ValueRatingAnalysis({
   subscriptions,
@@ -54,6 +55,15 @@ export function ValueRatingAnalysis({
           This is based on how you rated each subscription. Sweep never tracks your apps or browser, so
           only you know what is worth keeping.
         </p>
+
+        {breakdown.some((b) => (b.rating === 'rarely_used' || b.rating === 'cancel_candidate') && b.count > 0) ? (
+          <Link
+            href="/subscriptions?tab=kill"
+            className="inline-flex items-center min-h-[44px] text-xs font-semibold text-danger underline underline-offset-4"
+          >
+            See your kill list and what you save in a year
+          </Link>
+        ) : null}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {breakdown.map((item) => (
