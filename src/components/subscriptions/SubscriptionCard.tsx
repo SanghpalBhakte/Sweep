@@ -157,10 +157,15 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
           <span className="ml-2.5 text-right shrink-0">
             <span className="block font-mono text-[15px] font-semibold tabular-nums">
               {formatCurrency(subscription.amount, subscription.currency)}
+              {convertedMonthly !== null && subscription.billing_cycle !== 'monthly' ? (
+                <span className="text-xs font-normal text-muted-foreground">
+                  {formatCycle(subscription.billing_cycle, subscription.custom_interval_days)}
+                </span>
+              ) : null}
             </span>
             <span className="block font-mono text-xs text-muted-foreground tabular-nums">
               {convertedMonthly !== null
-                ? `${isDifferentCurrency ? '' : `${formatCycle(subscription.billing_cycle, subscription.custom_interval_days)} · `}≈ ${formatCurrency(convertedMonthly, displayCurrency, { showCents: false })}/mo`
+                ? `≈ ${formatCurrency(convertedMonthly, displayCurrency, { showCents: false })}/mo`
                 : formatCycle(subscription.billing_cycle, subscription.custom_interval_days)}
             </span>
           </span>
