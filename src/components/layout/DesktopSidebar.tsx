@@ -71,10 +71,10 @@ export function DesktopSidebar() {
 
   const navItems = [
     {
-      href: '/',
+      href: '/home',
       label: 'Overview',
       icon: LayoutDashboard,
-      active: pathname === '/',
+      active: pathname === '/home',
     },
     {
       href: '/subscriptions',
@@ -109,7 +109,7 @@ export function DesktopSidebar() {
     <aside className="hidden md:flex flex-col w-60 lg:w-64 collapsed:w-16 border-r border-border h-screen sticky top-0 bg-surface/30 shrink-0 z-20 select-none overflow-hidden transition-[width] duration-[280ms] ease-standard">
       {/* Brand */}
       <div className="h-13 sm:h-14 px-3.5 border-b border-border/50 flex items-center shrink-0">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="Sweep home">
+        <Link href="/home" className="flex items-center gap-2.5" aria-label="Sweep home">
           <SweepLogo variant="icon" size="sm" />
           <SweepLogo variant="wordmark" size="sm" className={fade} />
         </Link>

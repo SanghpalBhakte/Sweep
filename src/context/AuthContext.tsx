@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithPassword = async (
     email: string,
     password: string,
-    redirectTo: string = '/'
+    redirectTo: string = '/home'
   ): Promise<{ error: string | null; needsMFA?: boolean }> => {
     if (!isConfigured) {
       return { error: 'Supabase is not configured.' };
@@ -180,7 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async (
-    redirectTo: string = '/'
+    redirectTo: string = '/home'
   ): Promise<{ error: string | null }> => {
     if (!isConfigured) {
       return { error: 'Supabase is not configured.' };
@@ -243,7 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(data.session);
     setIsLoading(false);
     router.refresh();
-    router.replace('/');
+    router.replace('/home');
     return { error: null, needsEmailConfirmation: false };
   };
 

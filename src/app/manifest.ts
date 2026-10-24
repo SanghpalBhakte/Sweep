@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Sweep',
     short_name: 'Sweep',
     description: 'Put all your subscriptions in one place and get a reminder before anything renews.',
-    start_url: '/',
+    start_url: '/home',
     display: 'standalone',
     orientation: 'portrait',
     // Android paints its button bar with this colour in the installed app, so a light

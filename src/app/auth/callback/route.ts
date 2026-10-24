@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const rawNext = requestUrl.searchParams.get('next');
-  const next = getSafeNext(rawNext, '/');
+  const next = getSafeNext(rawNext, '/home');
 
   // Support forwarded headers in production / Vercel proxies
   const forwardedHost = request.headers.get('x-forwarded-host');

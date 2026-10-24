@@ -73,7 +73,7 @@ export async function sendWebPushToUser(
     body: payload.body,
     icon: '/icons/icon-192.png',
     badge: '/icons/icon-192.png',
-    url: payload.url || '/',
+    url: payload.url || '/home',
     tag: payload.tag || 'sweep-reminder',
   });
 

@@ -846,7 +846,7 @@ export default function StatementImportPage() {
               View subscriptions
             </ButtonLink>
 
-            <ButtonLink href="/" variant="outline" size="md">
+            <ButtonLink href="/home" variant="outline" size="md">
               Go to dashboard
             </ButtonLink>
           </div>

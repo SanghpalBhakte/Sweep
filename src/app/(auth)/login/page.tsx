@@ -41,7 +41,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawNext = searchParams.get('next');
-  const next = getSafeNext(rawNext, '/');
+  const next = getSafeNext(rawNext, '/home');
   const authErrorParam = searchParams.get('error');
 
   const { signInWithPassword, signInWithOtp, signInWithGoogle } = useAuth();

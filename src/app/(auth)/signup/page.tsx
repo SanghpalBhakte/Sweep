@@ -71,7 +71,7 @@ export default function SignUpPage() {
   const handleGoogleSignUp = async () => {
     setError(null);
     setIsGoogleLoading(true);
-    const res = await signInWithGoogle('/');
+    const res = await signInWithGoogle('/home');
     if (res.error) {
       setError(res.error);
       setIsGoogleLoading(false);

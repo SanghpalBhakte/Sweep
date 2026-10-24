@@ -340,7 +340,7 @@ export default function SettingsPage() {
     try {
       await clearAllData();
       setIsDeleteAllModalOpen(false);
-      window.location.href = '/';
+      window.location.href = '/home';
     } catch (err) {
       console.error('Failed to delete all data:', err);
     } finally {

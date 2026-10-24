@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { DashboardClient } from '@/components/dashboard/DashboardClient';
-import DashboardLoading from './loading';
+import DashboardLoading from '../loading';
 
 export const revalidate = 60;
 

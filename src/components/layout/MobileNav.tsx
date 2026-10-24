@@ -20,7 +20,7 @@ export function MobileNav() {
   const { stats } = useSubscriptions();
 
   const navItems: NavItem[] = [
-    { href: '/', label: 'Home', icon: Home, active: pathname === '/' },
+    { href: '/home', label: 'Home', icon: Home, active: pathname === '/home' },
     {
       href: '/subscriptions',
       label: 'Subscriptions',

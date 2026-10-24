@@ -2,7 +2,7 @@
   "name": "Sweep",
   "short_name": "Sweep",
   "description": "Put all your subscriptions in one place and get a reminder before anything renews.",
-  "start_url": "/",
+  "start_url": "/home",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#191516",

@@ -10,7 +10,7 @@ import Link from 'next/link';
 function MFAChallengeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/';
+  const next = searchParams.get('next') || '/home';
 
   const handleSuccess = () => {
     router.push(next);

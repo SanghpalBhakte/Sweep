@@ -51,6 +51,13 @@ export async function updateSession(request: NextRequest) {
     (c) => c.name.startsWith('sb-') || c.name.includes('auth-token')
   );
 
+  // Signed-in users skip the landing page and go straight to the app
+  if (pathname === '/' && hasAuthCookie) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/home';
+    return NextResponse.redirect(url);
+  }
+
   if (!hasAuthCookie) {
     if (isStrictlyProtectedRoute) {
       const url = request.nextUrl.clone();
@@ -129,7 +136,7 @@ export async function updateSession(request: NextRequest) {
     ) {
       const nextParam = request.nextUrl.searchParams.get('next');
       const url = request.nextUrl.clone();
-      url.pathname = getSafeNext(nextParam, '/');
+      url.pathname = getSafeNext(nextParam, '/home');
       url.searchParams.delete('next');
       return NextResponse.redirect(url);
     }

@@ -31,7 +31,7 @@ export function Header() {
         <div className="w-full px-4 sm:px-6 lg:px-8 h-13 sm:h-14 flex items-center justify-between gap-4">
           {/* Mobile Brand (visible only on mobile where sidebar is hidden) */}
           <div className="flex md:hidden items-center gap-2.5">
-            <Link href="/" className="flex items-center gap-2 min-h-[44px]" aria-label="Sweep home">
+            <Link href="/home" className="flex items-center gap-2 min-h-[44px]" aria-label="Sweep home">
               <SweepLogo size="sm" />
             </Link>
           </div>

@@ -17,7 +17,7 @@ function MFAChallengeForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawNext = searchParams.get('next');
-  const next = getSafeNext(rawNext, '/');
+  const next = getSafeNext(rawNext, '/home');
 
   const [factorId, setFactorId] = useState<string>('');
   const [challengeId, setChallengeId] = useState<string>('');

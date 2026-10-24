@@ -4,7 +4,7 @@
 // Path: public/sw.js
 // =============================================================================
 
-const CACHE_VERSION = 'sweep-v1.0.3';
+const CACHE_VERSION = 'sweep-v1.0.4';
 const SHELL_CACHE = `sweep-shell-${CACHE_VERSION}`;
 const STATIC_CACHE = `sweep-static-${CACHE_VERSION}`;
 const MEDIA_CACHE = `sweep-media-${CACHE_VERSION}`;
@@ -13,7 +13,7 @@ const CURRENT_CACHES = [SHELL_CACHE, STATIC_CACHE, MEDIA_CACHE];
 
 // Core essential static offline assets
 const CORE_STATIC_ASSETS = [
-  '/',
+  '/home',
   '/icons/favicon.svg',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -102,7 +102,7 @@ self.addEventListener('fetch', (event) => {
           if (cached) {
             return cached;
           }
-          const rootCached = await caches.match('/');
+          const rootCached = await caches.match('/home');
           if (rootCached) {
             return rootCached;
           }
@@ -201,7 +201,7 @@ self.addEventListener('push', (event) => {
     badge: data.badge || '/icons/icon-192.png',
     tag: data.tag || 'sweep-renewal-alert',
     data: {
-      url: data.url || '/',
+      url: data.url || '/home',
       subscriptionId: data.subscriptionId,
     },
     requireInteraction: false,
@@ -214,7 +214,7 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/home';
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
