@@ -430,6 +430,15 @@ export function DashboardClient() {
                   {period === 'monthly' ? ' a year' : ' a month'}
                 </p>
               ) : null}
+
+              {!isLoading ? (
+                <p className="mt-4 inline-flex flex-wrap items-baseline justify-center gap-x-2 rounded-lg border border-foreground/15 px-3 py-2 font-mono">
+                  <span className="text-[13px]">Due in the next 30 days:</span>
+                  <span className="text-lg font-semibold tabular-nums text-foreground">
+                    {formatCurrency(stats.upcoming30DaysTotal, targetCurrency, { showCents: false })}
+                  </span>
+                </p>
+              ) : null}
             </div>
 
             {!isLoading && groups.length > 0 ? (
@@ -509,9 +518,6 @@ export function DashboardClient() {
                 <div className="rule-single mt-6 mb-1" />
                 <TallyLine label="Next 7 days" muted={next7.count === 0}>
                   {next7.count > 0 ? formatCurrency(next7.total, targetCurrency) : 'Nothing due'}
-                </TallyLine>
-                <TallyLine label="Next 30 days" muted={stats.upcoming30DaysTotal === 0}>
-                  {formatCurrency(stats.upcoming30DaysTotal, targetCurrency)}
                 </TallyLine>
                 {stats.cancelCandidateCount > 0 ? (
                   <Link

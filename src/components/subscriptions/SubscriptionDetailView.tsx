@@ -9,7 +9,7 @@ import { Badge } from '../ui/Badge';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { ValueRatingTag } from '../ui/ValueRatingTag';
 import { SubscriptionForm } from './SubscriptionForm';
-import { formatCurrency, formatCycle, convertCurrency } from '@/lib/utils/currency';
+import { formatCurrency, formatCycle, convertCurrency, normalizeMonthlyAmount } from '@/lib/utils/currency';
 import { getCountdownBadge, formatDate } from '@/lib/utils/dates';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { downloadSubscriptionIcs } from '@/lib/utils/calendar';
@@ -62,14 +62,17 @@ export function SubscriptionDetailView({
   const isDifferentCurrency =
     subscription.currency.toUpperCase() !== displayCurrency.toUpperCase();
 
-  const convertedMonthly = isDifferentCurrency
-    ? convertCurrency(
-        subscription.monthly_amount,
-        subscription.currency,
-        displayCurrency,
-        exchangeRates.rates
-      )
-    : null;
+  // Worked out from the price and cycle, so it is right for 3 month, yearly and custom plans.
+  // Shown when the currency differs or the plan is not monthly.
+  const monthlyInOwnCurrency = normalizeMonthlyAmount(
+    subscription.amount,
+    subscription.billing_cycle,
+    subscription.custom_interval_days
+  );
+  const convertedMonthly =
+    isDifferentCurrency || subscription.billing_cycle !== 'monthly'
+      ? convertCurrency(monthlyInOwnCurrency, subscription.currency, displayCurrency, exchangeRates.rates)
+      : null;
 
   // Inferred estimated billing timeline
   const estimatedDates = React.useMemo(() => {
@@ -254,7 +257,7 @@ export function SubscriptionDetailView({
                 {formatCycle(subscription.billing_cycle, subscription.custom_interval_days)}
               </span>
             </div>
-            {isDifferentCurrency && convertedMonthly !== null ? (
+            {convertedMonthly !== null ? (
               <span className="text-xs text-primary font-medium">
                 ≈ {formatCurrency(convertedMonthly, displayCurrency)}/month
               </span>

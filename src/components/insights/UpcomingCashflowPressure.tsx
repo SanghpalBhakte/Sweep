@@ -70,7 +70,7 @@ export function UpcomingCashflowPressure({
 
               return (
                 <div
-                  key={subscription.id}
+                  key={`${subscription.id}-${renewalDate}`}
                   className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3"
                 >
                   <div className="min-w-0">

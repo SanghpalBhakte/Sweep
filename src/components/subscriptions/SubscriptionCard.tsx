@@ -11,6 +11,7 @@ import {
   formatCycle,
   formatCycleFull,
   convertCurrency,
+  normalizeMonthlyAmount,
 } from '@/lib/utils/currency';
 import { getCountdownBadge, getDaysUntil, formatDate } from '@/lib/utils/dates';
 import { cn } from '@/lib/utils/cn';
@@ -58,14 +59,17 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
     !subscription.price_hike_reviewed_at;
 
   const isDifferentCurrency = subscription.currency.toUpperCase() !== displayCurrency.toUpperCase();
-  const convertedMonthly = isDifferentCurrency
-    ? convertCurrency(
-        subscription.monthly_amount,
-        subscription.currency,
-        displayCurrency,
-        exchangeRates.rates
-      )
-    : null;
+  // Worked out from the price and cycle, so it is right for 3 month, yearly and custom plans.
+  // Shown when the currency differs or the plan is not monthly.
+  const monthlyInOwnCurrency = normalizeMonthlyAmount(
+    subscription.amount,
+    subscription.billing_cycle,
+    subscription.custom_interval_days
+  );
+  const convertedMonthly =
+    isDifferentCurrency || subscription.billing_cycle !== 'monthly'
+      ? convertCurrency(monthlyInOwnCurrency, subscription.currency, displayCurrency, exchangeRates.rates)
+      : null;
 
   const due = parseISO(subscription.next_renewal_date);
   const monthLabel =
@@ -152,8 +156,8 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
               {formatCurrency(subscription.amount, subscription.currency)}
             </span>
             <span className="block font-mono text-xs text-muted-foreground tabular-nums">
-              {isDifferentCurrency && convertedMonthly !== null
-                ? `≈ ${formatCurrency(convertedMonthly, displayCurrency)}/mo`
+              {convertedMonthly !== null
+                ? `${isDifferentCurrency ? '' : `${formatCycle(subscription.billing_cycle, subscription.custom_interval_days)} · `}≈ ${formatCurrency(convertedMonthly, displayCurrency, { showCents: false })}/mo`
                 : formatCycle(subscription.billing_cycle, subscription.custom_interval_days)}
             </span>
           </span>
