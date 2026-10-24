@@ -92,30 +92,13 @@ If the diff shows anything real (an extra column, policy or function), apply tha
 
 Password hashes come across inside `auth.users`, so both users keep their passwords. The new project has a different JWT secret, though, so **existing sessions are invalidated and both users sign in once more**.
 
-## 4. Edge function + cron on the new project
+## 4. Reminders
 
-```bash
-supabase functions deploy dispatch-reminders --project-ref NEW_REF
-supabase secrets set --project-ref NEW_REF APP_URL=... RESEND_API_KEY=... RESEND_FROM_EMAIL=...
-# SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically
-```
-
-`20240103000000_schedule_dispatch_cron.sql` has the **old** project URL hardcoded as a fallback, so the job `db push` just created points at Tokyo. Reschedule it on the new project:
-
-```sql
-select cron.unschedule('dispatch-sift-reminders-daily');
-select cron.schedule('dispatch-sift-reminders-daily', '0 8 * * *', $$
-  select net.http_post(
-    url := 'https://NEW_REF.supabase.co/functions/v1/dispatch-reminders',
-    headers := jsonb_build_object('Content-Type','application/json',
-      'Authorization','Bearer ' || coalesce(current_setting('app.settings.service_role_key', true), '')),
-    body := '{}'::jsonb);
-$$);
-```
-
-In the repo, change the fallback URL in that migration (and `project_id` in `supabase/config.toml`, line 44) to `NEW_REF`, so a future reset doesn't point at Tokyo again.
-
-> Side note, not caused by the move: reminders are triggered both by this pg_cron job (08:00 UTC → edge function) and by the Vercel cron in `vercel.json` (06:00 UTC → `/api/reminders/dispatch`). The unique index on `reminder_dispatch_logs` should prevent double-sends, but you probably only want one of them.
+Reminder emails and push notifications are sent by the Vercel cron in `vercel.json`
+(`/api/reminders/dispatch`, daily at 06:00 UTC), so nothing needs deploying on the
+Supabase side. The old edge function was removed, and
+`20261025010000_cleanup_indexes_and_policies.sql` turns off the pg_cron job that
+`20240103000000` creates, wherever pg_cron exists.
 
 ## 5. Point Vercel at Mumbai
 
