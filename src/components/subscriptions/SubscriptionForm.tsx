@@ -29,7 +29,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
-import { POPULAR_SERVICES, PopularService } from '@/lib/constants/popularServices';
+import {
+  PRESET_PRICES_NOTE,
+  PopularService,
+  PresetTier,
+  findPreset,
+  searchPresets,
+} from '@/lib/constants/popularServices';
+import { formatCurrency, formatCycle } from '@/lib/utils/currency';
 import { AddPaymentMethodModal } from './AddPaymentMethodModal';
 import { withBuiltinPaymentMethods, isBuiltinPaymentMethod } from '@/lib/constants/paymentMethods';
 import { suggestCategoryForMerchant } from '@/lib/utils/recurringDetector';
@@ -205,15 +212,30 @@ export function SubscriptionForm({
   // Service Autocomplete Suggestions State
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
 
-  const filteredSuggestions = useMemo(() => {
-    if (!name.trim() || name.trim().length < 1) return [];
-    const query = name.trim().toLowerCase();
-    return POPULAR_SERVICES.filter(
-      (s) =>
-        s.name.toLowerCase().includes(query) ||
-        (s.description && s.description.toLowerCase().includes(query))
-    ).slice(0, 5);
+  const filteredSuggestions = useMemo(() => searchPresets(name), [name]);
+
+  // When the name is a known service with India plans, offer its plans as chips.
+  const tierPreset = useMemo(() => {
+    const preset = findPreset(name);
+    return preset?.tiers?.length ? preset : undefined;
   }, [name]);
+  const tierDescriptionRef = useRef<string | null>(null);
+
+  const applyTier = (service: PopularService, tier: PresetTier) => {
+    setAmount(String(tier.amount));
+    currencyTouchedRef.current = true;
+    setCurrency(service.currency || 'INR');
+    setBillingCycle(tier.cycle);
+    // Put the plan name in the description, but never overwrite one the user typed.
+    setDescription((prev) => {
+      if (prev && prev !== tierDescriptionRef.current && prev !== service.description) return prev;
+      tierDescriptionRef.current = `${service.name} ${tier.name}`;
+      return tierDescriptionRef.current;
+    });
+  };
+
+  const isTierSelected = (tier: PresetTier) =>
+    amount === String(tier.amount) && billingCycle === tier.cycle && currency === 'INR';
 
   useEffect(() => {
     if (nameInputRef.current && !isEditing) {
@@ -242,7 +264,10 @@ export function SubscriptionForm({
   const handleSelectService = (service: PopularService) => {
     setName(service.name);
 
-    if (service.defaultAmount !== undefined && (!amount || amount === '0')) {
+    const firstTier = service.tiers?.[0];
+    if (firstTier && (!amount || amount === '0')) {
+      applyTier(service, firstTier);
+    } else if (service.defaultAmount !== undefined && (!amount || amount === '0')) {
       setAmount(String(service.defaultAmount));
       // Preset prices are in the service's own currency (USD unless stated),
       // so switch the currency too, otherwise "20" would land as Rs 20.
@@ -259,7 +284,10 @@ export function SubscriptionForm({
       setDescription(service.description);
     }
 
-    if (service.categorySlug) {
+    if (categoryId) {
+      // Keep the category already guessed from the name or picked by the user.
+      setCategoryTouched(true);
+    } else if (service.categorySlug) {
       const matchedCat = availableCategories.find(
         (c) =>
           c.slug === service.categorySlug ||
@@ -627,17 +655,51 @@ export function SubscriptionForm({
                           </span>
                         )}
                       </div>
-                      {service.defaultAmount !== undefined && (
+                      {service.tiers?.length ? (
+                        <span className="text-[11px] font-mono text-muted-foreground shrink-0">
+                          from {formatCurrency(service.tiers[0].amount, service.currency || 'INR', { showCents: false })}
+                          {formatCycle(service.tiers[0].cycle)}
+                        </span>
+                      ) : service.defaultAmount !== undefined ? (
                         <span className="text-[11px] font-mono text-muted-foreground shrink-0">
                           ${service.defaultAmount}/{service.billingCycle === 'yearly' ? 'yr' : 'mo'}
                         </span>
-                      )}
+                      ) : null}
                     </button>
                   ))}
                 </div>
               </div>
             ) : null}
           </div>
+
+          {tierPreset?.tiers ? (
+            <div className="space-y-1.5">
+              <span className="text-xs font-medium text-foreground block">Pick your plan</span>
+              <div className="flex flex-wrap gap-1.5">
+                {tierPreset.tiers.map((tier) => {
+                  const selected = isTierSelected(tier);
+                  return (
+                    <button
+                      key={`${tier.name}-${tier.cycle}`}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => applyTier(tierPreset, tier)}
+                      className={cn(
+                        'px-2.5 py-1 max-md:min-h-[44px] rounded-md border text-xs transition-colors cursor-pointer',
+                        selected
+                          ? 'border-primary bg-primary/10 text-primary font-semibold'
+                          : 'border-border bg-surface text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      {tier.name} {formatCurrency(tier.amount, tierPreset.currency || 'INR', { showCents: false })}
+                      {formatCycle(tier.cycle)}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground">{PRESET_PRICES_NOTE}</p>
+            </div>
+          ) : null}
 
           {/* Amount & Currency */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -681,7 +743,9 @@ export function SubscriptionForm({
               onChange={(e) => setBillingCycle(e.target.value as BillingCycle)}
             >
               <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly (Annual)</option>
+              <option value="quarterly">Every 3 months</option>
+              <option value="yearly">Yearly</option>
+              <option value="custom">Every few days (custom)</option>
             </Select>
 
             <Input
@@ -692,6 +756,19 @@ export function SubscriptionForm({
               required
             />
           </div>
+
+          {billingCycle === 'custom' ? (
+            <Input
+              label="Repeats every how many days? *"
+              type="number"
+              min="1"
+              step="1"
+              value={customDays}
+              onChange={(e) => setCustomDays(e.target.value)}
+              helperText="For example 28 for a 28 day phone recharge."
+              required
+            />
+          ) : null}
 
           {/* Category & Payment Method */}
           <div className="pt-2 border-t border-border/60">

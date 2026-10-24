@@ -1,14 +1,144 @@
+export interface PresetTier {
+  name: string;
+  amount: number;
+  cycle: 'monthly' | 'quarterly' | 'yearly';
+}
+
 export interface PopularService {
   name: string;
+  /** Other names people type, e.g. "hotstar" for JioHotstar */
+  aliases?: string[];
+  /** India plans in INR. When set, the form lets you pick one. */
+  tiers?: PresetTier[];
   defaultAmount?: number;
   currency?: string;
-  billingCycle?: 'monthly' | 'yearly';
+  billingCycle?: 'monthly' | 'quarterly' | 'yearly';
   categorySlug?: string;
   cancelUrl?: string;
   description?: string;
 }
 
-export const POPULAR_SERVICES: PopularService[] = [
+/** Shown next to preset prices. Update when the prices below are checked again. */
+export const PRESET_PRICES_NOTE = 'Prices checked Oct 2026 and may change. Match it to your bill.';
+
+const t = (name: string, amount: number, cycle: PresetTier['cycle']): PresetTier => ({ name, amount, cycle });
+
+// India first: these show up before the global ones in search.
+const INDIA_SERVICES: PopularService[] = [
+  {
+    name: 'Netflix',
+    currency: 'INR',
+    tiers: [t('Mobile', 149, 'monthly'), t('Basic', 199, 'monthly'), t('Standard', 499, 'monthly'), t('Premium', 649, 'monthly')],
+    categorySlug: 'entertainment-games',
+    cancelUrl: 'https://www.netflix.com/cancelplan',
+    description: 'Movies and shows',
+  },
+  {
+    name: 'JioHotstar',
+    aliases: ['hotstar', 'disney', 'jiocinema'],
+    currency: 'INR',
+    tiers: [
+      t('Mobile', 79, 'monthly'),
+      t('Mobile', 149, 'quarterly'),
+      t('Mobile', 499, 'yearly'),
+      t('Super', 149, 'monthly'),
+      t('Super', 349, 'quarterly'),
+      t('Super', 1099, 'yearly'),
+      t('Premium', 299, 'monthly'),
+      t('Premium', 699, 'quarterly'),
+      t('Premium', 2199, 'yearly'),
+    ],
+    categorySlug: 'entertainment-games',
+    cancelUrl: 'https://www.hotstar.com/in/mypage',
+    description: 'Cricket, movies and shows',
+  },
+  {
+    name: 'Spotify',
+    currency: 'INR',
+    tiers: [t('Individual', 139, 'monthly'), t('Duo', 179, 'monthly'), t('Family', 229, 'monthly')],
+    categorySlug: 'media-reading',
+    cancelUrl: 'https://www.spotify.com/in-en/account/subscription/',
+    description: 'Music streaming',
+  },
+  {
+    name: 'YouTube Premium',
+    aliases: ['youtube', 'yt premium', 'youtube music'],
+    currency: 'INR',
+    tiers: [t('Individual', 149, 'monthly'), t('Individual', 1490, 'yearly'), t('Family', 299, 'monthly')],
+    categorySlug: 'media-reading',
+    cancelUrl: 'https://www.youtube.com/paid_memberships',
+    description: 'No ads, music, downloads',
+  },
+  {
+    name: 'Amazon Prime',
+    aliases: ['prime', 'prime video'],
+    currency: 'INR',
+    tiers: [
+      t('Prime', 299, 'monthly'),
+      t('Prime', 599, 'quarterly'),
+      t('Prime', 1499, 'yearly'),
+      t('Prime Lite', 799, 'yearly'),
+      t('Shopping Edition', 399, 'yearly'),
+    ],
+    categorySlug: 'shopping-commerce',
+    cancelUrl: 'https://www.amazon.in/mc',
+    description: 'Delivery and Prime Video',
+  },
+  {
+    name: 'Google One',
+    aliases: ['google drive', 'gemini'],
+    currency: 'INR',
+    tiers: [
+      t('Lite 30 GB', 59, 'monthly'),
+      t('100 GB', 130, 'monthly'),
+      t('100 GB', 1300, 'yearly'),
+      t('2 TB', 650, 'monthly'),
+      t('2 TB', 6500, 'yearly'),
+      t('AI Pro 2 TB', 1950, 'monthly'),
+    ],
+    categorySlug: 'infra-cloud',
+    cancelUrl: 'https://one.google.com/settings',
+    description: 'Google storage',
+  },
+  {
+    name: 'ChatGPT',
+    aliases: ['chatgpt plus', 'openai'],
+    currency: 'INR',
+    tiers: [t('Go', 399, 'monthly'), t('Plus', 1999, 'monthly')],
+    categorySlug: 'software-dev',
+    cancelUrl: 'https://chatgpt.com/#settings/Subscription',
+    description: 'OpenAI subscription',
+  },
+  {
+    name: 'Apple Music',
+    currency: 'INR',
+    tiers: [t('Individual', 119, 'monthly'), t('Family', 179, 'monthly')],
+    categorySlug: 'media-reading',
+    cancelUrl: 'https://apps.apple.com/account/subscriptions',
+    description: 'Music streaming',
+  },
+  {
+    name: 'Zee5',
+    aliases: ['zee 5'],
+    currency: 'INR',
+    tiers: [t('Mobile', 649, 'yearly'), t('Premium HD', 299, 'quarterly'), t('Premium HD', 999, 'yearly')],
+    categorySlug: 'entertainment-games',
+    cancelUrl: 'https://www.zee5.com/myaccount/subscription',
+    description: 'Shows and movies',
+  },
+  {
+    name: 'SonyLIV',
+    aliases: ['sony liv'],
+    currency: 'INR',
+    tiers: [t('Mobile', 699, 'yearly'), t('Premium', 399, 'monthly'), t('Premium', 1499, 'yearly')],
+    categorySlug: 'entertainment-games',
+    cancelUrl: 'https://www.sonyliv.com/myaccount',
+    description: 'Sports, shows and movies',
+  },
+];
+
+// Global tools. Prices are USD.
+const GLOBAL_SERVICES: PopularService[] = [
   {
     name: 'Cursor Pro',
     defaultAmount: 20,
@@ -26,68 +156,12 @@ export const POPULAR_SERVICES: PopularService[] = [
     description: 'AI pair programmer',
   },
   {
-    name: 'ChatGPT Plus',
-    defaultAmount: 20,
-    billingCycle: 'monthly',
-    categorySlug: 'software-dev',
-    cancelUrl: 'https://chatgpt.com/#settings',
-    description: 'OpenAI subscription',
-  },
-  {
     name: 'Claude Pro',
     defaultAmount: 20,
     billingCycle: 'monthly',
     categorySlug: 'software-dev',
     cancelUrl: 'https://claude.ai/settings/billing',
     description: 'Anthropic AI assistant',
-  },
-  {
-    name: 'Spotify Premium',
-    defaultAmount: 11.99,
-    billingCycle: 'monthly',
-    categorySlug: 'media-reading',
-    cancelUrl: 'https://www.spotify.com/account/overview/',
-    description: 'Music streaming',
-  },
-  {
-    name: 'Apple Music',
-    defaultAmount: 10.99,
-    billingCycle: 'monthly',
-    categorySlug: 'media-reading',
-    cancelUrl: 'https://music.apple.com',
-    description: 'Music streaming',
-  },
-  {
-    name: 'YouTube Premium',
-    defaultAmount: 13.99,
-    billingCycle: 'monthly',
-    categorySlug: 'media-reading',
-    cancelUrl: 'https://www.youtube.com/paid_memberships',
-    description: 'Ad-free video & music',
-  },
-  {
-    name: 'Netflix Standard',
-    defaultAmount: 15.49,
-    billingCycle: 'monthly',
-    categorySlug: 'media-reading',
-    cancelUrl: 'https://www.netflix.com/youraccount',
-    description: 'Movie & TV streaming',
-  },
-  {
-    name: 'Disney+',
-    defaultAmount: 13.99,
-    billingCycle: 'monthly',
-    categorySlug: 'media-reading',
-    cancelUrl: 'https://www.disneyplus.com/account',
-    description: 'Streaming service',
-  },
-  {
-    name: 'Amazon Prime',
-    defaultAmount: 14.99,
-    billingCycle: 'monthly',
-    categorySlug: 'utilities-sync',
-    cancelUrl: 'https://www.amazon.com/mc/manage',
-    description: 'Prime membership',
   },
   {
     name: 'iCloud+ 50GB',
@@ -104,22 +178,6 @@ export const POPULAR_SERVICES: PopularService[] = [
     categorySlug: 'infra-cloud',
     cancelUrl: 'https://appleid.apple.com',
     description: 'Apple cloud storage',
-  },
-  {
-    name: 'Google One 100GB',
-    defaultAmount: 1.99,
-    billingCycle: 'monthly',
-    categorySlug: 'infra-cloud',
-    cancelUrl: 'https://one.google.com/settings',
-    description: 'Google cloud storage',
-  },
-  {
-    name: 'Google One 2TB',
-    defaultAmount: 9.99,
-    billingCycle: 'monthly',
-    categorySlug: 'infra-cloud',
-    cancelUrl: 'https://one.google.com/settings',
-    description: 'Google cloud storage',
   },
   {
     name: 'Dropbox Plus',
@@ -233,3 +291,28 @@ export const POPULAR_SERVICES: PopularService[] = [
     description: 'News & journalism',
   },
 ];
+
+export const POPULAR_SERVICES: PopularService[] = [...INDIA_SERVICES, ...GLOBAL_SERVICES];
+
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/** The preset whose name matches exactly (ignoring case and spaces), if any. */
+export function findPreset(name: string): PopularService | undefined {
+  const n = norm(name);
+  if (!n) return undefined;
+  return POPULAR_SERVICES.find((s) => norm(s.name) === n || s.aliases?.some((a) => norm(a) === n));
+}
+
+/** Presets for the search box: name, alias or description contains the query. */
+export function searchPresets(query: string, limit = 5): PopularService[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const nq = norm(q);
+  return POPULAR_SERVICES.filter(
+    (s) =>
+      s.name.toLowerCase().includes(q) ||
+      (nq && norm(s.name).includes(nq)) ||
+      s.aliases?.some((a) => norm(a).includes(nq)) ||
+      s.description?.toLowerCase().includes(q)
+  ).slice(0, limit);
+}
