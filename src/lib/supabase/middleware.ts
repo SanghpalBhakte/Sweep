@@ -51,8 +51,8 @@ export async function updateSession(request: NextRequest) {
     (c) => c.name.startsWith('sb-') || c.name.includes('auth-token')
   );
 
-  // Signed-in users skip the landing page and go straight to the app
-  if (pathname === '/' && hasAuthCookie) {
+  // Signed-in users and anyone who has opened the app before skip the landing page
+  if (pathname === '/' && (hasAuthCookie || request.cookies.has('sweep_app'))) {
     const url = request.nextUrl.clone();
     url.pathname = '/home';
     return NextResponse.redirect(url);

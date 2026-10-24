@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Header } from './Header';
 import { MobileNav } from './MobileNav';
@@ -20,6 +20,12 @@ const ServiceWorkerManager = dynamic(
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Remember that this browser has opened the app, so middleware skips the
+  // landing page next time (guests have no auth cookie to go by).
+  useEffect(() => {
+    document.cookie = 'sweep_app=1; path=/; max-age=31536000; samesite=lax';
+  }, []);
 
   useKeyboardShortcuts({
     onOpenAddModal: () => setIsAddModalOpen(true),
