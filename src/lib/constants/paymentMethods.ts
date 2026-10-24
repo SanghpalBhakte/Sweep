@@ -18,8 +18,11 @@ export type AllowedPaymentMethodType = (typeof PAYMENT_METHOD_TYPES)[number]['va
 // Ids must match. Listed in the order people in India most often pay for subscriptions.
 const BUILTIN: [string, string, AllowedPaymentMethodType][] = [
   ['20000000-0000-0000-0000-000000000004', 'UPI', 'upi'],
+  ['20000000-0000-0000-0000-000000000010', 'UPI AutoPay', 'upi'],
   ['20000000-0000-0000-0000-000000000001', 'Credit card', 'credit_card'],
   ['20000000-0000-0000-0000-000000000002', 'Debit card', 'debit_card'],
+  ['20000000-0000-0000-0000-000000000011', 'Play Store', 'other'],
+  ['20000000-0000-0000-0000-000000000012', 'App Store', 'other'],
   ['20000000-0000-0000-0000-000000000003', 'Net banking', 'bank_account'],
   ['20000000-0000-0000-0000-000000000007', 'Google Pay', 'google_pay'],
   ['20000000-0000-0000-0000-000000000005', 'PayPal', 'paypal'],
@@ -66,3 +69,47 @@ export function withBuiltinPaymentMethods(own: PaymentMethod[]): PaymentMethod[]
 }
 
 export const isBuiltinPaymentMethod = (pm: Pick<PaymentMethod, 'id'>) => BUILTIN_ORDER.has(pm.id);
+
+/**
+ * Plain steps to stop paying, based on how the subscription is paid.
+ * Matches the built-in rows by name too, so a user's own "Play Store" or "GPay autopay" works.
+ */
+export function cancelStepsFor(pm: Pick<PaymentMethod, 'name' | 'type'> | null | undefined): string[] | null {
+  if (!pm) return null;
+  const n = normName(pm.name);
+  if (n.includes('playstore') || n.includes('googleplay')) {
+    return [
+      'Open the Play Store app.',
+      'Tap your profile picture, then Payments and subscriptions, then Subscriptions.',
+      'Pick this subscription and tap Cancel subscription.',
+    ];
+  }
+  if (n.includes('appstore') || n.includes('itunes') || pm.type === 'apple_pay') {
+    return [
+      'Open the Settings app on your iPhone.',
+      'Tap your name, then Subscriptions.',
+      'Pick this subscription and tap Cancel Subscription.',
+    ];
+  }
+  if (pm.type === 'upi' || pm.type === 'google_pay' || n.includes('autopay') || n.includes('upi')) {
+    return [
+      'Cancel on the service site or app first.',
+      'Open your UPI app (GPay, PhonePe, Paytm or your bank app) and go to Autopay.',
+      'Find this subscription and revoke or cancel the mandate.',
+    ];
+  }
+  if (pm.type === 'credit_card' || pm.type === 'debit_card') {
+    return [
+      'Cancel on the service site or app first.',
+      'Then open your card or bank app and check for a saved e-mandate or standing instruction. Remove it if you see one.',
+      'Check your next statement to make sure the charge stopped.',
+    ];
+  }
+  if (pm.type === 'bank_account') {
+    return [
+      'Cancel on the service site or app first.',
+      'Then check standing instructions or mandates in your net banking and remove this one.',
+    ];
+  }
+  return null;
+}

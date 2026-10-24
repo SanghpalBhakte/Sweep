@@ -13,6 +13,7 @@ import { formatCurrency, formatCycle, convertCurrency } from '@/lib/utils/curren
 import { getCountdownBadge, formatDate } from '@/lib/utils/dates';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { downloadSubscriptionIcs } from '@/lib/utils/calendar';
+import { cancelStepsFor } from '@/lib/constants/paymentMethods';
 import {
   ArrowLeft,
   Calendar,
@@ -57,6 +58,7 @@ export function SubscriptionDetailView({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const countdown = getCountdownBadge(subscription.next_renewal_date);
+  const cancelSteps = cancelStepsFor(subscription.payment_method);
   const isDifferentCurrency =
     subscription.currency.toUpperCase() !== displayCurrency.toUpperCase();
 
@@ -309,6 +311,19 @@ export function SubscriptionDetailView({
               </span>
             </div>
           </div>
+
+          {cancelSteps ? (
+            <div className="py-1 border-b border-border/50 space-y-1">
+              <span className="text-muted-foreground block">
+                How to cancel when paid with {subscription.payment_method?.name}
+              </span>
+              <ol className="list-decimal pl-4 space-y-0.5 text-foreground">
+                {cancelSteps.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
 
           {subscription.description ? (
             <div className="py-1 border-b border-border/50">
