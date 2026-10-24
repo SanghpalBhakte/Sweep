@@ -280,7 +280,7 @@ export function SubscriptionForm({
     if (service.cancelUrl && !cancelUrl) {
       setCancelUrl(service.cancelUrl);
     }
-    if (service.description && !description) {
+    if (service.description && !description && !firstTier) {
       setDescription(service.description);
     }
 
