@@ -15,6 +15,8 @@ import {
 } from '@/lib/utils/currency';
 import { getCountdownBadge, getDaysUntil, formatDate } from '@/lib/utils/dates';
 import { cn } from '@/lib/utils/cn';
+import { cancelStepsFor } from '@/lib/constants/paymentMethods';
+import { downloadSubscriptionIcs } from '@/lib/utils/calendar';
 
 const CancellationReviewModal = dynamic(
   () => import('./CancellationReviewModal').then((m) => m.CancellationReviewModal),
@@ -50,6 +52,7 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
   const countdown = getCountdownBadge(subscription.next_renewal_date);
   const days = getDaysUntil(subscription.next_renewal_date);
   const isActive = subscription.status === 'active';
+  const cancelSteps = cancelStepsFor(subscription.payment_method);
   const overdue = isActive && days < 0;
 
   const hasUnreviewedPriceHike =
@@ -176,6 +179,18 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
             {subscription.description ? (
               <p className="mt-1 text-xs text-muted-foreground">{subscription.description}</p>
             ) : null}
+            {cancelSteps && isActive ? (
+              <div className="mt-2 text-xs text-muted-foreground">
+                <p className="font-medium text-foreground">
+                  To cancel (paid via {subscription.payment_method?.name}):
+                </p>
+                <ol className="mt-0.5 list-decimal pl-4 space-y-0.5">
+                  {cancelSteps.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
 
             <div className="mt-0.5 flex flex-wrap items-center gap-x-4">
               <Link href={`/subscriptions/${subscription.id}/edit`} className={actionClass}>
@@ -221,6 +236,16 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
                 >
                   Billing site ↗<span className="sr-only"> (opens in a new tab)</span>
                 </a>
+              ) : null}
+
+              {isActive ? (
+                <button
+                  type="button"
+                  onClick={() => downloadSubscriptionIcs(subscription)}
+                  className={actionClass}
+                >
+                  Add to calendar
+                </button>
               ) : null}
             </div>
           </div>
