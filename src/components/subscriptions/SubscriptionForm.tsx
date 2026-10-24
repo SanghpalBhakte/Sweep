@@ -35,6 +35,7 @@ import {
   PresetTier,
   findPreset,
   searchPresets,
+  studentPlanHint,
 } from '@/lib/constants/popularServices';
 import { formatCurrency, formatCycle } from '@/lib/utils/currency';
 import { AddPaymentMethodModal } from './AddPaymentMethodModal';
@@ -220,6 +221,14 @@ export function SubscriptionForm({
     return preset?.tiers?.length ? preset : undefined;
   }, [name]);
   const tierDescriptionRef = useRef<string | null>(null);
+  const studentHint = studentPlanHint({
+    name,
+    amount: Number(amount),
+    currency,
+    billing_cycle: billingCycle,
+    custom_interval_days: parseInt(customDays, 10) || undefined,
+    description,
+  });
 
   const applyTier = (service: PopularService, tier: PresetTier) => {
     setAmount(String(tier.amount));
@@ -697,6 +706,13 @@ export function SubscriptionForm({
                   );
                 })}
               </div>
+              {studentHint ? (
+                <p className="text-[11px] text-primary">
+                  Student plan is {formatCurrency(studentHint.tier.amount, 'INR', { showCents: false })}
+                  {formatCycle(studentHint.tier.cycle)} if you have a college ID. That saves{' '}
+                  {formatCurrency(studentHint.yearlySaving, 'INR', { showCents: false })} a year.
+                </p>
+              ) : null}
               <p className="text-[11px] text-muted-foreground">{PRESET_PRICES_NOTE}</p>
             </div>
           ) : null}

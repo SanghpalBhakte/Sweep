@@ -1,3 +1,6 @@
+import { normalizeMonthlyAmount } from '../utils/currency';
+import type { BillingCycle } from '../types';
+
 export interface PresetTier {
   name: string;
   amount: number;
@@ -20,6 +23,9 @@ export interface PopularService {
 
 /** Shown next to preset prices. Update when the prices below are checked again. */
 export const PRESET_PRICES_NOTE = 'Prices checked Oct 2026 and may change. Match it to your bill.';
+
+/** Tier name for student plans (college ID needed). studentPlanHint looks for it. */
+export const STUDENT_TIER = 'Student';
 
 const t = (name: string, amount: number, cycle: PresetTier['cycle']): PresetTier => ({ name, amount, cycle });
 
@@ -55,7 +61,12 @@ const INDIA_SERVICES: PopularService[] = [
   {
     name: 'Spotify',
     currency: 'INR',
-    tiers: [t('Individual', 139, 'monthly'), t('Duo', 179, 'monthly'), t('Family', 229, 'monthly')],
+    tiers: [
+      t('Individual', 139, 'monthly'),
+      t('Duo', 179, 'monthly'),
+      t('Family', 229, 'monthly'),
+      t(STUDENT_TIER, 69, 'monthly'),
+    ],
     categorySlug: 'media-reading',
     cancelUrl: 'https://www.spotify.com/in-en/account/subscription/',
     description: 'Music streaming',
@@ -64,7 +75,12 @@ const INDIA_SERVICES: PopularService[] = [
     name: 'YouTube Premium',
     aliases: ['youtube', 'yt premium', 'youtube music'],
     currency: 'INR',
-    tiers: [t('Individual', 149, 'monthly'), t('Individual', 1490, 'yearly'), t('Family', 299, 'monthly')],
+    tiers: [
+      t('Individual', 149, 'monthly'),
+      t('Individual', 1490, 'yearly'),
+      t('Family', 299, 'monthly'),
+      t(STUDENT_TIER, 89, 'monthly'),
+    ],
     categorySlug: 'media-reading',
     cancelUrl: 'https://www.youtube.com/paid_memberships',
     description: 'No ads, music, downloads',
@@ -112,7 +128,7 @@ const INDIA_SERVICES: PopularService[] = [
   {
     name: 'Apple Music',
     currency: 'INR',
-    tiers: [t('Individual', 119, 'monthly'), t('Family', 179, 'monthly')],
+    tiers: [t('Individual', 139, 'monthly'), t('Family', 179, 'monthly'), t(STUDENT_TIER, 69, 'monthly')],
     categorySlug: 'media-reading',
     cancelUrl: 'https://apps.apple.com/account/subscriptions',
     description: 'Music streaming',
@@ -315,4 +331,30 @@ export function searchPresets(query: string, limit = 5): PopularService[] {
       s.aliases?.some((a) => norm(a).includes(nq)) ||
       s.description?.toLowerCase().includes(q)
   ).slice(0, limit);
+}
+
+/**
+ * When a sub matches a preset with a student plan and costs more than it, the student
+ * price and what switching saves in a year. Null when already on it, on a shared plan, or not in INR.
+ */
+export function studentPlanHint(sub: {
+  name: string;
+  amount: number;
+  currency: string;
+  billing_cycle: BillingCycle;
+  custom_interval_days?: number | null;
+  description?: string | null;
+}): { tier: PresetTier; yearlySaving: number } | null {
+  const preset = findPreset(sub.name);
+  const tier = preset?.tiers?.find((x) => x.name === STUDENT_TIER);
+  if (!tier || sub.currency.toUpperCase() !== 'INR' || !(sub.amount > 0)) return null;
+  // Family and Duo plans are shared, so a one person student plan is not a like for like swap
+  const sharedTier = preset?.tiers?.some(
+    (x) => /family|duo/i.test(x.name) && x.amount === sub.amount && x.cycle === sub.billing_cycle
+  );
+  if (sharedTier || /family|duo|student/i.test(sub.description ?? '')) return null;
+  const monthly = normalizeMonthlyAmount(sub.amount, sub.billing_cycle, sub.custom_interval_days ?? undefined);
+  const studentMonthly = normalizeMonthlyAmount(tier.amount, tier.cycle);
+  const yearlySaving = Math.round((monthly - studentMonthly) * 12);
+  return yearlySaving > 0 ? { tier, yearlySaving } : null;
 }

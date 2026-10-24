@@ -16,6 +16,7 @@ import {
 import { getCountdownBadge, getDaysUntil, formatDate } from '@/lib/utils/dates';
 import { cn } from '@/lib/utils/cn';
 import { cancelStepsFor } from '@/lib/constants/paymentMethods';
+import { studentPlanHint } from '@/lib/constants/popularServices';
 import { downloadSubscriptionIcs } from '@/lib/utils/calendar';
 import { shareSummary } from '@/lib/utils/shares';
 import { SharesPanel } from './SharesPanel';
@@ -56,6 +57,7 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
   const isActive = subscription.status === 'active';
   const cancelSteps = cancelStepsFor(subscription.payment_method);
   const overdue = isActive && days < 0;
+  const studentHint = isActive ? studentPlanHint(subscription) : null;
 
   const hasUnreviewedPriceHike =
     typeof subscription.previous_amount === 'number' &&
@@ -191,6 +193,13 @@ export function SubscriptionCard({ subscription, onToggleStatus }: SubscriptionC
             </p>
             {subscription.description ? (
               <p className="mt-1 text-xs text-muted-foreground">{subscription.description}</p>
+            ) : null}
+            {studentHint ? (
+              <p className="mt-1 text-xs text-primary">
+                Student plan is {formatCurrency(studentHint.tier.amount, 'INR', { showCents: false })}
+                {formatCycle(studentHint.tier.cycle)}. Switch with your college ID and save{' '}
+                {formatCurrency(studentHint.yearlySaving, 'INR', { showCents: false })} a year.
+              </p>
             ) : null}
             {cancelSteps && isActive ? (
               <div className="mt-2 text-xs text-muted-foreground">
