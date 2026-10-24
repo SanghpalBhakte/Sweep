@@ -24,6 +24,11 @@ function allowTest(userId: string): boolean {
   return true;
 }
 
+// Lets Settings say whether email reminders are on. Says nothing about which account sends them.
+export async function GET() {
+  return NextResponse.json({ enabled: Boolean(emailProvider()) });
+}
+
 export async function POST() {
   const supabase = await createClient();
   if (!supabase) {

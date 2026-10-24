@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
+import { IosInstallTip } from '@/components/pwa/IosInstallTip';
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
@@ -216,6 +217,15 @@ export default function SettingsPage() {
       setIsSaving(false);
     }
   };
+
+  const [emailEnabled, setEmailEnabled] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!user || !isConfigured) return;
+    fetch('/api/email/test')
+      .then((r) => r.json())
+      .then((b) => setEmailEnabled(Boolean(b.enabled)))
+      .catch(() => setEmailEnabled(null));
+  }, [user, isConfigured]);
 
   const [isEmailTesting, setIsEmailTesting] = useState(false);
   const [emailTestStatus, setEmailTestStatus] = useState<string | null>(null);
@@ -498,7 +508,23 @@ export default function SettingsPage() {
 
               {/* Delivery channels: plain rows, not boxes inside the card */}
               <div className="divide-y divide-border/60 border-t border-border/60 mt-2">
-                {isPushSupported ? (
+                {!user && isConfigured ? (
+                  <div className="py-3 space-y-2">
+                    <div className="min-w-0">
+                      <span className="text-xs font-medium text-foreground block">
+                        Reminders need a free account
+                      </span>
+                      <span className="text-[11px] text-muted-foreground">
+                        Email and phone reminders only work when you are signed in. Your
+                        subscriptions come with you. For now, open a subscription and tap Add to
+                        calendar.
+                      </span>
+                    </div>
+                    <ButtonLink href="/signup" variant="primary" size="sm" className="text-xs">
+                      Create a free account
+                    </ButtonLink>
+                  </div>
+                ) : isPushSupported ? (
                   <div className="py-3 space-y-1.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
@@ -522,16 +548,32 @@ export default function SettingsPage() {
                       <p className="text-[11px] text-muted-foreground">{pushActionStatus}</p>
                     )}
                   </div>
-                ) : null}
+                ) : (
+                  <IosInstallTip />
+                )}
 
                 {/* Test that reminder emails actually arrive */}
                 {isConfigured && user ? (
                   <div className="py-3 space-y-1.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <span className="text-xs font-medium text-foreground block">Email reminders</span>
+                        <span className="text-xs font-medium text-foreground block">
+                          Email reminders{' '}
+                          {emailEnabled !== null ? (
+                            <span
+                              className={cn(
+                                'ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold',
+                                emailEnabled ? 'bg-success-subtle text-success' : 'bg-surface text-muted-foreground'
+                              )}
+                            >
+                              {emailEnabled ? 'On' : 'Off'}
+                            </span>
+                          ) : null}
+                        </span>
                         <span className="text-[11px] text-muted-foreground truncate block">
-                          Sent to {user.email}
+                          {emailEnabled === false
+                            ? 'Email is not set up on the server yet.'
+                            : `Sent to ${user.email}`}
                         </span>
                       </div>
                       <Button

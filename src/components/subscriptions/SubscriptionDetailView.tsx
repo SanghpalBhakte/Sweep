@@ -12,6 +12,7 @@ import { SubscriptionForm } from './SubscriptionForm';
 import { formatCurrency, formatCycle, convertCurrency } from '@/lib/utils/currency';
 import { getCountdownBadge, formatDate } from '@/lib/utils/dates';
 import { useSubscriptions } from '@/context/SubscriptionContext';
+import { downloadSubscriptionIcs } from '@/lib/utils/calendar';
 import {
   ArrowLeft,
   Calendar,
@@ -26,6 +27,7 @@ import {
   FileText,
   AlertTriangle,
   CheckCircle2,
+  CalendarPlus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -404,6 +406,18 @@ export function SubscriptionDetailView({
         </span>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => downloadSubscriptionIcs(subscription)}
+            className="w-full sm:w-auto text-xs gap-1.5"
+          >
+            <CalendarPlus className="w-3.5 h-3.5 text-primary" />
+            <span>Add to calendar</span>
+          </Button>
+
           {/* Non-Destructive Status Action */}
           <Button
             type="button"
@@ -424,6 +438,7 @@ export function SubscriptionDetailView({
               </>
             )}
           </Button>
+          </div>
 
           {/* Destructive Delete Action (Confirmation Gated) */}
           <Button
