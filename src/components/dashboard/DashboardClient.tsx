@@ -6,7 +6,8 @@ import dynamic from 'next/dynamic';
 import { format } from 'date-fns';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { useAuth } from '@/context/AuthContext';
-import { IosInstallTip } from '@/components/pwa/IosInstallTip';
+import { InstallCard } from '@/components/pwa/InstallCard';
+import { TurnOnRemindersCard, useShowTurnOnReminders } from '@/components/reminders/TurnOnRemindersCard';
 import { WelcomeScreen } from '@/components/dashboard/WelcomeScreen';
 import { ButtonLink } from '@/components/ui/Button';
 import { AnimatedCurrency } from '@/components/ui/AnimatedCurrency';
@@ -169,6 +170,7 @@ function StatementLine({ sub, group }: { sub: Subscription; group: GroupKey }) {
 export function DashboardClient() {
   const { subscriptions, stats, displayCurrency, exchangeRates, isLoading } = useSubscriptions();
   const { user } = useAuth();
+  const showTurnOnReminders = useShowTurnOnReminders(subscriptions.length > 0, Boolean(user));
 
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -360,8 +362,12 @@ export function DashboardClient() {
         </div>
       </div>
 
-      {/* Push on iPhone only works once the app is on the home screen */}
-      {user ? <IosInstallTip once className="mb-4 max-sm:mt-2" /> : null}
+      {/* One card at a time: turn reminders on first, then install (iPhone needs install first) */}
+      {showTurnOnReminders ? (
+        <TurnOnRemindersCard className="mb-4 max-sm:mt-2" />
+      ) : user ? (
+        <InstallCard hasSubscriptions={subscriptions.length > 0} className="mb-4 max-sm:mt-2" />
+      ) : null}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start">
         {/* ─── The statement ─────────────────────────────────────── */}

@@ -763,8 +763,17 @@ class SubscriptionService {
             currency_preference: updated.currency_preference,
             theme_preference: updated.theme_preference,
             default_reminder_days: updated.default_reminder_days,
+            notifications_enabled: updated.notifications_enabled !== false,
+            notify_renewals: updated.notify_renewals !== false,
+            notify_trials: updated.notify_trials !== false,
             updated_at: updated.updated_at,
           });
+          // Separate call so the rest still saves if the timezone column is not there yet
+          if (updates.timezone !== undefined) {
+            await (supabase.from('profiles') as any)
+              .update({ timezone: updates.timezone })
+              .eq('id', user.id);
+          }
           // Separate call so the rest still saves if the upi_id column is not there yet
           if (updates.upi_id !== undefined) {
             await (supabase.from('profiles') as any)

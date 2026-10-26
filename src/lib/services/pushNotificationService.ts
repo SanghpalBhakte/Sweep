@@ -18,6 +18,32 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray;
 }
 
+const STEP_TIMEOUT_MS = 20_000;
+
+/** Rejects with `message` if the step takes longer than 20 seconds. */
+export function withTimeout<T>(promise: Promise<T>, message: string, ms: number = STEP_TIMEOUT_MS): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+    promise.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      }
+    );
+  });
+}
+
+/** True when an existing subscription was made with this VAPID public key. */
+export function sameKey(existing: ArrayBuffer | null | undefined, key: Uint8Array): boolean {
+  if (!existing) return false;
+  const a = new Uint8Array(existing);
+  return a.length === key.length && a.every((v, i) => v === key[i]);
+}
+
 export class PushNotificationService {
   /**
    * Check if the browser supports Service Workers and Web Push
@@ -48,14 +74,74 @@ export class PushNotificationService {
     if (!this.isSupported()) return null;
 
     try {
-      const reg = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/',
-      });
-      await navigator.serviceWorker.ready;
-      return reg;
+      await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      return await withTimeout(
+        navigator.serviceWorker.ready,
+        'The app\'s background worker did not start in 20 seconds. Reload the page and try again.'
+      );
     } catch (err) {
       console.warn('Could not register service worker:', err);
       return null;
+    }
+  }
+
+  private async saveToServer(sub: PushSubscription): Promise<{ success: boolean; error?: string }> {
+    const subJson = sub.toJSON();
+    if (!subJson.endpoint || !subJson.keys?.p256dh || !subJson.keys?.auth) {
+      return { success: false, error: 'Incomplete push subscription generated.' };
+    }
+
+    const token = await this.getAuthToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), STEP_TIMEOUT_MS);
+    try {
+      const res = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers,
+        signal: controller.signal,
+        body: JSON.stringify({
+          endpoint: subJson.endpoint,
+          p256dh: subJson.keys.p256dh,
+          auth: subJson.keys.auth,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        return { success: false, error: data.error || 'Failed to save subscription to server.' };
+      }
+      return { success: true };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err?.name === 'AbortError' ? 'Sweep did not answer in 20 seconds. Check your connection and try again.' : 'Could not reach Sweep. Check your connection and try again.',
+      };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  /**
+   * On app open: if this browser still has a subscription made with today's key,
+   * send it to the server again (an upsert), in case the server dropped it.
+   * Returns whether this device is really on.
+   */
+  async resync(vapidPublicKey?: string): Promise<boolean> {
+    if (!this.isSupported() || Notification.permission !== 'granted') return false;
+    const key = vapidPublicKey || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    if (!key) return false;
+    try {
+      const reg = await navigator.serviceWorker.getRegistration('/');
+      const sub = reg ? await reg.pushManager.getSubscription() : null;
+      if (!sub || !sameKey(sub.options.applicationServerKey, urlBase64ToUint8Array(key))) return false;
+      if (await this.getAuthToken()) await this.saveToServer(sub);
+      return true;
+    } catch {
+      return false;
     }
   }
 
@@ -104,7 +190,8 @@ export class PushNotificationService {
     }
 
     try {
-      // 1. Request native permission from explicit user interaction
+      // 1. Ask first, straight from the tap. The key is already here (build-time env),
+      // so nothing slow runs between "Allow" and subscribe, which iOS is strict about.
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
         return {
@@ -119,51 +206,45 @@ export class PushNotificationService {
       // 2. Obtain service worker registration
       const reg = await this.registerServiceWorker();
       if (!reg) {
-        return { success: false, error: 'Could not initialize service worker.' };
+        return { success: false, error: 'The app\'s background worker did not start. Reload the page and try again.' };
       }
 
-      // 3. Subscribe with PushManager. Drop any old one first: if it was made with
-      // a different VAPID key, subscribe() would fail and pushes could never arrive.
-      const old = await reg.pushManager.getSubscription();
-      if (old) await old.unsubscribe();
+      // 3. A browser keeps one subscription per worker. Reuse it if it was made with
+      // this key; otherwise drop it, or subscribe() fails and pushes never arrive.
       const convertedVapidKey = urlBase64ToUint8Array(key);
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: convertedVapidKey as BufferSource,
-      });
-
-      const subJson = subscription.toJSON();
-      if (!subJson.endpoint || !subJson.keys?.p256dh || !subJson.keys?.auth) {
-        return { success: false, error: 'Incomplete push subscription generated.' };
+      let subscription = await reg.pushManager.getSubscription();
+      if (subscription && !sameKey(subscription.options.applicationServerKey, convertedVapidKey)) {
+        const oldEndpoint = subscription.endpoint;
+        await subscription.unsubscribe().catch(() => false);
+        subscription = null;
+        void this.removeFromServer(oldEndpoint);
       }
-
-      const token = await this.getAuthToken();
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      if (!subscription) {
+        subscription = await withTimeout(
+          reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey as BufferSource,
+          }),
+          'Your device\'s push service did not answer in 20 seconds. Check your connection and try again.'
+        );
       }
 
       // 4. Save to backend
-      const res = await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          endpoint: subJson.endpoint,
-          p256dh: subJson.keys.p256dh,
-          auth: subJson.keys.auth,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        return { success: false, error: data.error || 'Failed to save subscription to server.' };
-      }
-
-      return { success: true };
+      return await this.saveToServer(subscription);
     } catch (err: any) {
       console.error('Push subscription failed:', err);
       return { success: false, error: err.message || 'An unexpected error occurred during subscription.' };
     }
+  }
+
+  private async removeFromServer(endpoint: string): Promise<void> {
+    const token = await this.getAuthToken();
+    if (!token) return;
+    await fetch('/api/push/unsubscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ endpoint }),
+    }).catch(() => undefined);
   }
 
   /**

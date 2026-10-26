@@ -18,6 +18,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { showErrorToast } from '@/lib/toast/toast';
 
 export function AlertsSlideOver() {
   const {
@@ -26,8 +27,20 @@ export function AlertsSlideOver() {
     closeAlertPanel,
     dismissAlert,
     permissionStatus,
-    requestPermission,
+    isPushSupported,
+    isPushSubscribed,
+    enablePushNotifications,
   } = useNotifications();
+  const [isEnabling, setIsEnabling] = React.useState(false);
+
+  // Asking for permission alone is not enough: without a push subscription
+  // nothing arrives while the app is closed.
+  const handleTurnOn = async () => {
+    setIsEnabling(true);
+    const res = await enablePushNotifications();
+    setIsEnabling(false);
+    if (!res.success) showErrorToast(res.error || 'Could not turn on reminders.');
+  };
 
   React.useEffect(() => {
     if (!isAlertPanelOpen) return;
@@ -83,7 +96,7 @@ export function AlertsSlideOver() {
           {/* Content Body */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
             {/* Soft Opt-In Permission Card if not yet requested */}
-            {permissionStatus === 'default' ? (
+            {isPushSupported && !isPushSubscribed && permissionStatus !== 'denied' ? (
               <div className="p-3.5 rounded-xl border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--primary)/0.04)] space-y-2.5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-[hsl(var(--foreground))]">
                   <BellRing className="w-4 h-4 text-[hsl(var(--primary))]" />
@@ -96,7 +109,8 @@ export function AlertsSlideOver() {
                   type="button"
                   variant="primary"
                   size="sm"
-                  onClick={() => requestPermission()}
+                  onClick={handleTurnOn}
+                  isLoading={isEnabling}
                   className="w-full text-xs"
                 >
                   Turn on notifications

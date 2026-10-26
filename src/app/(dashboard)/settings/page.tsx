@@ -6,6 +6,7 @@ import { useSubscriptions } from '@/context/SubscriptionContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
 import { isIosNotInstalled } from '@/components/pwa/IosInstallTip';
+import { formatReminderHour } from '@/lib/utils/pushReminders';
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
@@ -95,6 +96,7 @@ export default function SettingsPage() {
     enablePushNotifications,
     disablePushNotifications,
     sendTestPushNotification,
+    openReminderGuide,
     updatePreferences,
   } = useNotifications();
 
@@ -281,7 +283,7 @@ export default function SettingsPage() {
       } else {
         const res = await enablePushNotifications();
         if (res.success) {
-          setPushActionStatus('Turned on. This phone will get reminders.');
+          setPushActionStatus('Turned on. This device will get reminders.');
         } else {
           setPushActionStatus(res.error || 'Permission not granted or push unavailable.');
         }
@@ -580,7 +582,9 @@ export default function SettingsPage() {
                       <div className="min-w-0">
                         <span className="text-xs font-medium text-foreground block">Phone reminders</span>
                         <span className="text-[11px] text-muted-foreground">
-                          {isPushSubscribed ? 'On for this device' : 'Off for this device'}
+                          {isPushSubscribed
+                            ? `On for this device. Arrives at about ${formatReminderHour()} your time.`
+                            : 'Off for this device'}
                         </span>
                       </div>
                       <Button
@@ -595,16 +599,21 @@ export default function SettingsPage() {
                       </Button>
                     </div>
                     {isPushSubscribed ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleTestPush}
-                        isLoading={isTestPushLoading}
-                        className="text-xs"
-                      >
-                        Send test reminder
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleTestPush}
+                          isLoading={isTestPushLoading}
+                          className="text-xs"
+                        >
+                          Send test reminder
+                        </Button>
+                        <Button type="button" variant="outline" size="sm" onClick={openReminderGuide} className="text-xs">
+                          Make sure reminders arrive
+                        </Button>
+                      </div>
                     ) : null}
                     {pushActionStatus && (
                       <p className="text-[11px] text-muted-foreground">{pushActionStatus}</p>

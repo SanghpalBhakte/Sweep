@@ -6,6 +6,8 @@
 import webpush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 import { getServerEnv, getPublicEnv } from '@/lib/env';
+import { isAllowedPushEndpoint, pushHost } from '@/lib/utils/pushEndpoint';
+import { REMINDER_TTL_SECONDS, type PushPayload } from '@/lib/utils/pushReminders';
 
 // Note on VAPID Security:
 // NEXT_PUBLIC_VAPID_PUBLIC_KEY is public for browser PushManager.subscribe().
@@ -26,18 +28,34 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   }
 }
 
-interface PushPayload {
-  title: string;
-  body: string;
-  url?: string;
-  tag?: string;
-  subscriptionId?: string;
+/** A refused push, described without ids, keys or notification text. */
+export function describePushRefusal(err: { statusCode?: number; body?: unknown; endpoint?: string }): {
+  status: number | null;
+  host: string;
+  reason: string;
+} {
+  let reason = '';
+  if (typeof err.body === 'string' && err.body.trim()) {
+    try {
+      // Apple answers {"reason":"BadDeviceToken"}; FCM and others answer plain text
+      const parsed = JSON.parse(err.body);
+      reason = typeof parsed?.reason === 'string' ? parsed.reason : '';
+    } catch {
+      reason = err.body.trim().replace(/\s+/g, ' ').slice(0, 160);
+    }
+  }
+  return { status: typeof err.statusCode === 'number' ? err.statusCode : null, host: pushHost(err.endpoint || ''), reason };
+}
+
+/** 404 and 410 mean the subscription is gone for good. Everything else might be ours or temporary. */
+export function isGoneForGood(status: number | null): boolean {
+  return status === 404 || status === 410;
 }
 
 export async function sendWebPushToUser(
   userId: string,
   payload: PushPayload,
-  opts: { endpoint?: string } = {}
+  opts: { endpoint?: string; ttlSeconds?: number; urgency?: 'normal' | 'high' } = {}
 ): Promise<{ sent: number; failed: number; cleaned: number }> {
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     console.warn('Web Push skipped: VAPID keys not configured on server.');
@@ -45,15 +63,13 @@ export async function sendWebPushToUser(
   }
 
   const supabaseUrl = publicEnv.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey =
-    serverEnv.SUPABASE_SERVICE_ROLE_KEY ||
-    publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceKey = serverEnv.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceKey) {
     return { sent: 0, failed: 0, cleaned: 0 };
   }
 
-  const supabase = createClient(supabaseUrl, serviceKey);
+  const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
   // Fetch active push subscriptions for this user
   // With an endpoint, only that one device gets it (the settings test button)
@@ -69,31 +85,28 @@ export async function sendWebPushToUser(
   let failed = 0;
   let cleaned = 0;
 
-  const notificationPayload = JSON.stringify({
-    title: payload.title,
-    body: payload.body,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
-    url: payload.url || '/home',
-    tag: payload.tag || 'sweep-reminder',
-  });
+  // Flat, and only what the notification shows. The service worker adds the icon and badge.
+  const body = JSON.stringify({ title: payload.title, body: payload.body, tag: payload.tag, url: payload.url });
 
   for (const sub of subscriptions) {
-    const pushSubscription = {
-      endpoint: sub.endpoint,
-      keys: {
-        p256dh: sub.p256dh,
-        auth: sub.auth,
-      },
-    };
+    if (!isAllowedPushEndpoint(sub.endpoint)) {
+      console.warn('[push] skipped endpoint outside the allow-list', { host: pushHost(sub.endpoint) });
+      failed++;
+      continue;
+    }
 
     try {
-      await webpush.sendNotification(pushSubscription, notificationPayload);
+      await webpush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+        body,
+        { TTL: opts.ttlSeconds ?? REMINDER_TTL_SECONDS, urgency: opts.urgency ?? 'normal' }
+      );
       sent++;
     } catch (err: any) {
       failed++;
-      // Gone (404 / 410), or made with an old VAPID key (403): it can never work again
-      if (err.statusCode === 404 || err.statusCode === 410 || err.statusCode === 403) {
+      const refusal = describePushRefusal({ statusCode: err?.statusCode, body: err?.body, endpoint: sub.endpoint });
+      console.warn('[push] refused', refusal);
+      if (isGoneForGood(refusal.status)) {
         await supabase.from('push_subscriptions').delete().eq('id', sub.id);
         cleaned++;
       }

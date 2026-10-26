@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendWebPushToUser } from '@/lib/services/serverPushService';
+import { TEST_TTL_SECONDS } from '@/lib/utils/pushReminders';
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
         url: '/home',
         tag: 'sweep-test-push',
       },
-      { endpoint }
+      { endpoint, ttlSeconds: TEST_TTL_SECONDS, urgency: 'high' }
     );
 
     if (result.sent === 0) {

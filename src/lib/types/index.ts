@@ -31,6 +31,8 @@ export interface Profile {
   notifications_enabled?: boolean;
   notify_renewals?: boolean;
   notify_trials?: boolean;
+  /** IANA timezone, e.g. Asia/Kolkata. Phone reminders arrive at 9 AM here. */
+  timezone?: string | null;
   /** Used to build UPI pay links when asking friends for their share */
   upi_id?: string | null;
   created_at: string;

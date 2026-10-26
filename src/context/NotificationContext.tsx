@@ -33,6 +33,10 @@ interface NotificationContextType {
   disablePushNotifications: () => Promise<{ success: boolean; error?: string }>;
   sendTestPushNotification: () => Promise<{ success: boolean; error?: string }>;
   sendTestNotification: () => boolean;
+  /** "Make sure reminders arrive" steps for this device */
+  isReminderGuideOpen: boolean;
+  openReminderGuide: () => void;
+  closeReminderGuide: () => void;
   updatePreferences: (updates: Partial<NotificationPreferences>) => Promise<void>;
 }
 
@@ -45,6 +49,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [isPushSupported, setIsPushSupported] = useState(false);
   const [isPushSubscribed, setIsPushSubscribed] = useState(false);
   const [isAlertPanelOpen, setIsAlertPanelOpen] = useState(false);
+  const [isReminderGuideOpen, setIsReminderGuideOpen] = useState(false);
 
   // Initialize dismissed alerts and check browser push capabilities after idle
   useEffect(() => {
@@ -56,9 +61,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       setIsPushSupported(isSupported);
 
       if (isSupported) {
-        pushNotificationService.getExistingSubscription().then((sub) => {
-          setIsPushSubscribed(Boolean(sub));
-        });
+        // Re-register this device with the server if it is still subscribed with
+        // today's key; a subscription made with an old key counts as off.
+        pushNotificationService.resync().then(setIsPushSubscribed);
       }
     };
 
@@ -70,6 +75,21 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       setTimeout(deferPushCheck, 1000);
     }
   }, []);
+
+  // Reminders go out at 9 AM in the timezone saved here. Only once the column exists
+  // (signed-in profiles from the database have the key; guest profiles don't).
+  useEffect(() => {
+    if (!profile || !('timezone' in profile)) return;
+    let deviceZone: string | undefined;
+    try {
+      deviceZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      return;
+    }
+    if (deviceZone && profile.timezone !== deviceZone) {
+      updateProfile({ timezone: deviceZone }).catch(() => undefined);
+    }
+  }, [profile, updateProfile]);
 
   const preferences: NotificationPreferences = useMemo(() => {
     return {
@@ -107,6 +127,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     if (res.success) {
       setIsPushSubscribed(true);
       setPermissionStatus('granted');
+      setIsReminderGuideOpen(true);
+    } else {
+      setPermissionStatus(getBrowserNotificationPermission());
     }
     return res;
   }, []);
@@ -163,6 +186,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         disablePushNotifications,
         sendTestPushNotification,
         sendTestNotification: handleSendTestNotification,
+        isReminderGuideOpen,
+        openReminderGuide: () => setIsReminderGuideOpen(true),
+        closeReminderGuide: () => setIsReminderGuideOpen(false),
         updatePreferences: handleUpdatePreferences,
       }}
     >

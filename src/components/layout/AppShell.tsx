@@ -6,10 +6,17 @@ import { Header } from './Header';
 import { MobileNav } from './MobileNav';
 import { DesktopSidebar } from './DesktopSidebar';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+// Catches the browser's install offer early, before the install card mounts
+import '@/lib/utils/installPrompt';
 
 // Dynamically import non-critical modals and client managers to reduce critical First Load JS
 const AddSubscriptionModal = dynamic(
   () => import('../subscriptions/AddSubscriptionModal').then((m) => m.AddSubscriptionModal),
+  { ssr: false }
+);
+
+const ReminderGuide = dynamic(
+  () => import('@/components/reminders/ReminderGuide').then((m) => m.ReminderGuide),
   { ssr: false }
 );
 
@@ -61,6 +68,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* 6. Non-intrusive PWA update notification banner */}
       <ServiceWorkerManager />
+
+      {/* 7. "Make sure reminders arrive" steps, opened after turning reminders on */}
+      <ReminderGuide />
     </div>
   );
 }

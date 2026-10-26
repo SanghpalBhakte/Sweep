@@ -5,6 +5,7 @@ import { subscriptionService } from '@/lib/services/subscriptionService';
 import { deriveAppAlerts } from '@/lib/utils/reminders';
 import { formatCurrency } from '@/lib/utils/currency';
 import { rollForwardRenewalDate } from '@/lib/utils/dates';
+import { reminderText } from '@/lib/utils/pushReminders';
 import { getServerEnv } from '@/lib/env';
 import { sendEmail, emailProvider, escapeHtml } from '@/lib/services/emailService';
 
@@ -99,12 +100,16 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
       // 1. Send the email (Gmail or Resend, see emailService)
       if (emailProvider()) {
         try {
-          const subject =
-            alert.daysUntil === 0
-              ? `${alert.subscriptionName} renews today (${formatCurrency(alert.amount, alert.currency)})`
-              : alert.isTrial
-              ? `Your ${alert.subscriptionName} free trial ends in ${alert.daysUntil} ${alert.daysUntil === 1 ? 'day' : 'days'}`
-              : `${alert.subscriptionName} renews in ${alert.daysUntil} ${alert.daysUntil === 1 ? 'day' : 'days'}`;
+          // Same words as the phone notification
+          const subject = reminderText(
+            {
+              sub: { name: alert.subscriptionName },
+              kind: `${alert.isTrial ? 'trial' : 'renewal'}_${alert.daysUntil}d`,
+              daysUntil: alert.daysUntil,
+              targetDate: alert.targetDate,
+            },
+            formatCurrency(alert.amount, alert.currency)
+          ).title;
 
           const html = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 540px; margin: 0 auto; padding: 24px; color: #24201E; background: #F6F1E8; border-radius: 12px; border: 1px solid #D8CFC4;">

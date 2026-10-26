@@ -4,7 +4,7 @@
 // Path: public/sw.js
 // =============================================================================
 
-const CACHE_VERSION = 'sweep-v1.0.4';
+const CACHE_VERSION = 'sweep-v1.0.5';
 const SHELL_CACHE = `sweep-shell-${CACHE_VERSION}`;
 const STATIC_CACHE = `sweep-static-${CACHE_VERSION}`;
 const MEDIA_CACHE = `sweep-media-${CACHE_VERSION}`;
@@ -16,6 +16,7 @@ const CORE_STATIC_ASSETS = [
   '/home',
   '/icons/favicon.svg',
   '/icons/icon-192.png',
+  '/icons/badge-96.png',
   '/icons/icon-512.png',
   '/icons/apple-touch-icon.png',
 ];
@@ -179,32 +180,33 @@ self.addEventListener('fetch', (event) => {
 });
 
 // 5. Push Notification Handler
+// Payload is flat: { title, body, tag, url }. Always show something: Safari drops
+// the subscription after pushes that show nothing.
+function sameOriginPath(url) {
+  return typeof url === 'string' && url.startsWith('/') && !url.startsWith('//') ? url : '/home';
+}
+
 self.addEventListener('push', (event) => {
-  if (!event.data) {
-    return;
-  }
-
   let data = {};
-  try {
-    data = event.data.json();
-  } catch (err) {
-    data = {
-      title: 'Sweep Reminder',
-      body: event.data.text() || 'You have an upcoming subscription renewal.',
-    };
+  if (event.data) {
+    try {
+      data = event.data.json() || {};
+    } catch (err) {
+      data = { body: event.data.text() };
+    }
   }
 
-  const title = data.title || 'Sweep Renewal Alert';
+  const title = data.title || 'Sweep';
+  const tag = data.tag || 'sweep-reminder';
   const options = {
-    body: data.body || 'A recurring subscription is scheduled to renew soon.',
-    icon: data.icon || '/icons/icon-192.png',
-    badge: data.badge || '/icons/icon-192.png',
-    tag: data.tag || 'sweep-renewal-alert',
-    data: {
-      url: data.url || '/home',
-      subscriptionId: data.subscriptionId,
-    },
-    requireInteraction: false,
+    body: data.body || 'You have a renewal coming up. Tap to open Sweep.',
+    icon: '/icons/icon-192.png',
+    // Monochrome and transparent: Android draws it in the status bar
+    badge: '/icons/badge-96.png',
+    tag,
+    // Same tag already showing: replace it quietly instead of buzzing again
+    renotify: false,
+    data: { url: sameOriginPath(data.url) },
   };
 
   event.waitUntil(self.registration.showNotification(title, options));

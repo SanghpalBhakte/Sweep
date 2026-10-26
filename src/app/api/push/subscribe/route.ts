@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { isAllowedPushEndpoint } from '@/lib/utils/pushEndpoint';
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,6 +8,11 @@ export async function POST(req: NextRequest) {
 
     if (!endpoint || !p256dh || !auth) {
       return NextResponse.json({ error: 'Missing push subscription parameters' }, { status: 400 });
+    }
+
+    // Only real browser push services, so the cron can't be pointed at any other URL
+    if (!isAllowedPushEndpoint(endpoint)) {
+      return NextResponse.json({ error: 'This browser\'s push service is not supported.' }, { status: 400 });
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
