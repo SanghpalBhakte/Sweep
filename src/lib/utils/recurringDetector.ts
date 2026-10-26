@@ -256,5 +256,10 @@ export function isAlreadyTracked(candidateName: string, trackedNames: string[]):
   const key = (n: string) => n.replace(/\(.*?\)/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const c = key(candidateName);
   if (!c) return false;
-  return trackedNames.some((t) => key(t) === c);
+  // "Spotify" found in a statement is the same as "Spotify Premium" in the list
+  return trackedNames.some((t) => {
+    const k = key(t);
+    if (!k) return false;
+    return k === c || (Math.min(k.length, c.length) >= 4 && (k.startsWith(c) || c.startsWith(k)));
+  });
 }

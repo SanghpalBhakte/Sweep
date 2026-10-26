@@ -89,5 +89,8 @@ describe('subscription detector', () => {
     expect(isAlreadyTracked('Netflix', ['netflix '])).toBe(true);
     expect(isAlreadyTracked('Spotify (₹119)', ['Spotify'])).toBe(true);
     expect(isAlreadyTracked('Spotify', ['Netflix'])).toBe(false);
+    expect(isAlreadyTracked('Spotify', ['Spotify Premium'])).toBe(true);
+    expect(isAlreadyTracked('Google One', ['Google Play'])).toBe(false);
+    expect(isAlreadyTracked('Jio', ['JioHotstar'])).toBe(false);
   });
 });

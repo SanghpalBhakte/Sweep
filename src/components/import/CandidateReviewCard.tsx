@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Category, RecurringCandidate, Subscription, ValueRating } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils/currency';
-import { formatDate } from '@/lib/utils/dates';
+import { formatDate, rollForwardRenewalDate } from '@/lib/utils/dates';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
 import { ChevronDown, ChevronUp, Sparkles, Layers, AlertCircle, TrendingUp } from 'lucide-react';
@@ -148,6 +148,17 @@ export function CandidateReviewCard({
                 <span>·</span>
                 <span>
                   Latest charge: {formatDate(candidate.lastDate)}
+                </span>
+                <span>·</span>
+                <span className="font-medium text-foreground">
+                  Next renewal:{' '}
+                  {formatDate(
+                    rollForwardRenewalDate(
+                      candidate.lastDate,
+                      candidate.billingCycle,
+                      candidate.billingCycle === 'custom' ? candidate.frequencyDays : undefined
+                    )
+                  )}
                 </span>
               </div>
             </div>

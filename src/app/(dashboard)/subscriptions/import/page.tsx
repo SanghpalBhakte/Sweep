@@ -23,6 +23,7 @@ import {
 import { parsePdfStatement } from '@/lib/utils/pdfParser';
 import { detectRecurringCandidates, isAlreadyTracked } from '@/lib/utils/recurringDetector';
 import { rollForwardRenewalDate } from '@/lib/utils/dates';
+import { parseStatementDate } from '@/lib/utils/statementParsing';
 import { normalizeMonthlyAmount } from '@/lib/utils/currency';
 import dynamic from 'next/dynamic';
 import { StatementDropzone } from '@/components/import/CsvDropzone';
@@ -133,7 +134,9 @@ export default function StatementImportPage() {
     setFileType('csv');
     const { headers, rows } = parseRawCsv(csvContent);
 
-    if (headers.length === 0 || rows.length === 0) {
+    // A statement has a few columns and at least some dates in it
+    const hasDates = rows.some((r) => Object.values(r).some((v) => parseStatementDate(v)));
+    if (headers.length < 3 || rows.length === 0 || !hasDates) {
       setUploadError("This file doesn't look like a bank statement. Download the CSV from your bank's net banking and try again.");
       return;
     }
