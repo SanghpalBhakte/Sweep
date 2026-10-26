@@ -69,8 +69,24 @@ const securityHeaders = [
   },
 ];
 
+// Keep in sync with src/lib/site.ts
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://sift-sand.vercel.app').replace(/\/+$/, '');
+// Other addresses of this same Vercel project. Pages there move to SITE_URL so
+// links and shares all end up on one address. /api stays so crons keep working.
+const OTHER_HOSTS = ['sweep-subs.vercel.app', 'sift-sand.vercel.app'].filter(
+  (h) => h !== new URL(SITE_URL).host
+);
+
 const nextConfig = {
   reactStrictMode: true,
+  async redirects() {
+    return OTHER_HOSTS.map((host) => ({
+      source: '/:path((?!api/).*)',
+      has: [{ type: 'host', value: host }],
+      destination: `${SITE_URL}/:path`,
+      permanent: true,
+    }));
+  },
   poweredByHeader: false,
   compress: true,
   async headers() {

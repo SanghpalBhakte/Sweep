@@ -9,6 +9,7 @@ import { NotificationProvider } from '@/context/NotificationContext';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { WebVitalsReporter } from '@/lib/utils/webVitals';
+import { SITE_URL } from '@/lib/site';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -39,12 +40,11 @@ const splineMono = Spline_Sans_Mono({
   variable: '--font-spline-mono',
 });
 
-const SITE_URL = 'https://sweep-subs.vercel.app';
 const SITE_TITLE = 'Sweep: Keep track of your subscriptions';
 const SITE_DESCRIPTION =
   'Put all your subscriptions in one place. Get a reminder before something renews or a free trial ends, and see how much you spend each month.';
 const OG_IMAGE = {
-  url: '/og-image.png',
+  url: `${SITE_URL}/og-image.png`,
   width: 1200,
   height: 630,
   alt: 'Sweep logo with the text: Keep track of your subscriptions',
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   applicationName: 'Sweep',
   alternates: {
-    canonical: './',
+    canonical: SITE_URL,
   },
   manifest: '/manifest.webmanifest',
   icons: {
@@ -83,7 +83,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    url: './',
+    url: SITE_URL,
     siteName: 'Sweep',
     images: [OG_IMAGE],
     locale: 'en_US',

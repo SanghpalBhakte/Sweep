@@ -46,7 +46,7 @@ project_id = "zsycpokyuqzilptmdcme"
 # The GitHub link applies this file to the live project on every push to main,
 # so the live login addresses must be set here or they get reset to localhost.
 [remotes.production.auth]
-site_url = "https://sweep-subs.vercel.app"
+site_url = "https://sift-sand.vercel.app"
 additional_redirect_urls = [
   "https://sweep-subs.vercel.app/**",
   "https://sift-sand.vercel.app/**",
