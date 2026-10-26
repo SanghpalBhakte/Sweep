@@ -13,6 +13,10 @@ import { CheckCircle2, AlertCircle, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 const GOOGLE_AUTH_ON = process.env.NEXT_PUBLIC_GOOGLE_AUTH === 'on';
+// Magic links need a custom SMTP server in Supabase: the built-in mailer only
+// delivers to the project's own team. Set NEXT_PUBLIC_EMAIL_LINKS=on in Vercel
+// once SMTP is set up; until then only password and Google show.
+const EMAIL_LINKS_ON = process.env.NEXT_PUBLIC_EMAIL_LINKS === 'on';
 
 function GoogleIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
@@ -54,12 +58,16 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(
     // A magic link only works in the browser that asked for it (Supabase keeps a
     // one-time key there), so say how to get past it instead of "invalid link"
-    authErrorParam === 'auth-failed'
+    authErrorParam !== 'auth-failed'
+      ? null
+      : EMAIL_LINKS_ON
       ? 'That sign-in link didn\'t work. Links only work in the same browser or app you asked from, and only once. Send a new one below, or sign in with your password.'
-      : null
+      : 'That sign-in didn\'t work. Please try again.'
   );
   // Came back from a failed link: the fix is a new link, so start on that tab
-  const [authMode, setAuthMode] = useState<'password' | 'otp'>(authErrorParam === 'auth-failed' ? 'otp' : 'password');
+  const [authMode, setAuthMode] = useState<'password' | 'otp'>(
+    EMAIL_LINKS_ON && authErrorParam === 'auth-failed' ? 'otp' : 'password'
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,38 +149,40 @@ function LoginForm() {
         ) : null}
 
         {/* Mode Switcher */}
-        <div className="grid grid-cols-2 p-1 bg-surface border border-border rounded-lg text-xs">
-          <button
-            type="button"
-            onClick={() => {
-              setAuthMode('password');
-              setError(null);
-            }}
-            className={cn(
-              'py-1.5 max-md:min-h-[44px] font-medium rounded-md transition-all cursor-pointer',
-              authMode === 'password'
-                ? 'bg-card text-foreground shadow-xs font-semibold'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            Password
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setAuthMode('otp');
-              setError(null);
-            }}
-            className={cn(
-              'py-1.5 max-md:min-h-[44px] font-medium rounded-md transition-all cursor-pointer',
-              authMode === 'otp'
-                ? 'bg-card text-foreground shadow-xs font-semibold'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            Magic link
-          </button>
-        </div>
+        {EMAIL_LINKS_ON ? (
+          <div className="grid grid-cols-2 p-1 bg-surface border border-border rounded-lg text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('password');
+                setError(null);
+              }}
+              className={cn(
+                'py-1.5 max-md:min-h-[44px] font-medium rounded-md transition-all cursor-pointer',
+                authMode === 'password'
+                  ? 'bg-card text-foreground shadow-xs font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Password
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('otp');
+                setError(null);
+              }}
+              className={cn(
+                'py-1.5 max-md:min-h-[44px] font-medium rounded-md transition-all cursor-pointer',
+                authMode === 'otp'
+                  ? 'bg-card text-foreground shadow-xs font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Magic link
+            </button>
+          </div>
+        ) : null}
 
         {isOtpSent ? (
           <div className="text-center py-3 space-y-2">
@@ -225,18 +235,20 @@ function LoginForm() {
                   required
                   autoComplete="current-password"
                 />
-                <div className="flex justify-end -mt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode('otp');
-                      setError(null);
-                    }}
-                    className="tap text-[11px] text-muted-foreground hover:text-primary cursor-pointer transition-colors"
-                  >
-                    Forgot password? Sign in with magic link
-                  </button>
-                </div>
+                {EMAIL_LINKS_ON ? (
+                  <div className="flex justify-end -mt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('otp');
+                        setError(null);
+                      }}
+                      className="tap text-[11px] text-muted-foreground hover:text-primary cursor-pointer transition-colors"
+                    >
+                      Forgot password? Sign in with magic link
+                    </button>
+                  </div>
+                ) : null}
               </>
             ) : null}
 
