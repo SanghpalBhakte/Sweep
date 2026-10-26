@@ -72,7 +72,7 @@ function check(label: string, txs: NormalizedTransaction[], opts: { exactDebits?
 }
 
 describe('bank statement import, end to end', () => {
-  it.each(['hdfc.csv', 'axis.csv', 'kotak.csv'])('%s', (file) => {
+  it.each(['hdfc.csv', 'sbi.csv', 'icici.csv', 'axis.csv', 'kotak.csv'])('%s', (file) => {
     const { mapping, txs } = fromCsvText(readFileSync(join(FIX, file), 'utf8'));
     expect(mapping.dateColumn).toBeTruthy();
     check(file, txs);

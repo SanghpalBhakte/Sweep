@@ -21,7 +21,7 @@ import {
   AccountGroup,
 } from '@/lib/utils/multiAccountDetector';
 import { parsePdfStatement } from '@/lib/utils/pdfParser';
-import { detectRecurringCandidates } from '@/lib/utils/recurringDetector';
+import { detectRecurringCandidates, isAlreadyTracked } from '@/lib/utils/recurringDetector';
 import { rollForwardRenewalDate } from '@/lib/utils/dates';
 import { normalizeMonthlyAmount } from '@/lib/utils/currency';
 import dynamic from 'next/dynamic';
@@ -121,6 +121,11 @@ export default function StatementImportPage() {
     ? `Statement ${currentBatchNum} of ${totalBatchNum}`
     : 'Compared with what you already track';
 
+  // Things already in the list are shown but left unticked, so they are never added twice
+  const trackedNames = subscriptions.map((s) => s.name);
+  const untickTracked = (list: RecurringCandidate[]) =>
+    list.map((c) => (isAlreadyTracked(c.merchantName, trackedNames) ? { ...c, selected: false } : c));
+
   // Step 1A: CSV File Loaded
   const handleCsvLoaded = (csvContent: string, name: string) => {
     setUploadError(null);
@@ -129,7 +134,7 @@ export default function StatementImportPage() {
     const { headers, rows } = parseRawCsv(csvContent);
 
     if (headers.length === 0 || rows.length === 0) {
-      setUploadError('The CSV file could not be parsed. Please check the file structure.');
+      setUploadError("This file doesn't look like a bank statement. Download the CSV from your bank's net banking and try again.");
       return;
     }
 
@@ -237,7 +242,7 @@ export default function StatementImportPage() {
       setPendingPdfFile(null);
       setNormalizedTransactions(result.transactions);
 
-      const detected = detectRecurringCandidates(result.transactions, categories, profileCurrency);
+      const detected = untickTracked(detectRecurringCandidates(result.transactions, categories, profileCurrency));
       setCandidates(detected);
       setStep('review');
     } catch (err: any) {
@@ -284,8 +289,15 @@ export default function StatementImportPage() {
       confirmedMapping
     );
     setNormalizedTransactions(normalized);
+    if (normalized.length === 0) {
+      setUploadError(
+        "Couldn't find any payments in this file. Check that the date and amount columns are picked right."
+      );
+      return;
+    }
+    setUploadError(null);
 
-    const detected = detectRecurringCandidates(normalized, categories, activeBatchCurrency);
+    const detected = untickTracked(detectRecurringCandidates(normalized, categories, activeBatchCurrency));
     setCandidates(detected);
     setStep('review');
   };
@@ -304,12 +316,14 @@ export default function StatementImportPage() {
   };
 
   const handleSelectAll = (select: boolean) => {
-    setCandidates((prev) => prev.map((c) => ({ ...c, selected: select })));
+    setCandidates((prev) =>
+      prev.map((c) => ({ ...c, selected: select && !isAlreadyTracked(c.merchantName, trackedNames) }))
+    );
   };
 
   // Step 4: Import Execution
   const handleExecuteImport = async () => {
-    const selected = candidates.filter((c) => c.selected);
+    const selected = candidates.filter((c) => c.selected && !isAlreadyTracked(c.merchantName, trackedNames));
     if (selected.length === 0) return;
 
     setIsImporting(true);
@@ -700,11 +714,11 @@ export default function StatementImportPage() {
               <Inbox className="w-8 h-8 mx-auto text-muted-foreground" />
               <div className="space-y-1">
                 <h3 className="text-sm font-semibold text-foreground">
-                  No recurring patterns detected
+                  No subscriptions found
                 </h3>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                  We could not find repeated recurring charges in this account batch. You can always add
-                  subscriptions manually.
+                  Sweep looks for the same payment coming back every week, month or year. Try a
+                  statement that covers at least 2 or 3 months, or add subscriptions by hand.
                 </p>
               </div>
               <Button
@@ -720,9 +734,7 @@ export default function StatementImportPage() {
           ) : (
             <div className="space-y-3">
               {filteredCandidates.map((candidate) => {
-                const existingMatch = subscriptions.find(
-                  (s) => s.name.toLowerCase().trim() === candidate.merchantName.toLowerCase().trim()
-                );
+                const existingMatch = subscriptions.find((s) => isAlreadyTracked(candidate.merchantName, [s.name]));
 
                 return (
                   <CandidateReviewCard

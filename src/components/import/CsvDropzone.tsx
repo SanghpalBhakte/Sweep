@@ -223,7 +223,7 @@ export function StatementDropzone({
             Your file stays on your device
           </div>
           <p className="text-[11px] leading-relaxed">
-            Sweep reads the file right here on your phone or laptop. Nothing is uploaded. Money
+            Your statement is read only in this browser. It is never uploaded or saved. Money
             coming in is ignored, and only the subscriptions you pick get added.
           </p>
         </div>

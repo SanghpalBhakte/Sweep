@@ -1,3 +1,4 @@
+import Papa from 'papaparse';
 import { CsvColumnMapping, NormalizedTransaction } from '../types';
 import { normalizeMerchantDescriptor } from './merchantMatcher';
 import { detectDateOrder, headerWords, parseMoney, parseStatementDate } from './statementParsing';
@@ -15,8 +16,11 @@ export function parseRawCsv(csvText: string): { headers: string[]; rows: Record<
   const cleanText = csvText.replace(/^﻿/, '').trim();
   if (!cleanText) return { headers: [], rows: [] };
 
+  // Our own delimiter guess: Papa only looks at the top lines, which are often
+  // "Account Name : ..." junk in Indian bank exports.
   const delimiter = detectDelimiter(cleanText);
-  const lines = parseCsvLines(cleanText, delimiter);
+  const { data } = Papa.parse<string[]>(cleanText, { delimiter, skipEmptyLines: 'greedy' });
+  const lines = data.filter((cells) => Array.isArray(cells) && cells.some((c) => String(c).trim().length > 0));
   if (lines.length === 0) return { headers: [], rows: [] };
 
   return rowsFromTable(lines);
@@ -88,48 +92,6 @@ function findHeaderRow(table: string[][]): number {
     if (table[i].filter((c) => c.trim()).length >= 3) return i;
   }
   return 0;
-}
-
-/**
- * Character-by-character parser handling quoted cells and escaped quotes
- */
-function parseCsvLines(text: string, delimiter: string): string[][] {
-  const result: string[][] = [];
-  let currentLine: string[] = [];
-  let currentCell = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const nextChar = text[i + 1];
-
-    if (char === '"') {
-      if (inQuotes && nextChar === '"') {
-        currentCell += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (char === delimiter && !inQuotes) {
-      currentLine.push(currentCell);
-      currentCell = '';
-    } else if ((char === '\r' || char === '\n') && !inQuotes) {
-      if (char === '\r' && nextChar === '\n') i++;
-      currentLine.push(currentCell);
-      if (currentLine.some((c) => c.trim().length > 0)) result.push(currentLine);
-      currentLine = [];
-      currentCell = '';
-    } else {
-      currentCell += char;
-    }
-  }
-
-  if (currentCell.length > 0 || currentLine.length > 0) {
-    currentLine.push(currentCell);
-    if (currentLine.some((c) => c.trim().length > 0)) result.push(currentLine);
-  }
-
-  return result;
 }
 
 /**
