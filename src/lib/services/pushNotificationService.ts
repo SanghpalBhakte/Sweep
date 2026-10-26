@@ -122,7 +122,10 @@ export class PushNotificationService {
         return { success: false, error: 'Could not initialize service worker.' };
       }
 
-      // 3. Subscribe with PushManager
+      // 3. Subscribe with PushManager. Drop any old one first: if it was made with
+      // a different VAPID key, subscribe() would fail and pushes could never arrive.
+      const old = await reg.pushManager.getSubscription();
+      if (old) await old.unsubscribe();
       const convertedVapidKey = urlBase64ToUint8Array(key);
       const subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,

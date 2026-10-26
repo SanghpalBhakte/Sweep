@@ -92,8 +92,8 @@ export async function sendWebPushToUser(
       sent++;
     } catch (err: any) {
       failed++;
-      // Auto-cleanup: If subscription has expired or unsubscribed (404 / 410 Gone)
-      if (err.statusCode === 404 || err.statusCode === 410) {
+      // Gone (404 / 410), or made with an old VAPID key (403): it can never work again
+      if (err.statusCode === 404 || err.statusCode === 410 || err.statusCode === 403) {
         await supabase.from('push_subscriptions').delete().eq('id', sub.id);
         cleaned++;
       }
