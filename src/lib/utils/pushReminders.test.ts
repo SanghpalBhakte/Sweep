@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { findDueReminders, todayInIndia, ReminderSub } from './pushReminders';
+import { findDueReminders, reminderText, todayInIndia, ReminderSub } from './pushReminders';
 
 const base: ReminderSub = {
   id: 's1',
@@ -16,7 +16,7 @@ const base: ReminderSub = {
 };
 
 describe('findDueReminders', () => {
-  it('finds a renewal 2 days away and one today', () => {
+  it('uses 2 days before and the day itself when nothing was picked', () => {
     const due = findDueReminders(
       [base, { ...base, id: 's2', next_renewal_date: '2026-10-26' }, { ...base, id: 's3', next_renewal_date: '2026-10-27' }],
       '2026-10-26'
@@ -40,6 +40,25 @@ describe('findDueReminders', () => {
   it('skips paused subscriptions and turned off kinds', () => {
     expect(findDueReminders([{ ...base, status: 'paused' }], '2026-10-26')).toEqual([]);
     expect(findDueReminders([base], '2026-10-26', { renewals: false })).toEqual([]);
+  });
+
+  it('follows the days the user picked', () => {
+    const subs = [base, { ...base, id: 's2', next_renewal_date: '2026-11-02' }, { ...base, id: 's3', next_renewal_date: '2026-10-29' }];
+    const due = findDueReminders(subs, '2026-10-26', { defaultDays: [7, 3, 1] });
+    expect(due.map((d) => [d.sub.id, d.kind])).toEqual([
+      ['s2', 'renewal_7d'],
+      ['s3', 'renewal_3d'],
+    ]);
+  });
+
+  it("a subscription's own days win over the profile", () => {
+    const due = findDueReminders([{ ...base, reminder_offsets: [2] }], '2026-10-26', { defaultDays: [7] });
+    expect(due[0].kind).toBe('renewal_2d');
+  });
+
+  it('writes plain text', () => {
+    const [r] = findDueReminders([{ ...base, next_renewal_date: '2026-10-27' }], '2026-10-26', { defaultDays: [1] });
+    expect(reminderText(r, '₹649').title).toBe('Netflix renews tomorrow');
   });
 
   it('gets the date in India', () => {

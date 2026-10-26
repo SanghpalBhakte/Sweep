@@ -5,7 +5,7 @@ import { findDueReminders, reminderText, todayInIndia, ReminderSub } from '@/lib
 import { formatCurrency } from '@/lib/utils/currency';
 
 // Daily at 03:30 UTC (9:00 AM IST), see vercel.json. Sends a push for each
-// renewal or free trial ending in 2 days or today, once per device owner.
+// renewal or free trial ending on one of the user's reminder days, once each.
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
@@ -36,10 +36,10 @@ export async function GET(req: NextRequest) {
   if (userIds.length === 0) return NextResponse.json(result);
 
   const [{ data: profiles }, { data: subs, error: subErr }] = await Promise.all([
-    db.from('profiles').select('id, notifications_enabled, notify_renewals, notify_trials').in('id', userIds),
+    db.from('profiles').select('id, notifications_enabled, notify_renewals, notify_trials, default_reminder_days').in('id', userIds),
     db
       .from('subscriptions')
-      .select('id, user_id, name, amount, currency, billing_cycle, custom_interval_days, next_renewal_date, is_trial, trial_end_date, status')
+      .select('id, user_id, name, amount, currency, billing_cycle, custom_interval_days, next_renewal_date, is_trial, trial_end_date, status, reminder_offsets')
       .in('user_id', userIds)
       .eq('status', 'active'),
   ]);
@@ -55,7 +55,11 @@ export async function GET(req: NextRequest) {
     const due = findDueReminders(
       ((subs || []) as ReminderSub[]).filter((s) => s.user_id === userId),
       today,
-      { renewals: profile?.notify_renewals !== false, trials: profile?.notify_trials !== false }
+      {
+        renewals: profile?.notify_renewals !== false,
+        trials: profile?.notify_trials !== false,
+        defaultDays: profile?.default_reminder_days,
+      }
     );
     if (due.length === 0) continue;
     result.due += due.length;

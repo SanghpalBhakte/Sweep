@@ -24,8 +24,10 @@ const CADENCES: Cadence[] = [
 
 // Regular payments that are not subscriptions: loans, rent, investments, bills,
 // cash, fuel and money sent to people. Only checked for merchants we don't know.
+// NACH, ACH and ECS are left out: they are just how auto-debits are paid, and
+// lots of real subscriptions come through them.
 const NOT_A_SUBSCRIPTION =
-  /\b(emi|loan|rent|rental|\bsip\b|mutual ?fund|nach|ach ?dr?|insurance|lic|policy|credit ?card|cc ?(bill|payment)|card ?payment|atm|cash|neft|imps|rtgs|salary|fd|rd|ppf|nps|tax|gst|challan|school|college|tuition|fees?|electricity|bescom|msedcl|tneb|water ?bill|gas ?bill|petrol|diesel|fuel|hpcl|iocl|bpcl|indian ?oil|bharat ?petroleum|self ?transfer|own ?account)\b/i;
+  /\b(emi|loan|rent|rental|\bsip\b|mutual ?fund|insurance|lic|policy|credit ?card|cc ?(bill|payment)|card ?payment|atm|cash|neft|imps|rtgs|salary|fd|rd|ppf|nps|tax|gst|challan|school|college|tuition|fees?|electricity|bescom|msedcl|tneb|water ?bill|gas ?bill|petrol|diesel|fuel|hpcl|iocl|bpcl|indian ?oil|bharat ?petroleum|self ?transfer|own ?account)\b/i;
 // UPI to a person: phone-number VPAs, Google Pay personal handles, P2P/P2A tags
 const PERSON_TRANSFER = /\b\d{10}@|@ok(axis|sbi|hdfcbank|icici)\b|\bP2[AP]\b/i;
 // An unknown merchant only counts when its narration looks like a paid plan or an
