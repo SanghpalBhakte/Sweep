@@ -5,7 +5,6 @@ import { subscriptionService } from '@/lib/services/subscriptionService';
 import { deriveAppAlerts } from '@/lib/utils/reminders';
 import { formatCurrency } from '@/lib/utils/currency';
 import { rollForwardRenewalDate } from '@/lib/utils/dates';
-import { sendWebPushToUser } from '@/lib/services/serverPushService';
 import { getServerEnv } from '@/lib/env';
 import { sendEmail, emailProvider, escapeHtml } from '@/lib/services/emailService';
 
@@ -95,7 +94,6 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
 
     if (!existingLog) {
       let emailDispatched = false;
-      let pushDispatched = false;
       let dispatchError: string | null = null;
 
       // 1. Send the email (Gmail or Resend, see emailService)
@@ -155,21 +153,8 @@ async function runDispatch(targetUser: { id: string; email: string }, supabase: 
         }
       }
 
-      // 2. Dispatch Native Web Push Alert
-      try {
-        const pushRes = await sendWebPushToUser(targetUser.id, {
-          title: alert.title,
-          body: `${alert.subscriptionName}: ${formatCurrency(alert.amount, alert.currency)} due on ${alert.targetDate}`,
-          url: `/subscriptions/${alert.subscriptionId}/edit`,
-          tag: `renewal-${alert.subscriptionId}`,
-          subscriptionId: alert.subscriptionId,
-        });
-        if (pushRes.sent > 0) {
-          pushDispatched = true;
-        }
-      } catch (err: any) {
-        console.warn('Web push dispatch error:', err);
-      }
+      // Phone pushes go out from /api/cron/reminders, so this route only sends email.
+      const pushDispatched = false;
 
       // 3. Record dispatch log
       const status = emailDispatched || pushDispatched ? 'sent' : 'failed';

@@ -93,14 +93,14 @@ export class PushNotificationService {
    */
   async subscribe(vapidPublicKey?: string): Promise<{ success: boolean; error?: string }> {
     if (!this.isSupported()) {
-      return { success: false, error: 'Web Push notifications are not supported by this browser.' };
+      return { success: false, error: 'This browser can\'t show notifications.' };
     }
 
     // Note: The VAPID Public Key is intentionally public and client-facing, as mandated
     // by the W3C Push API specification for PushManager.subscribe({ applicationServerKey }).
     const key = vapidPublicKey || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
     if (!key) {
-      return { success: false, error: 'Web Push VAPID public key is not configured.' };
+      return { success: false, error: 'Reminders are not set up on the server yet (VAPID key missing).' };
     }
 
     try {
@@ -111,8 +111,8 @@ export class PushNotificationService {
           success: false,
           error:
             permission === 'denied'
-              ? 'Notification permission was denied in browser settings.'
-              : 'Notification permission was dismissed.',
+              ? 'Notifications are blocked for Sweep. Allow them in your browser settings, then try again.'
+              : 'You closed the permission popup. Tap the button again to allow it.',
         };
       }
 
@@ -211,9 +211,11 @@ export class PushNotificationService {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
+      const current = await this.getExistingSubscription();
       const res = await fetch('/api/push/test', {
         method: 'POST',
         headers,
+        body: JSON.stringify({ endpoint: current?.endpoint }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {

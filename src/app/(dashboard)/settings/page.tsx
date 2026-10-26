@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSubscriptions } from '@/context/SubscriptionContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
-import { IosInstallTip } from '@/components/pwa/IosInstallTip';
+import { isIosNotInstalled } from '@/components/pwa/IosInstallTip';
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
@@ -111,6 +111,10 @@ export default function SettingsPage() {
   const [ratesSyncSuccess, setRatesSyncSuccess] = useState(false);
   const [pushActionStatus, setPushActionStatus] = useState<string | null>(null);
   const [isPushLoading, setIsPushLoading] = useState(false);
+  const [isTestPushLoading, setIsTestPushLoading] = useState(false);
+  // Checked after mount so the server render and the first client render match
+  const [iosNeedsInstall, setIosNeedsInstall] = useState(false);
+  useEffect(() => setIosNeedsInstall(isIosNotInstalled()), []);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   // 2FA TOTP Factors State
@@ -253,6 +257,14 @@ export default function SettingsPage() {
     } finally {
       setIsEmailTesting(false);
     }
+  };
+
+  const handleTestPush = async () => {
+    setIsTestPushLoading(true);
+    setPushActionStatus(null);
+    const res = await sendTestPushNotification();
+    setPushActionStatus(res.success ? 'Sent. It should show up in a few seconds.' : res.error || 'Could not send the test.');
+    setIsTestPushLoading(false);
   };
 
   const handleTogglePush = async () => {
@@ -555,11 +567,18 @@ export default function SettingsPage() {
                       Create a free account
                     </ButtonLink>
                   </div>
+                ) : iosNeedsInstall ? (
+                  <div className="py-3 space-y-1">
+                    <span className="text-xs font-medium text-foreground block">Phone reminders</span>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      On iPhone, add Sweep to your Home Screen first, then turn on reminders.
+                    </p>
+                  </div>
                 ) : isPushSupported ? (
                   <div className="py-3 space-y-1.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <span className="text-xs font-medium text-foreground block">Phone notifications</span>
+                        <span className="text-xs font-medium text-foreground block">Phone reminders</span>
                         <span className="text-[11px] text-muted-foreground">
                           {isPushSubscribed ? 'On for this device' : 'Off for this device'}
                         </span>
@@ -572,15 +591,32 @@ export default function SettingsPage() {
                         isLoading={isPushLoading}
                         className="shrink-0"
                       >
-                        {isPushSubscribed ? 'Turn off' : 'Turn on'}
+                        {isPushSubscribed ? 'Turn off' : 'Turn on reminders'}
                       </Button>
                     </div>
+                    {isPushSubscribed ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleTestPush}
+                        isLoading={isTestPushLoading}
+                        className="text-xs"
+                      >
+                        Send test reminder
+                      </Button>
+                    ) : null}
                     {pushActionStatus && (
                       <p className="text-[11px] text-muted-foreground">{pushActionStatus}</p>
                     )}
                   </div>
                 ) : (
-                  <IosInstallTip />
+                  <div className="py-3 space-y-1">
+                    <span className="text-xs font-medium text-foreground block">Phone reminders</span>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      This browser can&apos;t show notifications. Try Chrome, Edge or Firefox.
+                    </p>
+                  </div>
                 )}
 
                 {/* Test that reminder emails actually arrive */}

@@ -43,25 +43,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No user profile found' }, { status: 404 });
     }
 
-    const result = await sendWebPushToUser(user.id, {
-      title: 'Sweep · Test Notification',
-      body: 'Quiet renewal and trial alerts are active on this browser.',
-      url: '/settings',
-      tag: 'sweep-test-push',
-    });
+    // Send only to the device that tapped the button when it tells us which one
+    const body = await req.json().catch(() => ({}));
+    const endpoint = typeof body?.endpoint === 'string' ? body.endpoint : undefined;
+
+    const result = await sendWebPushToUser(
+      user.id,
+      {
+        title: 'Test reminder from Sweep',
+        body: 'Reminders work on this device. Tap to open Sweep.',
+        url: '/home',
+        tag: 'sweep-test-push',
+      },
+      { endpoint }
+    );
 
     if (result.sent === 0) {
       return NextResponse.json({
         success: false,
-        error: 'No active push subscriptions found for this browser. Please enable push first.',
+        error: 'This device is not set up for reminders yet. Tap Turn on reminders first.',
       });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: `Test push sent to ${result.sent} device(s).`,
-      result,
-    });
+    return NextResponse.json({ success: true, result });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
   }

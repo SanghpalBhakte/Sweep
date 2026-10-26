@@ -36,7 +36,8 @@ interface PushPayload {
 
 export async function sendWebPushToUser(
   userId: string,
-  payload: PushPayload
+  payload: PushPayload,
+  opts: { endpoint?: string } = {}
 ): Promise<{ sent: number; failed: number; cleaned: number }> {
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     console.warn('Web Push skipped: VAPID keys not configured on server.');
@@ -55,10 +56,10 @@ export async function sendWebPushToUser(
   const supabase = createClient(supabaseUrl, serviceKey);
 
   // Fetch active push subscriptions for this user
-  const { data: subscriptions, error } = await supabase
-    .from('push_subscriptions')
-    .select('*')
-    .eq('user_id', userId);
+  // With an endpoint, only that one device gets it (the settings test button)
+  let query = supabase.from('push_subscriptions').select('*').eq('user_id', userId);
+  if (opts.endpoint) query = query.eq('endpoint', opts.endpoint);
+  const { data: subscriptions, error } = await query;
 
   if (error || !subscriptions || subscriptions.length === 0) {
     return { sent: 0, failed: 0, cleaned: 0 };

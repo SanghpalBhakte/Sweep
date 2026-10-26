@@ -210,12 +210,13 @@ export function DashboardClient() {
     }
     const titles: Record<GroupKey, string> = {
       overdue: 'Overdue',
-      week: 'This week',
+      week: 'Coming up (next 7 days)',
       month: 'Later this month',
       later: 'Later',
     };
     return (['overdue', 'week', 'month', 'later'] as GroupKey[])
-      .filter((key) => buckets[key].length > 0)
+      // Coming up always shows, even when empty, so reminders are visible without push
+      .filter((key) => buckets[key].length > 0 || (key === 'week' && sorted.length > 0))
       .map((key) => ({
         key,
         title: titles[key],
@@ -499,6 +500,9 @@ export function DashboardClient() {
                   ).map((sub) => (
                     <StatementLine key={sub.id} sub={sub} group={group.key} />
                   ))}
+                  {group.items.length === 0 ? (
+                    <p className="py-2 font-mono text-xs text-muted-foreground">Nothing renews in the next 7 days.</p>
+                  ) : null}
                   {group.key !== 'overdue' && group.key !== 'week' && group.items.length > 4 ? (
                     <button
                       type="button"
