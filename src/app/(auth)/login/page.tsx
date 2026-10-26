@@ -46,15 +46,20 @@ function LoginForm() {
 
   const { signInWithPassword, signInWithOtp, signInWithGoogle } = useAuth();
 
-  const [authMode, setAuthMode] = useState<'password' | 'otp'>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [error, setError] = useState<string | null>(
-    authErrorParam === 'auth-failed' ? 'Authentication link was invalid or expired.' : null
+    // A magic link only works in the browser that asked for it (Supabase keeps a
+    // one-time key there), so say how to get past it instead of "invalid link"
+    authErrorParam === 'auth-failed'
+      ? 'That sign-in link didn\'t work. Links only work in the same browser or app you asked from, and only once. Send a new one below, or sign in with your password.'
+      : null
   );
+  // Came back from a failed link: the fix is a new link, so start on that tab
+  const [authMode, setAuthMode] = useState<'password' | 'otp'>(authErrorParam === 'auth-failed' ? 'otp' : 'password');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +182,9 @@ function LoginForm() {
             </h3>
             <p className="text-xs text-muted-foreground">
               We sent a secure magic sign-in link to <strong>{email}</strong>.
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              Open it on this device, in this same browser or app.
             </p>
             <button
               type="button"
