@@ -70,7 +70,7 @@ const securityHeaders = [
 ];
 
 // Keep in sync with src/lib/site.ts
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://sift-sand.vercel.app').replace(/\/+$/, '');
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://sweep-subs.vercel.app').replace(/\/+$/, '');
 // Other addresses of this same Vercel project. Pages there move to SITE_URL so
 // links and shares all end up on one address. /api stays so crons keep working.
 const OTHER_HOSTS = ['sweep-subs.vercel.app', 'sift-sand.vercel.app'].filter(
